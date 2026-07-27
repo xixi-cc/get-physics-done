@@ -448,13 +448,6 @@ _WRITE_PAPER_STAGE_ALLOWED_TOOLS = frozenset(
         "web_search",
     }
 )
-VERIFY_WORK_MCP_VERIFICATION_TOOLS = frozenset(
-    {
-        "mcp__gpd_verification__get_bundle_checklist",
-        "mcp__gpd_verification__suggest_contract_checks",
-        "mcp__gpd_verification__run_contract_check",
-    }
-)
 VERIFY_WORK_STAGE_ALLOWED_TOOLS = frozenset(
     {
         "ask_user",
@@ -465,7 +458,6 @@ VERIFY_WORK_STAGE_ALLOWED_TOOLS = frozenset(
         "search_files",
         "shell",
         "task",
-        *VERIFY_WORK_MCP_VERIFICATION_TOOLS,
     }
 )
 VERIFY_WORK_BASE_INIT_FIELDS = frozenset(
@@ -1751,7 +1743,6 @@ __all__ = [
     "WORKFLOW_STAGE_MANIFEST_DIR",
     "WORKFLOW_STAGE_MANIFEST_SUFFIX",
     "VERIFY_WORK_INIT_FIELDS",
-    "VERIFY_WORK_MCP_VERIFICATION_TOOLS",
     "VERIFY_WORK_REFERENCE_RUNTIME_FIELDS",
     "VERIFY_WORK_SCHEMA_BRIDGE_FIELDS",
     "VERIFY_WORK_STAGE_ALLOWED_TOOLS",
