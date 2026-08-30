@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from enum import StrEnum
 from functools import lru_cache
 from pathlib import Path
+from typing import Literal, TypeAlias
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
@@ -107,6 +108,13 @@ class BranchingStrategy(StrEnum):
     NONE = "none"
     PER_PHASE = "per-phase"
     PER_MILESTONE = "per-milestone"
+
+
+# ``auto`` keeps ordinary work on the main capable agent and delegates an
+# independent workflow agent only when the workflow's explicit risk classifier
+# fires.  Booleans remain accepted so existing project configs are unchanged.
+WorkflowAgentPolicy: TypeAlias = bool | Literal["auto"]
+DownstreamCheckpointPolicy: TypeAlias = bool | Literal["auto"]
 
 
 # ─── Model Profiles ─────────────────────────────────────────────────────────────
@@ -342,15 +350,15 @@ class GPDProjectConfig(BaseModel):
 
     # Workflow toggles
     commit_docs: bool = True
-    research: bool = True
-    plan_checker: bool = True
-    verifier: bool = True
+    research: WorkflowAgentPolicy = True
+    plan_checker: WorkflowAgentPolicy = True
+    verifier: WorkflowAgentPolicy = True
     parallelization: bool = True
     max_unattended_minutes_per_plan: int = Field(default=15, ge=1)
     max_unattended_minutes_per_wave: int = Field(default=30, ge=1)
     checkpoint_after_n_tasks: int = Field(default=1, ge=1)
     checkpoint_after_first_load_bearing_result: bool = True
-    checkpoint_before_downstream_dependent_tasks: bool = True
+    checkpoint_before_downstream_dependent_tasks: DownstreamCheckpointPolicy = True
     project_usd_budget: float | None = Field(default=None, gt=0)
     session_usd_budget: float | None = Field(default=None, gt=0)
 

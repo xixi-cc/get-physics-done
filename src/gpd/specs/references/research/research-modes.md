@@ -67,7 +67,7 @@ Explore and adaptive modes widen comparison and tangent surfacing, but they do *
 |---|---|
 | **explore** | Multiple derivation attempts only when the approved plan already includes explicit variants from a tangent or comparison decision. Lighter self-critique (focus on feasibility, not polish). Accept "back of envelope" calculations to test approach viability. Larger deviation tolerance before escalating. Document which approaches work and which don't — failure is data. |
 | **balanced** | Standard execution. Full self-critique protocol. Deviation rules apply normally. |
-| **exploit** | Maximum rigor execution. Extra self-critique checkpoints (every 2 steps, not 3-4). Zero deviation tolerance — any unexpected difficulty escalates immediately. The approach is known to work; execution must be flawless. |
+| **exploit** | Maximum rigor execution with continuous internal self-critique. Keep local checks inside coherent work; escalate unresolved deviations before dependent reasoning uses them rather than pausing mechanically every two steps. |
 | **adaptive** | Execute in explore style while the approach is still being falsified. Once a decisive benchmark or anchor confirms the method family, switch to exploit-style rigor for follow-on work. |
 
 ### gpd-plan-checker

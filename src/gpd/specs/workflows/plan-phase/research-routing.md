@@ -27,6 +27,13 @@ fi
 
 **Skip if:** `--gaps` flag, `--skip-research` flag, or `research_enabled` is false (from init) without `--research` override.
 
+If `research_enabled` is `auto`, load
+`references/orchestration/risk-triggered-review.md` and apply its Researcher
+Auto Route before treating a missing `RESEARCH.md` as a reason to spawn. A
+missing optional research artifact alone is not a trigger. Record the decision
+as `auto_route: run|skip`; a clean skip continues directly to planning without
+asking the user. An explicit `--research` flag still forces the route.
+
 ### Research Mode Decision
 
 <event name="research_route_decision">
@@ -49,7 +56,9 @@ bundle bodies, planner templates, or checker controls in this event.
   plausibly stale for this phase.
 </event>
 
-**If RESEARCH.md missing OR `--research` flag OR explore mode with existing research:**
+**If the Researcher Auto Route selected `run`, RESEARCH.md is missing while
+`research_enabled` is true, `--research` is present, or explore mode with an
+enabled researcher requires a refresh:**
 
 Display banner:
 

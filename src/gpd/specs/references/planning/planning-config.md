@@ -41,16 +41,16 @@ Configuration options for `GPD/` directory behavior in physics research projects
 | `execution.max_unattended_minutes_per_wave` | `30`             | Wave-level unattended budget before forcing a bounded review                                     |
 | `execution.checkpoint_after_n_tasks` | `1`                    | Task budget before forcing a bounded continuation segment                                        |
 | `execution.checkpoint_after_first_load_bearing_result` | `true` | Require a first-result sanity gate before fanout, especially when decisive evidence is not yet in hand |
-| `execution.checkpoint_before_downstream_dependent_tasks` | `true` | Require review before dependent downstream work unlocks when later tasks would assume unresolved decisive evidence |
+| `execution.checkpoint_before_downstream_dependent_tasks` | `true` | `true`, `false`, or `"auto"`; auto requires a gate only for an uncleared load-bearing result and reuses fresh equivalent checks |
 | `research_mode`                 | `"balanced"`                 | Research strategy: `"explore"` (breadth), `"balanced"`, `"exploit"` (depth), `"adaptive"`       |
 | `parallelization`               | `true`                       | Execute plans within a wave in parallel (`true`) or sequentially (`false`)                     |
 | `model_profile`                 | `"review"`                   | Research profile: `"deep-theory"`, `"numerical"`, `"exploratory"`, `"review"`, `"paper-writing"` |
 | `git.branching_strategy`        | `"none"`                     | Git branching approach: `"none"`, `"per-phase"`, or `"per-milestone"`                          |
 | `git.phase_branch_template`     | `"gpd/phase-{phase}-{slug}"` | Branch template for the `per-phase` strategy                                                   |
 | `git.milestone_branch_template` | `"gpd/{milestone}-{slug}"`   | Branch template for the `per-milestone` strategy                                               |
-| `workflow.research`             | `true`                       | Spawn the phase-researcher during `plan-phase`                                                 |
-| `workflow.verifier`             | `true`                       | Enable end-of-phase verification                                                               |
-| `workflow.plan_checker`         | `true`                       | Spawn plan checker agent during plan-phase to validate plans before execution                   |
+| `workflow.research`             | `true`                       | `true`, `false`, or `"auto"`; auto spawns only for research-risk triggers                      |
+| `workflow.verifier`             | `true`                       | `true`, `false`, or `"auto"`; auto verifies load-bearing, conflicting, or promoted results     |
+| `workflow.plan_checker`         | `true`                       | `true`, `false`, or `"auto"`; auto checks only risk-bearing plans                              |
 
 </config_schema>
 
@@ -130,6 +130,15 @@ When cadence logic injects a gate, the orchestrator still runs lightweight conve
 - `model_profile` affects how much detail, rigor, and verification depth each executor applies
 - `review_cadence` affects where bounded continuation segments appear
 - keep them independent so, for example, `paper-writing` can still run with `dense` cadence when stakes are high
+
+**Risk-triggered workflow agents:**
+
+- `true` always enables the independent agent at its normal workflow point
+- `false` disables that generic agent, subject to mandatory proof red-teaming
+- `"auto"` follows `references/orchestration/risk-triggered-review.md`
+- auto decisions do not change the main planner/executor model tier or internal reasoning depth
+- a skipped independent check leaves results at working/candidate status
+- fresh equivalent checks are fingerprinted and reused instead of repeated at adjacent gates
 
 **Cost:** Each cadence-driven gate adds overhead, but the cost is negligible compared to letting a wrong first assumption propagate through downstream waves.
 

@@ -128,6 +128,24 @@ class TestGPDProjectConfigDefaults:
         assert cfg.branching_strategy == BranchingStrategy.NONE
         assert cfg.model_overrides is None
 
+    def test_workflow_auto_policy_is_accepted_without_changing_boolean_defaults(self):
+        cfg = GPDProjectConfig(
+            research="auto",
+            plan_checker="auto",
+            verifier="auto",
+            checkpoint_before_downstream_dependent_tasks="auto",
+        )
+
+        assert cfg.research == "auto"
+        assert cfg.plan_checker == "auto"
+        assert cfg.verifier == "auto"
+        assert cfg.checkpoint_before_downstream_dependent_tasks == "auto"
+
+    @pytest.mark.parametrize("field", ["research", "plan_checker", "verifier"])
+    def test_workflow_auto_policy_rejects_unknown_strings(self, field: str):
+        with pytest.raises(ValueError):
+            GPDProjectConfig(**{field: "sometimes"})
+
 
 class TestConfigKeyContracts:
     def test_supported_config_keys_are_writable_aliases_only(self) -> None:
@@ -198,6 +216,18 @@ class TestConfigKeyContracts:
         updated, canonical = apply_config_update({"workflow": {"research": False}}, "workflow.research", True)
         assert canonical == "research"
         assert updated == {"research": True}
+
+        updated, canonical = apply_config_update({"workflow": {"research": True}}, "workflow.research", "auto")
+        assert canonical == "research"
+        assert updated == {"research": "auto"}
+
+        updated, canonical = apply_config_update(
+            {"execution": {"checkpoint_before_downstream_dependent_tasks": True}},
+            "execution.checkpoint_before_downstream_dependent_tasks",
+            "auto",
+        )
+        assert canonical == "checkpoint_before_downstream_dependent_tasks"
+        assert updated == {"execution": {"checkpoint_before_downstream_dependent_tasks": "auto"}}
 
         updated, canonical = apply_config_update(
             {

@@ -55,13 +55,20 @@ This stage may write only these keys:
 - `parallelization`
 - `planning.commit_docs`
 - `execution.review_cadence`
+- `execution.max_unattended_minutes_per_plan`
+- `execution.max_unattended_minutes_per_wave`
+- `execution.checkpoint_after_n_tasks`
+- `execution.checkpoint_after_first_load_bearing_result`
+- `execution.checkpoint_before_downstream_dependent_tasks`
 - `model_profile`
 - `workflow.research`
 - `workflow.plan_checker`
 - `workflow.verifier`
 
-Do not write model override maps, git branching keys, unattended budget keys,
-USD budget keys, convention keys, or a `physics` section. Project conventions are outside this stage and outside `GPD/config.json`; they stay in `GPD/state.json` and `GPD/CONVENTIONS.md`.
+Do not write model override maps, git branching keys, USD budget keys,
+convention keys, or a `physics` section. Project conventions are outside this
+stage and outside `GPD/config.json`; they stay in `GPD/state.json` and
+`GPD/CONVENTIONS.md`.
 </allowed_config_keys>
 
 <preset_gate>
@@ -77,7 +84,7 @@ Use ask_user:
 - question: "Which starting workflow preset should GPD use for `GPD/config.json`?"
 - options:
   - "Core research (Recommended)" -- supervised, balanced, parallel, dense review, commit docs, all workflow agents, review profile
-  - "Theory" -- derivation-heavy workflow with `model_profile=deep-theory`
+  - "Theory" -- tier-1 deep derivation with sparse process cadence and risk-triggered independent agents
   - "Numerics" -- computation-heavy workflow with `model_profile=numerical`
   - "Publication / manuscript" -- paper-writing workflow with `model_profile=paper-writing`
   - "Full research" -- core research defaults plus publication-readiness tracking through existing workflow toggles
@@ -123,10 +130,14 @@ Research mode: explore / balanced / exploit / adaptive
 Review cadence: dense / adaptive / sparse
 Parallelization: true / false
 Planning commit docs: true / false
-Workflow research agent: true / false
-Workflow plan checker: true / false
-Workflow verifier: true / false
+Workflow research agent: true / false / auto
+Workflow plan checker: true / false / auto
+Workflow verifier: true / false / auto
 Model profile: deep-theory / numerical / exploratory / review / paper-writing
+Unattended minutes per plan / wave: positive integers
+Checkpoint after N tasks: positive integer
+First load-bearing result checkpoint: true / false
+Pre-dependent checkpoint: true / false / auto
 ```
 
 `planning.commit_docs` is stored here as policy. This stage does not mutate
