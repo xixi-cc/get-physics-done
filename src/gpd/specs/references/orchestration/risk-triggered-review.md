@@ -96,4 +96,3 @@ load-bearing result. Reuse a fresh first-result, proof-redteam, targeted
 independent cross-check, or verifier pass when it covers the same result,
 assumptions, conventions, and claim scope. Log `deduplicated_against` and do not
 ask the user to approve the same unchanged result twice.
-
