@@ -432,6 +432,16 @@ def _write_proof_contract_phase(tmp_path: Path) -> tuple[Path, Path]:
     return phase_dir, plan_path
 
 
+def _replace_proof_deliverable_path(plan_path: Path, path_text: str) -> None:
+    content = plan_path.read_text(encoding="utf-8")
+    original = "      path: derivations/theorem-proof.tex\n"
+    assert original in content
+    plan_path.write_text(
+        content.replace(original, f"      path: {path_text}\n", 1),
+        encoding="utf-8",
+    )
+
+
 def _proof_verification_content(
     *,
     proof_audit_block: str,
@@ -612,6 +622,161 @@ def test_validate_frontmatter_verification_accepts_complete_passed_proof_audit(t
 
     assert result.valid is True
     assert result.errors == []
+
+
+def test_validate_frontmatter_verification_accepts_project_root_relative_proof_audit_paths(
+    tmp_path: Path,
+) -> None:
+    phase_dir, plan_path = _write_proof_contract_phase(tmp_path)
+    proof_path = "GPD/phases/01-proof/derivations/theorem-proof.tex"
+    audit_path = "GPD/phases/01-proof/01-01-PROOF-REDTEAM.md"
+    _replace_proof_deliverable_path(plan_path, proof_path)
+    verification_path = phase_dir / "01-VERIFICATION.md"
+    verification_path.write_text(
+        _proof_verification_content(
+            proof_audit_block=_proof_audit_block(
+                phase_dir,
+                proof_artifact_path=proof_path,
+                audit_artifact_path=audit_path,
+            )
+        ),
+        encoding="utf-8",
+    )
+
+    result = validate_frontmatter(
+        verification_path.read_text(encoding="utf-8"),
+        "verification",
+        source_path=verification_path,
+    )
+
+    assert result.valid is True
+    assert result.errors == []
+
+
+def test_validate_frontmatter_verification_prefers_project_root_candidate_on_anchor_collision(
+    tmp_path: Path,
+) -> None:
+    phase_dir, plan_path = _write_proof_contract_phase(tmp_path)
+    proof_path = "proofs/theorem-proof.tex"
+    _replace_proof_deliverable_path(plan_path, proof_path)
+    project_root_candidate = tmp_path / proof_path
+    project_root_candidate.parent.mkdir(parents=True)
+    project_root_candidate.write_bytes(_proof_artifact_path(phase_dir).read_bytes())
+    artifact_relative_collision = phase_dir / proof_path
+    artifact_relative_collision.parent.mkdir(parents=True)
+    artifact_relative_collision.write_text("% distinct artifact-relative decoy\n", encoding="utf-8")
+    verification_path = phase_dir / "01-VERIFICATION.md"
+    verification_path.write_text(
+        _proof_verification_content(
+            proof_audit_block=_proof_audit_block(
+                phase_dir,
+                proof_artifact_path=proof_path,
+                proof_artifact_sha256=_sha256_path(project_root_candidate),
+            )
+        ),
+        encoding="utf-8",
+    )
+
+    result = validate_frontmatter(
+        verification_path.read_text(encoding="utf-8"),
+        "verification",
+        source_path=verification_path,
+    )
+
+    assert result.valid is True
+    assert result.errors == []
+
+
+def test_validate_frontmatter_verification_rejects_lexical_parent_traversal_for_proof_artifact(
+    tmp_path: Path,
+) -> None:
+    phase_dir, plan_path = _write_proof_contract_phase(tmp_path)
+    proof_path = "../outside-proof.tex"
+    _replace_proof_deliverable_path(plan_path, proof_path)
+    traversed_artifact = phase_dir.parent / "outside-proof.tex"
+    traversed_artifact.write_text("% lexically traversed proof artifact\n", encoding="utf-8")
+    verification_path = phase_dir / "01-VERIFICATION.md"
+    verification_path.write_text(
+        _proof_verification_content(
+            proof_audit_block=_proof_audit_block(
+                phase_dir,
+                proof_artifact_path=proof_path,
+                proof_artifact_sha256=_sha256_path(traversed_artifact),
+            )
+        ),
+        encoding="utf-8",
+    )
+
+    result = validate_frontmatter(
+        verification_path.read_text(encoding="utf-8"),
+        "verification",
+        source_path=verification_path,
+    )
+
+    assert result.valid is False
+    assert any(
+        "proof_audit proof_artifact_path must not traverse parent directories" in error for error in result.errors
+    )
+
+
+def test_validate_frontmatter_verification_rejects_proof_symlink_escape(
+    tmp_path: Path,
+) -> None:
+    phase_dir, plan_path = _write_proof_contract_phase(tmp_path)
+    outside_artifact = tmp_path.parent / f"{tmp_path.name}-outside-proof.tex"
+    outside_artifact.write_text("% outside project root\n", encoding="utf-8")
+    proof_path = "escape-proof.tex"
+    _replace_proof_deliverable_path(plan_path, proof_path)
+    (phase_dir / proof_path).symlink_to(outside_artifact)
+    verification_path = phase_dir / "01-VERIFICATION.md"
+    verification_path.write_text(
+        _proof_verification_content(
+            proof_audit_block=_proof_audit_block(
+                phase_dir,
+                proof_artifact_path=proof_path,
+                proof_artifact_sha256=_sha256_path(outside_artifact),
+            )
+        ),
+        encoding="utf-8",
+    )
+
+    result = validate_frontmatter(
+        verification_path.read_text(encoding="utf-8"),
+        "verification",
+        source_path=verification_path,
+    )
+
+    assert result.valid is False
+    assert any(
+        "proof_audit proof_artifact_path must resolve inside the project root" in error for error in result.errors
+    )
+
+
+def test_validate_frontmatter_verification_rejects_absolute_proof_artifact_path(
+    tmp_path: Path,
+) -> None:
+    phase_dir, plan_path = _write_proof_contract_phase(tmp_path)
+    proof_path = _proof_artifact_path(phase_dir).resolve().as_posix()
+    _replace_proof_deliverable_path(plan_path, proof_path)
+    verification_path = phase_dir / "01-VERIFICATION.md"
+    verification_path.write_text(
+        _proof_verification_content(
+            proof_audit_block=_proof_audit_block(
+                phase_dir,
+                proof_artifact_path=proof_path,
+            )
+        ),
+        encoding="utf-8",
+    )
+
+    result = validate_frontmatter(
+        verification_path.read_text(encoding="utf-8"),
+        "verification",
+        source_path=verification_path,
+    )
+
+    assert result.valid is False
+    assert any("proof_audit proof_artifact_path must be a project-relative path" in error for error in result.errors)
 
 
 def test_validate_frontmatter_verification_rejects_passed_proof_claim_when_named_parameter_disappears_from_coverage(
