@@ -30,12 +30,6 @@ AGENTS_DIR = REPO_ROOT / "src" / "gpd" / "agents"
 REFERENCES_DIR = REPO_ROOT / "src" / "gpd" / "specs" / "references"
 
 PHASE5_TARGET_AGENT_ROLE_KITS = {
-    "gpd-research-mapper": (
-        "status-routing",
-        "fresh-continuation",
-        "files-written-freshness",
-        "context-pressure",
-    ),
     "gpd-notation-coordinator": (
         "status-routing",
         "fresh-continuation",

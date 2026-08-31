@@ -210,7 +210,7 @@ def test_insert_phase_workflow_points_to_merged_decimal_phase_section() -> None:
 
 
 def test_research_mapper_references_use_renamed_template_tree() -> None:
-    agent = (REPO_ROOT / "src/gpd/agents/gpd-research-mapper.md").read_text(encoding="utf-8")
+    agent = (REPO_ROOT / "src/gpd/agents/gpd-researcher.md").read_text(encoding="utf-8")
     workflow = (REPO_ROOT / "src/gpd/specs/workflows/map-research.md").read_text(encoding="utf-8")
 
     expected_paths = [
@@ -223,8 +223,9 @@ def test_research_mapper_references_use_renamed_template_tree() -> None:
         "references/templates/research-mapper/CONCERNS.md",
     ]
     for token in expected_paths:
-        assert token in agent
+        assert token not in agent
     assert "references/templates/research-mapper/" in workflow
+    assert "`project-map`" in agent
 
 
 def test_source_files_only_reference_existing_reference_markdown_files() -> None:

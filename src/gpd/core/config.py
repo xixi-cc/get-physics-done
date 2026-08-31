@@ -142,26 +142,12 @@ MODEL_PROFILES: dict[str, dict[str, ModelTier]] = {
         "review": ModelTier.TIER_2,
         "paper-writing": ModelTier.TIER_1,
     },
-    "gpd-phase-researcher": {
+    "gpd-researcher": {
         "deep-theory": ModelTier.TIER_1,
         "numerical": ModelTier.TIER_1,
         "exploratory": ModelTier.TIER_1,
         "review": ModelTier.TIER_2,
         "paper-writing": ModelTier.TIER_2,
-    },
-    "gpd-project-researcher": {
-        "deep-theory": ModelTier.TIER_1,
-        "numerical": ModelTier.TIER_2,
-        "exploratory": ModelTier.TIER_1,
-        "review": ModelTier.TIER_2,
-        "paper-writing": ModelTier.TIER_3,
-    },
-    "gpd-research-synthesizer": {
-        "deep-theory": ModelTier.TIER_1,
-        "numerical": ModelTier.TIER_2,
-        "exploratory": ModelTier.TIER_2,
-        "review": ModelTier.TIER_2,
-        "paper-writing": ModelTier.TIER_1,
     },
     "gpd-debugger": {
         "deep-theory": ModelTier.TIER_1,
@@ -169,13 +155,6 @@ MODEL_PROFILES: dict[str, dict[str, ModelTier]] = {
         "exploratory": ModelTier.TIER_2,
         "review": ModelTier.TIER_1,
         "paper-writing": ModelTier.TIER_2,
-    },
-    "gpd-research-mapper": {
-        "deep-theory": ModelTier.TIER_2,
-        "numerical": ModelTier.TIER_3,
-        "exploratory": ModelTier.TIER_3,
-        "review": ModelTier.TIER_3,
-        "paper-writing": ModelTier.TIER_3,
     },
     "gpd-verifier": {
         "deep-theory": ModelTier.TIER_1,
@@ -204,13 +183,6 @@ MODEL_PROFILES: dict[str, dict[str, ModelTier]] = {
         "exploratory": ModelTier.TIER_2,
         "review": ModelTier.TIER_2,
         "paper-writing": ModelTier.TIER_1,
-    },
-    "gpd-literature-reviewer": {
-        "deep-theory": ModelTier.TIER_1,
-        "numerical": ModelTier.TIER_2,
-        "exploratory": ModelTier.TIER_1,
-        "review": ModelTier.TIER_2,
-        "paper-writing": ModelTier.TIER_2,
     },
     "gpd-bibliographer": {
         "deep-theory": ModelTier.TIER_2,

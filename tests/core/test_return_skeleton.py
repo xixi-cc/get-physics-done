@@ -161,7 +161,7 @@ def test_list_gpd_return_profiles_matches_profile_registry_and_filters() -> None
         ("debugger", "debugger"),
         ("gpd-debugger", "debugger"),
         ("research_mapper", "researcher"),
-        ("gpd-research-mapper", "researcher"),
+        ("gpd-researcher", "researcher"),
         ("notation_coordinator", "notation"),
         ("gpd-notation-coordinator", "notation"),
         ("experiment_designer", "experiment_designer"),
@@ -244,7 +244,7 @@ def test_phase5_prompt_worker_profiles_expose_local_fields_without_path_defaults
     assert "design_file" not in experiment_designer.default_render_fields_by_status["completed"]
 
     researcher = GPD_RETURN_ROLE_PROFILES["researcher"]
-    assert "gpd-research-mapper" in researcher.agent_names
+    assert "gpd-researcher" in researcher.agent_names
 
 
 def test_phase5_prompt_worker_checkpoint_profiles_keep_child_boundary() -> None:

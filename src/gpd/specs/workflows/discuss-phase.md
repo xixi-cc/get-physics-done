@@ -5,7 +5,7 @@ stop conditions.
 </purpose>
 
 <downstream_awareness>
-`CONTEXT.md` feeds `gpd-phase-researcher` and `gpd-planner`. It must preserve
+`CONTEXT.md` feeds `gpd-researcher` and `gpd-planner`. It must preserve
 the user's load-bearing guidance in recognizable language: decisive
 observables, deliverables, prior output, benchmark, reference, and stop
 conditions. It should make decisions clear enough that downstream agents do not

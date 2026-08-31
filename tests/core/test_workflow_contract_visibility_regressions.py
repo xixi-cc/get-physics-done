@@ -220,7 +220,7 @@ def test_literature_review_workflow_surfaces_contract_gate_before_deferred_refer
                 "project_contract_gate.authoritative is not true",
             ),
             "gpd --raw validate lifecycle-contract-gate plan-phase",
-            "### Spawn gpd-phase-researcher",
+            "### Spawn gpd-researcher",
             "project_contract_gate.authoritative is not true",
         ),
         (

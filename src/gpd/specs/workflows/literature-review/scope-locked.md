@@ -204,7 +204,7 @@ Map the state-of-the-art:
 The reviewer now owns the synthesis pass in fresh context. Use the stage-local scope, anchors, and reference context to write the review and sidecar, rather than synthesizing it inline in the orchestrator.
 
 ```bash
-REVIEWER_MODEL=$(gpd resolve-model gpd-literature-reviewer)
+REVIEWER_MODEL=$(gpd resolve-model gpd-researcher)
 ```
 
 Build the reviewer prompt from the scoped evidence:
@@ -255,10 +255,10 @@ shared_state_policy: return_only
 ```
 REVIEW_RETURN=$(
 task(
-  subagent_type="gpd-literature-reviewer",
+  subagent_type="gpd-researcher",
   model="{reviewer_model}",
   readonly=false,
-  prompt="First, read {GPD_AGENTS_DIR}/gpd-literature-reviewer.md for your role and instructions.\\n\\n" + review_prompt
+  prompt="First, read {GPD_AGENTS_DIR}/gpd-researcher.md for your role and instructions. Use mode `literature-review`.\\n\\n" + review_prompt
 )
 )
 ```

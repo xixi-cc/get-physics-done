@@ -38,7 +38,8 @@ def _artifact_paths(gate: ChildGateTuple) -> tuple[str, ...]:
 def test_new_project_synthesizer_seam_routes_on_typed_returns_and_rejects_stale_summary_files() -> None:
     workflow = workflow_authority_text(WORKFLOWS_DIR, "new-project")
     path = WORKFLOWS_DIR / "new-project.md"
-    synth_tasks = _task_blocks_by_agent(path, "gpd-research-synthesizer")
+    synth_tasks = _task_blocks_by_agent(path, "gpd-researcher")
+    synth_tasks = [task for task in synth_tasks if "Use mode `synthesis`" in task.text]
     assert len(synth_tasks) == 1
     synth = synth_tasks[0]
     gate = _child_gate(workflow, "literature_synthesizer")
@@ -56,7 +57,7 @@ def test_new_project_synthesizer_seam_routes_on_typed_returns_and_rejects_stale_
     ):
         assert research_file in synth.text
     _assert_spawn_contract(synth, ("GPD/literature/SUMMARY.md",))
-    assert gate.role == "gpd-research-synthesizer"
+    assert gate.role == "gpd-researcher"
     assert gate.return_profile == "synthesizer"
     assert _artifact_paths(gate) == ("GPD/literature/SUMMARY.md",)
     assert gate.allowed_roots == ("GPD/literature",)
@@ -75,7 +76,7 @@ def test_new_milestone_synthesizer_seam_keeps_child_contract_visible_and_task_lo
 
     assert "Route `checkpoint`, `blocked`, or final `failed` through\n`references/orchestration/child-artifact-gate.md`" in workflow
     assert "After all 4 complete and required artifacts are present, spawn synthesizer:" in workflow
-    assert "task(prompt=\"First, read {GPD_AGENTS_DIR}/gpd-research-synthesizer.md for your role and instructions." in workflow
+    assert "task(prompt=\"First, read {GPD_AGENTS_DIR}/gpd-researcher.md for your role and instructions." in workflow
     assert "<files_to_read>" in workflow
     assert "- GPD/literature/PRIOR-WORK.md" in workflow
     assert "- GPD/literature/METHODS.md" in workflow

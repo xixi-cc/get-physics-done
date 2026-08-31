@@ -47,7 +47,7 @@ def test_research_phase_routes_on_typed_status_and_expected_artifacts() -> None:
     workflow = workflow_authority_text(WORKFLOWS_DIR, "research-phase")
 
     assert "Child artifact gate: apply `references/orchestration/child-artifact-gate.md`" in workflow
-    assert "role=`gpd-phase-researcher`" in workflow
+    assert "role=`gpd-researcher`" in workflow
     assert "expected=`{phase_dir}/{phase_number}-RESEARCH.md`" in workflow
     assert "references/orchestration/continuation-boundary.md" in workflow
     assert "gpd_return.status: completed" in workflow

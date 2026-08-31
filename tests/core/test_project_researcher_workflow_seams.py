@@ -39,7 +39,8 @@ def _artifact_paths(gate: ChildGateTuple) -> tuple[str, ...]:
 def test_new_project_project_researcher_scouts_route_on_typed_return_and_reject_stale_results() -> None:
     workflow = workflow_authority_text(WORKFLOWS_DIR, "new-project")
     path = WORKFLOWS_DIR / "new-project.md"
-    tasks = _task_blocks_by_agent(path, "gpd-project-researcher")
+    tasks = _task_blocks_by_agent(path, "gpd-researcher")
+    tasks = [task for task in tasks if "Use mode `project-survey`" in task.text]
     gate = _child_gate(workflow, "literature_scouts")
 
     expected = (
@@ -57,7 +58,7 @@ def test_new_project_project_researcher_scouts_route_on_typed_return_and_reject_
         assert len(task_outputs) == 1
         _assert_spawn_contract(task, task_outputs)
         assert "shared_state_policy: return_only" in task.text
-    assert gate.role == "gpd-project-researcher"
+    assert gate.role == "gpd-researcher"
     assert gate.return_profile == "researcher"
     assert _artifact_paths(gate) == expected
     assert gate.allowed_roots == ("GPD/literature",)
@@ -87,7 +88,7 @@ def test_new_milestone_project_researcher_scouts_require_fresh_continuations_and
         ),
     )
     assert 'id: "milestone_literature_scouts"' in workflow
-    assert 'role: "gpd-project-researcher"' in workflow
+    assert 'role: "gpd-researcher"' in workflow
     assert "GPD/literature/PRIOR-WORK.md" in workflow
     assert "GPD/literature/METHODS.md" in workflow
     assert "GPD/literature/COMPUTATIONAL.md" in workflow

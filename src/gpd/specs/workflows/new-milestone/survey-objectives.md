@@ -112,13 +112,13 @@ in parallel: Prior Work, Methods, Computational, Pitfalls.
 mkdir -p GPD/literature
 ```
 
-Spawn 4 parallel gpd-project-researcher agents. Each uses this template with dimension-specific fields:
+Spawn 4 parallel gpd-researcher agents. Each uses this template with dimension-specific fields:
 @{GPD_INSTALL_DIR}/references/orchestration/runtime-delegation-note.md
 
 **Common structure for all 4 scouts:**
 
 ```
-task(prompt="First, read {GPD_AGENTS_DIR}/gpd-project-researcher.md for your role and instructions.
+task(prompt="First, read {GPD_AGENTS_DIR}/gpd-researcher.md for your role and instructions. Use mode `project-survey`.
 
 <research_type>Literature Survey — {DIMENSION} for [new research direction].</research_type>
 
@@ -144,7 +144,7 @@ Use template: {GPD_INSTALL_DIR}/templates/research-project/{FILE}
 <handoff_expectation>
 Use the researcher `gpd_return` profile from your role prompt. Local completed output is `GPD/literature/{FILE}`.
 </handoff_expectation>
-", subagent_type="gpd-project-researcher", model="{researcher_model}", readonly=false, description="{DIMENSION} survey")
+", subagent_type="gpd-researcher", model="{researcher_model}", readonly=false, description="{DIMENSION} survey")
 ```
 
 Add this contract inside each spawned scout prompt when adapting it:
@@ -174,7 +174,7 @@ Dimension mapping:
 ```yaml
 child_gate:
   id: "milestone_literature_scouts"
-  role: "gpd-project-researcher"
+  role: "gpd-researcher"
   return_profile: "researcher"
   required_status: "completed"
   expected_artifacts:
@@ -201,7 +201,7 @@ scout as complete until the tuple passes.
 After all 4 complete and required artifacts are present, spawn synthesizer:
 
 ```
-task(prompt="First, read {GPD_AGENTS_DIR}/gpd-research-synthesizer.md for your role and instructions.
+task(prompt="First, read {GPD_AGENTS_DIR}/gpd-researcher.md for your role and instructions. Use mode `synthesis`.
 
 <task>
 Synthesize literature survey outputs into SUMMARY.md.
@@ -238,7 +238,7 @@ Do NOT commit — the orchestrator handles commits.
 <handoff_expectation>
 Use the synthesizer `gpd_return` profile from your role prompt. Local completed output is `GPD/literature/SUMMARY.md`.
 </handoff_expectation>
-", subagent_type="gpd-research-synthesizer", model="{synthesizer_model}", readonly=false, description="Synthesize literature survey")
+", subagent_type="gpd-researcher", model="{synthesizer_model}", readonly=false, description="Synthesize literature survey")
 ```
 
 Add this contract inside the spawned synthesizer prompt when adapting it:
@@ -262,7 +262,7 @@ This synthesizer contract is task-local. Do not reuse survey write scopes or wid
 ```yaml
 child_gate:
   id: "milestone_literature_synthesizer"
-  role: "gpd-research-synthesizer"
+  role: "gpd-researcher"
   return_profile: "synthesizer"
   required_status: "completed"
   expected_artifacts:

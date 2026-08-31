@@ -32,7 +32,7 @@ def test_literature_review_command_stays_thin_and_leaves_routing_to_the_workflow
     assert "explicit topic or research question" in command
     assert "under `GPD/literature/` rooted at the current workspace" in command
     assert "Standalone empty invocations should already have failed preflight." in command
-    assert "gpd-literature-reviewer" not in command
+    assert "gpd-researcher" not in command
     assert "gpd-bibliographer" not in command
     assert "gpd commit" not in command
 
@@ -40,7 +40,7 @@ def test_literature_review_command_stays_thin_and_leaves_routing_to_the_workflow
 def test_literature_review_workflow_requires_reviewer_and_bibliographer_spawn_contracts() -> None:
     workflow = workflow_authority_text(WORKFLOWS_DIR, "literature-review")
 
-    assert 'subagent_type="gpd-literature-reviewer"' in workflow
+    assert 'subagent_type="gpd-researcher"' in workflow
     assert 'subagent_type="gpd-bibliographer"' in workflow
     assert workflow.count("<spawn_contract>") >= 2
     assert "shared_state_policy: return_only" in workflow

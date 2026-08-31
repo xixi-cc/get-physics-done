@@ -31,27 +31,9 @@ def test_literature_review_workflow_routes_on_typed_status_and_artifact_gate() -
 
 
 def test_literature_reviewer_shows_base_return_fields_and_one_shot_checkpointing() -> None:
-    agent = _read(AGENTS_DIR / "gpd-literature-reviewer.md")
+    agent = _read(AGENTS_DIR / "gpd-researcher.md")
 
-    assert_prompt_contracts(
-        agent,
-        *semantic_concept(
-            "literature reviewer headings are presentation only",
-            required=(
-                "The markdown `## REVIEW COMPLETE` heading is presentation only.",
-                "The `## CHECKPOINT REACHED` heading below is presentation only.",
-                "stop at the continuation boundary",
-            ),
-        ),
-    )
-    assert "When reaching a checkpoint, return a typed `gpd_return` checkpoint and stop." in agent
-    assert "Use `gpd_return.status: completed` for a finished review." in agent
-
-    completed_block = agent.split("Use `gpd_return.status: completed` for a finished review.", 1)[1]
-    status_idx = completed_block.index("  status: completed")
-    files_idx = completed_block.index("  files_written: [GPD/literature/spectral-form-factor-REVIEW.md]")
-    issues_idx = completed_block.index("  issues: []")
-    next_actions_idx = completed_block.index('  next_actions: ["gpd:literature-review --synthesize"]')
-    papers_idx = completed_block.index("  papers_reviewed: 12")
-
-    assert status_idx < files_idx < issues_idx < next_actions_idx < papers_idx
+    assert "`literature-review`" in agent
+    assert "typed checkpoint" in agent
+    assert "standard `gpd_return` envelope" in agent
+    assert "files_written" in agent

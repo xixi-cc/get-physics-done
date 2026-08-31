@@ -380,7 +380,7 @@ COMMAND_SPAWN_TOKENS = {
 WORKFLOW_SPAWN_TOKENS = {
     "derive-equation.md": ["gpd-check-proof"],
     "explain.md": ["gpd-explainer", "gpd-bibliographer"],
-    "plan-phase.md": ["gpd-phase-researcher", "gpd-planner", "gpd-plan-checker"],
+    "plan-phase.md": ["gpd-researcher", "gpd-planner", "gpd-plan-checker"],
     "execute-phase.md": [
         "gpd-executor",
         "gpd-check-proof",
@@ -402,12 +402,12 @@ WORKFLOW_SPAWN_TOKENS = {
         "gpd-referee",
     ],
     "new-project.md": [
-        "gpd-project-researcher",
-        "gpd-research-synthesizer",
+        "gpd-researcher",
+        "gpd-researcher",
         "gpd-roadmapper",
         "gpd-notation-coordinator",
     ],
-    "new-milestone.md": ["gpd-project-researcher", "gpd-research-synthesizer", "gpd-roadmapper"],
+    "new-milestone.md": ["gpd-researcher", "gpd-researcher", "gpd-roadmapper"],
 }
 
 AGENT_REFERENCE_TOKENS = {
@@ -516,11 +516,6 @@ AGENT_REFERENCE_TOKENS = {
         "references/publication/publication-pipeline-modes.md",
         "references/publication/peer-review-panel.md",
     ],
-    "gpd-phase-researcher.md": [
-        "references/shared/shared-protocols.md",
-        "references/orchestration/agent-infrastructure.md",
-        "references/physics-subfields.md",
-    ],
     "gpd-plan-checker.md": [
         "references/shared/shared-protocols.md",
         "references/orchestration/agent-infrastructure.md",
@@ -539,10 +534,6 @@ AGENT_REFERENCE_TOKENS = {
         "references/planning/planner-conventions.md",
         "references/protocols/hypothesis-driven-research.md",
     ],
-    "gpd-project-researcher.md": [
-        "references/shared/shared-protocols.md",
-        "references/orchestration/agent-infrastructure.md",
-    ],
     "gpd-referee.md": [
         "references/shared/shared-protocols.md",
         "references/shared/reward-hacking-self-check.md",
@@ -554,28 +545,14 @@ AGENT_REFERENCE_TOKENS = {
         "references/publication/peer-review-panel.md",
         "templates/paper/referee-report.tex",
     ],
-    "gpd-research-synthesizer.md": [
-        "references/shared/shared-protocols.md",
-        "references/orchestration/agent-infrastructure.md",
-        "templates/research-project/SUMMARY.md",
-    ],
     "gpd-roadmapper.md": [
         "references/shared/shared-protocols.md",
         "references/orchestration/agent-infrastructure.md",
         "templates/roadmap.md",
         "templates/state.md",
     ],
-    "gpd-research-mapper.md": [
-        "references/shared/shared-protocols.md",
-        "references/orchestration/agent-infrastructure.md",
-        "references/physics-subfields.md",
-        "references/templates/research-mapper/FORMALISM.md",
-        "references/templates/research-mapper/REFERENCES.md",
-        "references/templates/research-mapper/ARCHITECTURE.md",
-        "references/templates/research-mapper/STRUCTURE.md",
-        "references/templates/research-mapper/CONVENTIONS.md",
-        "references/templates/research-mapper/VALIDATION.md",
-        "references/templates/research-mapper/CONCERNS.md",
+    "gpd-researcher.md": [
+        "references/shared/scientific-constitution.md",
     ],
     "gpd-verifier.md": [
         "references/shared/shared-protocols.md",
@@ -987,19 +964,14 @@ def test_return_only_planner_and_executor_do_not_commit_shared_state_files_by_de
     )
 
 
-def test_read_only_plan_checker_and_research_mapper_tool_policy_are_contract_aligned() -> None:
+def test_read_only_plan_checker_and_researcher_authority_are_contract_aligned() -> None:
     checker = (AGENTS_DIR / "gpd-plan-checker.md").read_text(encoding="utf-8")
-    mapper = (AGENTS_DIR / "gpd-research-mapper.md").read_text(encoding="utf-8")
+    mapper = (AGENTS_DIR / "gpd-researcher.md").read_text(encoding="utf-8")
 
     _ff(checker, "Return changed paths in `gpd_return.files_written`", context="plan checker read-only policy")
     _mf(checker, "files_written: []", "artifact_write_authority: read_only", context="plan checker read-only policy")
-    _m(
-        mapper,
-        "research mapper status-only web tools",
-        "All tools declared in frontmatter are available to this agent.",
-    )
-    _s(mapper, "research mapper status-only web tools", "Reserve `web_search`", "`web_fetch`", "`status` focus")
-    _f(mapper, "research mapper status-only web tools", "`status`: the same tools plus `web_search` and `web_fetch`")
+    _s(mapper, "researcher scoped authority", "allowed output paths", "do not commit", "shared project state")
+    _s(mapper, "researcher evidence discipline", "primary sources", "Training-memory recollection is only a lead")
 
 
 def test_referee_prompt_no_longer_claims_read_only_artifact_policy() -> None:
@@ -2905,17 +2877,17 @@ def test_roadmap_template_and_workflows_surface_phase_contract_coverage() -> Non
 
 
 def test_research_prompt_surfaces_use_canonical_literature_outputs() -> None:
-    project_researcher = (AGENTS_DIR / "gpd-project-researcher.md").read_text(encoding="utf-8")
-    research_synthesizer = (AGENTS_DIR / "gpd-research-synthesizer.md").read_text(encoding="utf-8")
-    phase_researcher = (AGENTS_DIR / "gpd-phase-researcher.md").read_text(encoding="utf-8")
+    project_researcher = (AGENTS_DIR / "gpd-researcher.md").read_text(encoding="utf-8")
+    research_synthesizer = (AGENTS_DIR / "gpd-researcher.md").read_text(encoding="utf-8")
+    phase_researcher = (AGENTS_DIR / "gpd-researcher.md").read_text(encoding="utf-8")
     roadmapper_agent = (AGENTS_DIR / "gpd-roadmapper.md").read_text(encoding="utf-8")
 
     for content in (project_researcher, research_synthesizer, phase_researcher, roadmapper_agent):
         assert "GPD/research/" not in content
 
     assert "GPD/literature/" in project_researcher
-    assert "GPD/literature/SUMMARY.md" in research_synthesizer
-    assert "GPD/literature/SUMMARY.md" in phase_researcher
+    assert "project literature" in research_synthesizer
+    assert "assigned `RESEARCH.md`" in phase_researcher
     assert "literature/SUMMARY.md" in roadmapper_agent
 
 
@@ -2964,12 +2936,12 @@ def test_new_project_minimal_mode_and_planning_wiring_allow_coarse_scoped_decomp
 def test_reference_workflows_require_anchor_registry_propagation() -> None:
     literature_workflow = _workflow_authority_text("literature-review")
     literature_command = (COMMANDS_DIR / "literature-review.md").read_text(encoding="utf-8")
-    literature_agent = (AGENTS_DIR / "gpd-literature-reviewer.md").read_text(encoding="utf-8")
+    literature_agent = (AGENTS_DIR / "gpd-researcher.md").read_text(encoding="utf-8")
     bibliographer_agent = (AGENTS_DIR / "gpd-bibliographer.md").read_text(encoding="utf-8")
     compare_workflow = (WORKFLOWS_DIR / "compare-results.md").read_text(encoding="utf-8")
     map_workflow = _workflow_authority_text("map-research")
     map_command = (COMMANDS_DIR / "map-research.md").read_text(encoding="utf-8")
-    mapper_agent = (AGENTS_DIR / "gpd-research-mapper.md").read_text(encoding="utf-8")
+    mapper_agent = (AGENTS_DIR / "gpd-researcher.md").read_text(encoding="utf-8")
 
     literature_bootstrap_fields = (
         load_workflow_stage_manifest("literature-review").stage("review_bootstrap").required_init_fields
@@ -3007,25 +2979,17 @@ def test_reference_workflows_require_anchor_registry_propagation() -> None:
         "literature-review",
         semantic_fragments=("staged workflow owns", "scope fixing", "artifact gating", "citation verification"),
         stale_fragments=(
-            "First, read {GPD_AGENTS_DIR}/gpd-literature-reviewer.md for your role and instructions",
+            "First, read {GPD_AGENTS_DIR}/gpd-researcher.md for your role and instructions",
             "Write to: GPD/literature/{slug}-REVIEW.md",
         ),
     )
     assert "Active Anchor Registry" not in literature_command
+    _s(literature_agent, "thin literature mode", "`literature-review`", "citation-source sidecar", "active anchors")
     _mf(
-        literature_agent,
-        "active_anchors",
+        literature_workflow,
         "GPD/literature/{slug}-CITATION-SOURCES.json",
-        "gpd paper-build --citation-sources",
         "reference_id",
-        context="literature reviewer citation sidecar fields",
-    )
-    _sf(
-        literature_agent,
-        "compatible with the `CitationSource` shape",
-        "`bibtex_key` as an optional preferred key",
-        "Keep `bibtex_key` stable",
-        context="literature reviewer bibtex key stability",
+        context="literature workflow citation sidecar fields",
     )
     _assert_prompt_concepts(
         bibliographer_agent,
@@ -3078,7 +3042,7 @@ def test_reference_workflows_require_anchor_registry_propagation() -> None:
         semantic_fragments=("workflow", "staged init", "mapper fanout", "return routing"),
         stale_fragments=("project_contract_load_info", "reference_artifacts_content"),
     )
-    assert "REFERENCES.md is an anchor registry" in mapper_agent
+    _s(mapper_agent, "thin project-map provenance", "`project-map`", "stable locators", "evidence is absent")
 
 
 def test_literature_review_stage_manifest_keeps_citation_audit_write_visible() -> None:
@@ -3117,7 +3081,7 @@ def test_file_producing_command_surfaces_use_canonical_spawn_contract() -> None:
         "literature-review",
         semantic_fragments=("staged workflow", "artifact gating", "citation verification"),
         stale_fragments=(
-            "First, read {GPD_AGENTS_DIR}/gpd-literature-reviewer.md for your role and instructions",
+            "First, read {GPD_AGENTS_DIR}/gpd-researcher.md for your role and instructions",
             "Write to: GPD/literature/{slug}-REVIEW.md",
         ),
     )
@@ -3456,7 +3420,7 @@ def test_sensitivity_analysis_workflow_uses_canonical_cli_commands() -> None:
 
 
 def test_phase_research_and_verification_surfaces_keep_anchor_checks_mandatory() -> None:
-    phase_researcher = (AGENTS_DIR / "gpd-phase-researcher.md").read_text(encoding="utf-8")
+    phase_researcher = (AGENTS_DIR / "gpd-researcher.md").read_text(encoding="utf-8")
     planner_agent = (AGENTS_DIR / "gpd-planner.md").read_text(encoding="utf-8")
     planner_execution = (REFERENCES_DIR / "planning" / "planner-execution-procedure.md").read_text(encoding="utf-8")
     planner_surface = planner_agent + "\n" + planner_execution
@@ -3466,8 +3430,8 @@ def test_phase_research_and_verification_surfaces_keep_anchor_checks_mandatory()
     _assert_prompt_concepts(
         phase_researcher,
         {
-            "active anchor section": ("## Active Anchor References",),
-            "mandatory anchor inputs": ("contract-critical anchors", "mandatory inputs"),
+            "active anchor handling": ("active anchors", "locked phase context"),
+            "source discipline": ("primary sources", "claim support"),
         },
         context="phase researcher anchor checks",
     )
@@ -3523,19 +3487,11 @@ def test_phase_research_and_verification_surfaces_keep_anchor_checks_mandatory()
 
 
 def test_phase_researcher_prompt_keeps_the_one_shot_handoff_and_return_contract_visible() -> None:
-    phase_researcher = (AGENTS_DIR / "gpd-phase-researcher.md").read_text(encoding="utf-8")
+    phase_researcher = (AGENTS_DIR / "gpd-researcher.md").read_text(encoding="utf-8")
     research_workflow = _workflow_authority_text("research-phase")
     research_command = (COMMANDS_DIR / "research-phase.md").read_text(encoding="utf-8")
 
-    _mf(
-        phase_researcher,
-        "## RESEARCH COMPLETE",
-        "## RESEARCH BLOCKED",
-        "gpd_return:",
-        "status: completed",
-        "GPD/phases/03-spectral-form-factor/03-RESEARCH.md",
-        context="phase researcher return envelope",
-    )
+    _s(phase_researcher, "thin phase research handoff", "`phase-research`", "standard `gpd_return` envelope", "files_written")
     _mf(
         research_workflow,
         "references/orchestration/continuation-boundary.md",
@@ -3656,7 +3612,7 @@ def test_validator_backed_examples_use_concrete_machine_readable_values() -> Non
 def test_convention_templates_are_state_lock_projections_not_authorities() -> None:
     conventions = (TEMPLATES_DIR / "conventions.md").read_text(encoding="utf-8")
     notation = (TEMPLATES_DIR / "notation-glossary.md").read_text(encoding="utf-8")
-    mapper = (AGENTS_DIR / "gpd-research-mapper.md").read_text(encoding="utf-8")
+    mapper = (AGENTS_DIR / "gpd-researcher.md").read_text(encoding="utf-8")
     infra = (REFERENCES_DIR / "orchestration" / "agent-infrastructure.md").read_text(encoding="utf-8")
 
     paper_writer = (AGENTS_DIR / "gpd-paper-writer.md").read_text(encoding="utf-8")
@@ -3678,8 +3634,7 @@ def test_convention_templates_are_state_lock_projections_not_authorities() -> No
         "`state.json.convention_lock` plus the `GPD/CONVENTIONS.md` / `GPD/NOTATION_GLOSSARY.md` projections",
         context="paper writer convention projection pointers",
     )
-    _m(mapper, "research mapper convention lock command", "state.json.convention_lock` through `gpd convention set`")
-    _f(mapper, "research mapper stale convention authority claim", "authoritative project-level convention lock")
+    _s(mapper, "researcher convention tracking", "conventions", "units", "do not commit")
     _assert_semantic_concept(
         infra,
         "agent infrastructure convention writers",
@@ -5503,7 +5458,7 @@ def test_review_and_execution_prompts_expand_required_schema_sources() -> None:
 def test_verification_and_agent_reference_prompts_expand_or_stage_required_reference_bodies() -> None:
     verify_work = _expand_prompt_surface(WORKFLOWS_DIR / "verify-work.md")
     verify_phase = _expand_prompt_surface(WORKFLOWS_DIR / "verify-phase.md")
-    phase_researcher = _expand_prompt_surface(AGENTS_DIR / "gpd-phase-researcher.md")
+    phase_researcher = _expand_prompt_surface(AGENTS_DIR / "gpd-researcher.md")
     planner = _expand_prompt_surface(AGENTS_DIR / "gpd-planner.md")
     verify_work_staging = registry.get_command("verify-work").staged_loading
     assert verify_work_staging is not None
@@ -5550,14 +5505,13 @@ def test_verification_and_agent_reference_prompts_expand_or_stage_required_refer
     )
     _m(
         phase_researcher,
-        "phase researcher shared protocol include",
-        "- `@{GPD_INSTALL_DIR}/references/shared/shared-protocols.md`",
+        "researcher scientific constitution include",
+        "references/shared/scientific-constitution.md",
     )
     _ff(
         phase_researcher,
-        "# Shared Research Philosophy and Protocols",
-        "# Agent Infrastructure Protocols",
-        context="phase researcher expanded reference headings",
+        "# GPD Scientific Constitution",
+        context="researcher expanded constitution heading",
     )
     _mf(
         planner,

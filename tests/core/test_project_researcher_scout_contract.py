@@ -39,18 +39,15 @@ def _artifact_paths(gate: ChildGateTuple) -> tuple[str, ...]:
     return tuple(artifact.path for artifact in gate.expected_artifacts)
 
 
-def test_project_researcher_uses_staged_mode_and_one_shot_checkpoint_language() -> None:
-    source = _read_agent("gpd-project-researcher.md")
+def test_researcher_uses_explicit_modes_and_scoped_checkpoint_language() -> None:
+    source = _read_agent("gpd-researcher.md")
 
-    assert "role_kits:" in source
-    assert "  - fresh-continuation" in source
-    assert "return the typed checkpoint and stop" in source
-    assert "{GPD_INSTALL_DIR}/references/orchestration/continuation-boundary.md" in source
-    assert "@{GPD_INSTALL_DIR}/references/shared/shared-protocols.md" not in source
-    assert "@{GPD_INSTALL_DIR}/references/research/researcher-shared.md" not in source
-    assert "Do not wait inside the same spawned run." not in source
-    assert "Do not query config or reread init JSON inside this agent." in source
-    assert "Write only the assigned `write_scope.allowed_paths`" in source
+    assert "`project-survey`" in source
+    assert "typed checkpoint" in source
+    assert "references/shared/scientific-constitution.md" in source
+    assert "shared-protocols.md" not in source
+    assert "researcher-shared.md" not in source
+    assert "Write only to the allowed paths" in source
     assert "Execute all 4 parallel research threads independently" not in source
 
 
@@ -60,7 +57,7 @@ def test_new_project_scout_returns_route_on_typed_status_and_files_written() -> 
 
     assert "Use the staged `research_mode` from `LITERATURE_SURVEY_INIT`" in workflow
     assert "@{GPD_INSTALL_DIR}/references/orchestration/runtime-delegation-note.md" in workflow
-    assert gate.role == "gpd-project-researcher"
+    assert gate.role == "gpd-researcher"
     assert gate.return_profile == "researcher"
     assert gate.required_status == "completed"
     assert _artifact_paths(gate) == (
@@ -85,7 +82,7 @@ def test_new_project_synthesizer_return_stays_typed_and_file_backed() -> None:
     workflow = _read_workflow("new-project")
     gate = _child_gate(workflow, "literature_synthesizer")
 
-    assert gate.role == "gpd-research-synthesizer"
+    assert gate.role == "gpd-researcher"
     assert gate.return_profile == "synthesizer"
     assert gate.required_status == "completed"
     assert _artifact_paths(gate) == ("GPD/literature/SUMMARY.md",)

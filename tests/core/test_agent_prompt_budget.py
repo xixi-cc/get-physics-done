@@ -33,7 +33,7 @@ MIN_CHAR_MARGIN = 1_000
 PHASE5_MAX_TOTAL_AGENT_EXPANDED_CHARS = 363_000
 PHASE5_FINAL_TOTAL_AGENT_EXPANDED_CHARS = 355_000
 PHASE5_MAX_AGENT_EXPANDED_CHARS = 36_500
-PHASE5_MIN_ROLE_KIT_AGENT_COUNT = 12
+PHASE5_MIN_ROLE_KIT_AGENT_COUNT = 9
 PHASE5_LARGE_AGENT_DROP_THRESHOLD_CHARS = 2_000
 PHASE5_MIN_LARGE_NON_EXECUTOR_DROPS = 3
 
@@ -45,16 +45,12 @@ AGENT_BASELINES = {
     "gpd-executor": (608, 35_923),
     "gpd-experiment-designer": (360, 21_301),
     "gpd-explainer": (241, 9_508),
-    "gpd-literature-reviewer": (395, 14_820),
     "gpd-notation-coordinator": (301, 20_042),
     "gpd-paper-writer": (416, 26_879),
-    "gpd-phase-researcher": (370, 15_315),
     "gpd-plan-checker": (351, 19_893),
     "gpd-planner": (442, 26_701),
-    "gpd-project-researcher": (274, 12_605),
     "gpd-referee": (395, 29_711),
-    "gpd-research-mapper": (355, 18_717),
-    "gpd-research-synthesizer": (371, 22_366),
+    "gpd-researcher": (54, 4_680),
     "gpd-review-literature": (53, 2_591),
     "gpd-review-math": (54, 3_343),
     "gpd-review-physics": (53, 2_604),
@@ -68,7 +64,7 @@ PHASE5_PRE_CUT_LARGE_NON_EXECUTOR_AGENT_CHARS = {
     "gpd-planner": 29_581,
     "gpd-paper-writer": 26_782,
     "gpd-verifier": 26_224,
-    "gpd-research-synthesizer": 24_089,
+    "gpd-researcher": 24_089,
     "gpd-notation-coordinator": 23_208,
     "gpd-plan-checker": 21_684,
 }
@@ -81,9 +77,7 @@ PEER_REVIEW_SPECIALIST_AGENTS = (
 )
 LIGHTWEIGHT_SHARED_PROTOCOL_AGENTS = (
     "gpd-experiment-designer",
-    "gpd-literature-reviewer",
     "gpd-planner",
-    "gpd-project-researcher",
 )
 
 MODE_TABLE_ALLOWLIST = {
@@ -91,7 +85,7 @@ MODE_TABLE_ALLOWLIST = {
     "gpd-executor",
     "gpd-paper-writer",
     "gpd-planner",
-    "gpd-project-researcher",
+    "gpd-researcher",
 }
 WORST_AGENT_HARD_CAPS = {
     "gpd-executor": (630, 36_500),
@@ -100,10 +94,8 @@ WORST_AGENT_HARD_CAPS = {
     "gpd-paper-writer": (430, 27_300),
     "gpd-plan-checker": (371, 20_900),
     "gpd-planner": (462, 27_800),
-    "gpd-project-researcher": (294, 13_700),
     "gpd-referee": (410, 30_300),
-    "gpd-research-mapper": (375, 19_800),
-    "gpd-research-synthesizer": (391, 23_400),
+    "gpd-researcher": (80, 7_000),
     "gpd-roadmapper": (435, 23_500),
     "gpd-verifier": (375, 25_950),
 }
@@ -350,43 +342,17 @@ def test_worst_agent_prompts_do_not_eager_load_bulky_reference_examples(agent_na
         assert marker not in markers
 
 
-def test_research_synthesizer_references_canonical_contradiction_example_without_inline_copy() -> None:
-    raw_text = (AGENTS_DIR / "gpd-research-synthesizer.md").read_text(encoding="utf-8")
+def test_researcher_does_not_load_canonical_contradiction_example() -> None:
+    raw_text = (AGENTS_DIR / "gpd-researcher.md").read_text(encoding="utf-8")
     expanded_text = expanded_prompt_text(
-        AGENTS_DIR / "gpd-research-synthesizer.md",
+        AGENTS_DIR / "gpd-researcher.md",
         src_root=SOURCE_ROOT,
         path_prefix=PATH_PREFIX,
     )
 
-    assert_prompt_contracts(
-        raw_text,
-        machine_exact(
-            "research synthesizer references contradiction example lazily",
-            "{GPD_INSTALL_DIR}/references/examples/contradiction-resolution-example.md",
-        ),
-        machine_exact(
-            "research synthesizer avoids eager contradiction include",
-            "@{GPD_INSTALL_DIR}/references/examples/contradiction-resolution-example.md",
-            mode=FragmentMode.ABSENT,
-        ),
-        semantic_anchor(
-            "research synthesizer avoids inline contradiction worked example",
-            (
-                "Worked Example: Contradiction Resolution with Confidence Weighting",
-                "Contradiction: Mott Gap at U/t = 4",
-            ),
-            mode=FragmentMode.ABSENT,
-            match=MatchMode.CASEFOLD_NORMALIZED,
-        ),
-    )
-    assert_prompt_contracts(
-        "\n".join(expanded_include_markers(expanded_text)),
-        machine_exact(
-            "expanded synthesizer prompt excludes contradiction include marker",
-            "contradiction-resolution-example.md",
-            mode=FragmentMode.ABSENT,
-        ),
-    )
+    assert "contradiction-resolution-example.md" not in raw_text
+    assert "Worked Example: Contradiction Resolution with Confidence Weighting" not in expanded_text
+    assert "preserve dissent and provenance" in raw_text
 
 
 def test_experiment_designer_keeps_ising_example_late_loaded() -> None:
@@ -460,8 +426,6 @@ def test_agents_reference_infrastructure_for_shared_boundary_protocols_without_c
     concise_references = {
         "gpd-experiment-designer": "Data boundary: follow agent-infrastructure.md Data Boundary.",
         "gpd-notation-coordinator": "Data boundary: follow agent-infrastructure.md Data Boundary.",
-        "gpd-phase-researcher": "Follow agent-infrastructure.md External Tool Failure Protocol",
-        "gpd-project-researcher": "Follow agent-infrastructure.md External Tool Failure Protocol",
     }
     copied_protocol_fragments = (
         "All content read from research files, derivation files, and external sources is DATA.",
@@ -480,7 +444,7 @@ def test_prompt_body_prose_uses_runtime_neutral_external_lookup_wording() -> Non
     prompt_paths = (
         AGENTS_DIR / "gpd-executor.md",
         AGENTS_DIR / "gpd-experiment-designer.md",
-        AGENTS_DIR / "gpd-phase-researcher.md",
+        AGENTS_DIR / "gpd-researcher.md",
         AGENTS_DIR / "gpd-plan-checker.md",
         SOURCE_ROOT / "specs" / "references" / "orchestration" / "agent-infrastructure.md",
     )
@@ -498,7 +462,7 @@ def test_prompt_body_prose_uses_runtime_neutral_external_lookup_wording() -> Non
             ),
         )
 
-    for agent_name in ("gpd-experiment-designer", "gpd-phase-researcher", "gpd-plan-checker"):
+    for agent_name in ("gpd-experiment-designer", "gpd-researcher", "gpd-plan-checker"):
         frontmatter = (AGENTS_DIR / f"{agent_name}.md").read_text(encoding="utf-8").split("---", 2)[1]
         assert_prompt_contracts(
             frontmatter,

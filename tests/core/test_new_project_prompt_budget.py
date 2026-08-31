@@ -169,8 +169,8 @@ def test_new_project_minimal_artifacts_stage_surface_excludes_deferred_full_mach
 
     for forbidden in (
         ">>> Spawning 4 literature scouts",
-        "gpd-project-researcher",
-        "gpd-research-synthesizer",
+        "gpd-researcher",
+        "gpd-researcher",
         "gpd-roadmapper",
         "gpd-notation-coordinator",
         "literature survey",

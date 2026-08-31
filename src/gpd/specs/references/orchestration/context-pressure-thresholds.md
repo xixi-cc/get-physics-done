@@ -13,9 +13,7 @@ Agents override defaults based on their context consumption patterns. Agents tha
 | **Shared default** | < 40% | 40-60% | 60-75% | > 75% | -- | Baseline for agents without special needs |
 | gpd-consistency-checker | < 30% | 30-45% | 45-60% | > 60% | phase pair | Reads many cross-phase artifacts; needs headroom for compliance matrix |
 | gpd-debugger | < 30% | 30-50% | 50-65% | > 65% | investigation technique | Must hold hypothesis context, evidence history, and eliminated alternatives simultaneously |
-| gpd-literature-reviewer | < 35% | 35-50% | 50-60% | > 60% | review area | Each paper reviewed ~2-3%; many papers needed for thorough review |
-| gpd-phase-researcher | < 35% | 35-50% | 50-65% | > 65% | research area | web_search results ~2-4% each; synthesize after 8-10 searches |
-| gpd-project-researcher | < 35% | 35-50% | 50-65% | > 65% | research area | Same as phase-researcher; limit to 10-15 searches before synthesizing |
+| gpd-researcher | < 35% | 35-50% | 50-65% | > 65% | scoped research unit | External sources and project artifacts accumulate quickly; synthesize before widening |
 | gpd-planner | < 35% | 35-50% | 50-65% | > 65% | plan file | Large plan output (~5-8% per plan); keep plans concise |
 | gpd-plan-checker | < 35% | 35-50% | 50-65% | > 65% | plan check | Each verification dimension ~2-3%; exploratory mode abbreviates optional depth while comprehensive checks use the full matrix |
 | gpd-executor | < 40% | 40-55% | 55-70% | > 70% | task | Tracks both input and output; forced checkpoint at 50% regardless of task status |
@@ -28,10 +26,8 @@ Agents override defaults based on their context consumption patterns. Agents tha
 | gpd-referee | < 40% | 40-50% | 50-65% | > 65% | evaluation dimension | Start with 5 critical dimensions, expand if budget allows |
 | gpd-bibliographer | < 40% | 40-55% | 55-70% | > 70% | reference verification | Each reference verified ~1-2%; batch verifications |
 | gpd-experiment-designer | < 40% | 40-55% | 55-70% | > 70% | design section | Standard consumption pattern |
-| gpd-research-synthesizer | < 40% | 40-60% | 60-70% | > 70% | synthesis section | Loading 4-5 researcher outputs consumes ~20-30% before synthesis |
 | gpd-paper-writer | < 40% | 40-55% | 55-65% | > 65% | paper section | Each section ~5-10%; focus on assigned sections only |
 | gpd-roadmapper | < 40% | 40-60% | 60-75% | > 75% | phase design | Standard consumption; for 8+ phases use concise descriptions |
-| gpd-research-mapper | < 40% | 40-60% | 60-75% | > 75% | focus area document | Each focus area ~5-8%; limit exploration depth |
 | gpd-notation-coordinator | < 45% | 45-60% | 60-75% | > 75% | convention category | Produces shorter outputs; process one category at a time |
 | gpd-verifier | -- | -- | -- | ~75% | verification check | Single trigger only; no graduated levels |
 
@@ -40,10 +36,10 @@ Agents override defaults based on their context consumption patterns. Agents tha
 Three clusters based on how aggressively agents must manage context:
 
 **Conservative (GREEN < 30-35%):** Agents that read many cross-phase files or must maintain extensive internal state.
-- consistency-checker, debugger, literature-reviewer, phase-researcher, project-researcher, planner, plan-checker
+- consistency-checker, debugger, researcher, planner, plan-checker
 
 **Standard (GREEN < 40%):** Agents with typical read/write patterns.
-- executor, referee, bibliographer, experiment-designer, research-synthesizer, paper-writer, roadmapper, research-mapper
+- executor, referee, bibliographer, experiment-designer, paper-writer, roadmapper
 
 **Lenient (GREEN 40-45%):** Agents that produce short outputs or work with focused inputs.
 - notation-coordinator

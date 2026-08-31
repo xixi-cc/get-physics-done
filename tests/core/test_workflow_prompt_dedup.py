@@ -582,11 +582,7 @@ def test_agent_specific_return_examples_include_complete_valid_base_envelope_fie
     agent_examples = (
         "gpd-experiment-designer.md",
         "gpd-notation-coordinator.md",
-        "gpd-project-researcher.md",
-        "gpd-phase-researcher.md",
         "gpd-plan-checker.md",
-        "gpd-research-mapper.md",
-        "gpd-research-synthesizer.md",
         "gpd-roadmapper.md",
         "gpd-paper-writer.md",
         "gpd-verifier.md",
@@ -594,7 +590,6 @@ def test_agent_specific_return_examples_include_complete_valid_base_envelope_fie
         "gpd-referee.md",
         "gpd-bibliographer.md",
         "gpd-debugger.md",
-        "gpd-literature-reviewer.md",
         "gpd-planner.md",
     )
 
@@ -629,33 +624,22 @@ def test_bibliographer_delegates_return_boilerplate_to_agent_infrastructure() ->
 
 
 def test_research_agents_delegate_file_templates_to_canonical_templates() -> None:
-    project_researcher = (AGENTS_DIR / "gpd-project-researcher.md").read_text(encoding="utf-8")
-    phase_researcher = (AGENTS_DIR / "gpd-phase-researcher.md").read_text(encoding="utf-8")
-    synthesizer = (AGENTS_DIR / "gpd-research-synthesizer.md").read_text(encoding="utf-8")
+    project_researcher = (AGENTS_DIR / "gpd-researcher.md").read_text(encoding="utf-8")
+    phase_researcher = (AGENTS_DIR / "gpd-researcher.md").read_text(encoding="utf-8")
+    synthesizer = (AGENTS_DIR / "gpd-researcher.md").read_text(encoding="utf-8")
     summary_template = (TEMPLATES_DIR / "research-project" / "SUMMARY.md").read_text(encoding="utf-8")
 
-    for template_name in (
-        "SUMMARY.md",
-        "PRIOR-WORK.md",
-        "METHODS.md",
-        "COMPUTATIONAL.md",
-        "PITFALLS.md",
-    ):
-        assert f"{{GPD_INSTALL_DIR}}/templates/research-project/{template_name}" in project_researcher
-
-    assert has_line_with_terms(project_researcher, "project-literature skeletons", "canonical template")
+    assert "canonical template if one is named" in project_researcher
     assert "# Research Summary: [Project Name]" not in project_researcher
     assert "### Governing Theory" not in project_researcher
     assert "## FEASIBILITY.md (feasibility mode only)" not in project_researcher
 
-    assert "{GPD_INSTALL_DIR}/templates/research.md" in phase_researcher
-    assert has_line_with_terms(phase_researcher, "templates/research.md", "RESEARCH.md")
+    assert "assigned `RESEARCH.md`" in phase_researcher
     assert "# Phase [X]: [Name] - Research" not in phase_researcher
     assert "### Package / Framework Reuse Decision" in phase_researcher
 
-    assert "{GPD_INSTALL_DIR}/templates/research-project/SUMMARY.md" in synthesizer
     assert "# Research Summary Template" in summary_template
-    assert has_line_with_terms(synthesizer, "canonical template", "synthesizer-specific")
+    assert "`synthesis`" in synthesizer
     assert not has_line_with_terms(synthesizer, "Research Summary", "[Project Title]")
     assert not has_line_with_terms(synthesizer, "Aggregated references", "research files", "organized by topic")
 

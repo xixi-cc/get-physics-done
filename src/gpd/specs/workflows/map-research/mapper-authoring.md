@@ -23,7 +23,7 @@ from `map_bootstrap` before running `mapper_authoring` init.
 
 <process>
 <step name="spawn_agents">
-Spawn 4 parallel gpd-research-mapper agents.
+Spawn 4 parallel gpd-researcher agents.
 
 Load the authoring slice only after existing-map routing and directory setup are complete:
 
@@ -37,12 +37,12 @@ fi
 
 Apply `MAPPER_AUTHORING_INIT.staged_loading.field_access_instruction` before reading the authoring payload. Use that refresh for mapper prompts; do not reuse bootstrap state for authoring.
 
-Use task tool with `subagent_type="gpd-research-mapper"`, `model="{mapper_model}"`, `readonly=false`, and `run_in_background=true` for parallel execution.
+Use task tool with `subagent_type="gpd-researcher"`, `model="{mapper_model}"`, `readonly=false`, and `run_in_background=true` for parallel execution.
 @{GPD_INSTALL_DIR}/references/orchestration/runtime-delegation-note.md
 
 > Apply the canonical runtime delegation convention already loaded above.
 
-**CRITICAL:** Use the dedicated `gpd-research-mapper` agent, NOT `Explore`. The mapper agent writes documents directly.
+**CRITICAL:** Use the dedicated `gpd-researcher` agent, NOT `Explore`. The mapper agent writes documents directly.
 
 Each mapper prompt must carry the staged intake, reference file handles, active reference IDs, protocol load manifest/verifier extensions, contract load/validation status, and project contract. Keep compact inline authority instructions in the task prompt; prefer contract IDs only when `project_contract_gate.authoritative` is true. Mapper agents should read selected paths with file_read when the mapping task needs source text; this stage does not embed broad reference excerpts or rendered protocol prose.
 
@@ -51,12 +51,12 @@ Mapper write paths are project-rooted. Resolve every relative `GPD/research-map/
 **Agent 1: Theory Focus**
 
 task(
-  subagent_type="gpd-research-mapper",
+  subagent_type="gpd-researcher",
   model="{mapper_model}",
   readonly=false,
   run_in_background=true,
   description="Map research project theoretical content",
-  prompt="First, read {GPD_AGENTS_DIR}/gpd-research-mapper.md for your role and instructions.
+  prompt="First, read {GPD_AGENTS_DIR}/gpd-researcher.md for your role and instructions. Use mode `project-map`.
 
 Focus: theory. Bias toward {map_focus} when provided without dropping contract-critical anchors.
 Analyze theoretical content and literature foundations.
@@ -86,12 +86,12 @@ Return typed `gpd_return`; completed must satisfy the focus-specific file gate. 
 **Agent 2: Computation Focus**
 
 task(
-  subagent_type="gpd-research-mapper",
+  subagent_type="gpd-researcher",
   model="{mapper_model}",
   readonly=false,
   run_in_background=true,
   description="Map research project computational methods",
-  prompt="First, read {GPD_AGENTS_DIR}/gpd-research-mapper.md for your role and instructions.
+  prompt="First, read {GPD_AGENTS_DIR}/gpd-researcher.md for your role and instructions. Use mode `project-map`.
 
 Focus: computation. Bias toward {map_focus} when provided without dropping contract-critical anchors.
 Analyze computational methods, solvers, and project structure.
@@ -121,12 +121,12 @@ Return typed `gpd_return`; completed must satisfy the focus-specific file gate. 
 **Agent 3: Methodology Focus**
 
 task(
-  subagent_type="gpd-research-mapper",
+  subagent_type="gpd-researcher",
   model="{mapper_model}",
   readonly=false,
   run_in_background=true,
   description="Map research project conventions and validation",
-  prompt="First, read {GPD_AGENTS_DIR}/gpd-research-mapper.md for your role and instructions.
+  prompt="First, read {GPD_AGENTS_DIR}/gpd-researcher.md for your role and instructions. Use mode `project-map`.
 
 Focus: methodology. Bias toward {map_focus} when provided without dropping contract-critical anchors.
 Analyze notation conventions, unit systems, and validation practices.
@@ -156,12 +156,12 @@ Return typed `gpd_return`; completed must satisfy the focus-specific file gate. 
 **Agent 4: Status Focus**
 
 task(
-  subagent_type="gpd-research-mapper",
+  subagent_type="gpd-researcher",
   model="{mapper_model}",
   readonly=false,
   run_in_background=true,
   description="Map research project concerns and open questions",
-  prompt="First, read {GPD_AGENTS_DIR}/gpd-research-mapper.md for your role and instructions.
+  prompt="First, read {GPD_AGENTS_DIR}/gpd-researcher.md for your role and instructions. Use mode `project-map`.
 
 Focus: status. Bias toward {map_focus} when provided without dropping contract-critical anchors.
 Analyze open questions, known issues, and concerns.
@@ -322,7 +322,7 @@ End workflow.
 
 <success_criteria>
 - Project-rooted `GPD/research-map/` directory exists.
-- 4 background `gpd-research-mapper` agents wrote directly.
+- 4 background `gpd-researcher` agents wrote directly.
 - All accepted files pass typed return, disk, line-count, and secret checks.
 - Complete or partial status is reported with the correct next command.
   </success_criteria>

@@ -3622,7 +3622,7 @@ def init_plan_phase(
 
     result: dict[str, object] = {
         # Models
-        "researcher_model": _resolve_model(effective_cwd, "gpd-phase-researcher", config),
+        "researcher_model": _resolve_model(effective_cwd, "gpd-researcher", config),
         "planner_model": _resolve_model(effective_cwd, "gpd-planner", config),
         "checker_model": _resolve_model(effective_cwd, "gpd-plan-checker", config),
         # Workflow flags
@@ -3708,8 +3708,8 @@ def init_new_project(cwd: Path, stage: str | None = None) -> dict:
         result.update(
             {
                 # Models
-                "researcher_model": _resolve_model(project_cwd, "gpd-project-researcher", config),
-                "synthesizer_model": _resolve_model(project_cwd, "gpd-research-synthesizer", config),
+                "researcher_model": _resolve_model(project_cwd, "gpd-researcher", config),
+                "synthesizer_model": _resolve_model(project_cwd, "gpd-researcher", config),
                 "roadmapper_model": _resolve_model(project_cwd, "gpd-roadmapper", config),
             }
         )
@@ -3728,11 +3728,11 @@ def init_new_project(cwd: Path, stage: str | None = None) -> dict:
         providers=(
             _staged_scalar_field_provider(
                 "researcher_model",
-                lambda: _resolve_model(project_cwd, "gpd-project-researcher", config),
+                lambda: _resolve_model(project_cwd, "gpd-researcher", config),
             ),
             _staged_scalar_field_provider(
                 "synthesizer_model",
-                lambda: _resolve_model(project_cwd, "gpd-research-synthesizer", config),
+                lambda: _resolve_model(project_cwd, "gpd-researcher", config),
             ),
             _staged_scalar_field_provider(
                 "roadmapper_model",
@@ -3798,8 +3798,8 @@ def init_new_milestone(cwd: Path, stage: str | None = None) -> dict:
         result.update(
             {
                 # Models
-                "researcher_model": _resolve_model(effective_cwd, "gpd-project-researcher", config),
-                "synthesizer_model": _resolve_model(effective_cwd, "gpd-research-synthesizer", config),
+                "researcher_model": _resolve_model(effective_cwd, "gpd-researcher", config),
+                "synthesizer_model": _resolve_model(effective_cwd, "gpd-researcher", config),
                 "roadmapper_model": _resolve_model(effective_cwd, "gpd-roadmapper", config),
             }
         )
@@ -3820,11 +3820,11 @@ def init_new_milestone(cwd: Path, stage: str | None = None) -> dict:
         providers=(
             _staged_scalar_field_provider(
                 "researcher_model",
-                lambda: _resolve_model(effective_cwd, "gpd-project-researcher", config),
+                lambda: _resolve_model(effective_cwd, "gpd-researcher", config),
             ),
             _staged_scalar_field_provider(
                 "synthesizer_model",
-                lambda: _resolve_model(effective_cwd, "gpd-research-synthesizer", config),
+                lambda: _resolve_model(effective_cwd, "gpd-researcher", config),
             ),
             _staged_scalar_field_provider(
                 "roadmapper_model",

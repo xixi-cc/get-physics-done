@@ -25,7 +25,7 @@ Explore and adaptive modes widen comparison and tangent surfacing, but they do *
 
 ## Per-Agent Behavioral Effects
 
-### gpd-phase-researcher
+### gpd-researcher
 
 | Mode | Behavior |
 |---|---|
@@ -97,15 +97,6 @@ Explore and adaptive modes widen comparison and tangent surfacing, but they do *
 | **exploit** | Publication-grade review. Apply the standards of the target journal. Check every claim against evidence. Verify reproducibility. Evaluate whether the paper meets the acceptance criteria of PRL/PRD/JHEP/etc. |
 | **adaptive** | Stay constructive while method choice is still open, then shift to exploit-style publication scrutiny after the approach is locked. |
 
-### gpd-literature-reviewer
-
-| Mode | Behavior |
-|---|---|
-| **explore** | Maximum breadth. Survey 30+ papers across multiple approaches and adjacent subfields. Build citation network with competing methodologies. Include negative results and open debates. Identify non-obvious connections to other fields. Budget: 50-70k tokens. |
-| **balanced** | Standard review. 15-25 papers focused on the chosen approach. Standard citation network. Include seminal works, key reviews, and recent developments. Budget: 30-45k tokens. |
-| **exploit** | Focused review. 8-12 papers: seminal paper, best review, most recent results, key methodological references. No breadth — depth on the specific technique. Budget: 15-25k tokens. |
-| **adaptive** | Stay broad until the method family is locked by decisive evidence, then narrow to exploit-style review. |
-
 ### gpd-experiment-designer
 
 | Mode | Behavior |
@@ -115,15 +106,6 @@ Explore and adaptive modes widen comparison and tangent surfacing, but they do *
 | **exploit** | Precision design. Tight parameter ranges around known interesting regions. Maximum convergence depth (5+ values per parameter). Highest statistical standards. Every simulation point serves the final result. |
 | **adaptive** | Start exploratory while key regimes or observables are still uncertain, then tighten to exploit-style precision after the decisive regime is identified. |
 
-### gpd-research-synthesizer
-
-| Mode | Behavior |
-|---|---|
-| **explore** | Multi-approach synthesis. Present all viable methods with tradeoffs without picking a winner. Cross-validation matrix includes ALL pairwise comparisons. Flag complementary approaches as tangent candidates for optional parallel investigation rather than assuming new branches. |
-| **balanced** | Standard synthesis. Recommend a single approach based on evidence weight. Present alternatives briefly. Standard cross-validation matrix. |
-| **exploit** | Focused synthesis. Distill the single recommended approach with maximum implementation detail. Skip alternative comparison — extract every actionable detail for the executor. |
-| **adaptive** | Stay multi-approach until decisive evidence or an explicit approach lock exists, then focus synthesis on the locked method. |
-
 ### gpd-roadmapper
 
 | Mode | Behavior |
@@ -132,15 +114,6 @@ Explore and adaptive modes widen comparison and tangent surfacing, but they do *
 | **balanced** | Standard roadmap. Linear phase sequence with verification checkpoints. Single approach. 5-10 phases. |
 | **exploit** | Minimal roadmap. Shortest path from problem to result. 3-6 phases. No exploratory or comparison phases. Pure execution. |
 | **adaptive** | Keep alternative paths visible only while approach choice remains open; collapse to a lean exploit-style roadmap once the method family is locked, and keep branch-backed workstreams explicit rather than implicit. |
-
-### gpd-research-mapper
-
-| Mode | Behavior |
-|---|---|
-| **explore** | Broad mapping. Include adjacent frameworks, alternative formalisms, cross-subfield connections. Equation catalog includes variants from different approaches. Flag framework choice as open question. |
-| **balanced** | Standard mapping. Primary theoretical framework with key equations, conventions, and open questions. |
-| **exploit** | Focused mapping. Only the specific formalism being used. Skip alternatives. Focus on computational status (implemented vs needs derivation). |
-| **adaptive** | Map alternatives while framework choice remains open; narrow once decisive evidence or an explicit approach lock stabilizes the formalism. |
 
 ## Transition Detection (Adaptive Mode)
 

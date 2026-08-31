@@ -86,7 +86,7 @@ fi
 ```
 </event>
 
-### Spawn gpd-phase-researcher
+### Spawn gpd-researcher
 
 Apply the shared runtime delegation note at task-construction time:
 @{GPD_INSTALL_DIR}/references/orchestration/runtime-delegation-note.md
@@ -153,8 +153,8 @@ shared_state_policy: return_only
 RESEARCH_HANDOFF_STARTED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 RESEARCH_RETURN=$(
 task(
-  prompt="First, read {GPD_AGENTS_DIR}/gpd-phase-researcher.md for your role and instructions.\n\n" + research_prompt,
-  subagent_type="gpd-phase-researcher",
+  prompt="First, read {GPD_AGENTS_DIR}/gpd-researcher.md for your role and instructions. Use mode `phase-research`.\n\n" + research_prompt,
+  subagent_type="gpd-researcher",
   model="{researcher_model}",
   readonly=false,
   description="Research Phase {phase_number}"
@@ -171,7 +171,7 @@ Run this `child_gate`; shared gate and continuation rules live in `references/or
 ```yaml
 child_gate:
   id: "phase_researcher_context_refresh"
-  role: "gpd-phase-researcher"
+  role: "gpd-researcher"
   return_profile: "researcher"
   required_status: "completed"
   expected_artifacts:
@@ -240,8 +240,8 @@ shared_state_policy: return_only
 ```bash
 RESEARCH_RETURN=$(
 task(
-  prompt="First, read {GPD_AGENTS_DIR}/gpd-phase-researcher.md for your role and instructions.\n\n" + continuation_prompt,
-  subagent_type="gpd-phase-researcher",
+  prompt="First, read {GPD_AGENTS_DIR}/gpd-researcher.md for your role and instructions. Use mode `phase-research`.\n\n" + continuation_prompt,
+  subagent_type="gpd-researcher",
   model="{researcher_model}",
   readonly=false,
   description="Continue research Phase {phase_number}"

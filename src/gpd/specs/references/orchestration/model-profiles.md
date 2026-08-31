@@ -23,16 +23,12 @@ If no override is configured for the active runtime, `gpd resolve-model` returns
 | gpd-planner              | tier-1        | tier-1      | tier-1        | tier-1   | tier-1          |
 | gpd-roadmapper           | tier-1        | tier-1      | tier-2        | tier-1   | tier-2          |
 | gpd-executor             | tier-1        | tier-2      | tier-2        | tier-2   | tier-1          |
-| gpd-phase-researcher     | tier-1        | tier-1      | tier-1        | tier-2   | tier-2          |
-| gpd-project-researcher   | tier-1        | tier-2      | tier-1        | tier-2   | tier-3          |
-| gpd-research-synthesizer | tier-1        | tier-2      | tier-2        | tier-2   | tier-1          |
+| gpd-researcher           | tier-1        | tier-1      | tier-1        | tier-2   | tier-2          |
 | gpd-debugger             | tier-1        | tier-1      | tier-2        | tier-1   | tier-2          |
-| gpd-research-mapper      | tier-2        | tier-3      | tier-3        | tier-3   | tier-3          |
 | gpd-verifier             | tier-1        | tier-1      | tier-2        | tier-1   | tier-2          |
 | gpd-plan-checker         | tier-2        | tier-2      | tier-2        | tier-1   | tier-2          |
 | gpd-consistency-checker  | tier-1        | tier-2      | tier-2        | tier-1   | tier-2          |
 | gpd-paper-writer         | tier-1        | tier-2      | tier-2        | tier-2   | tier-1          |
-| gpd-literature-reviewer  | tier-1        | tier-2      | tier-1        | tier-2   | tier-2          |
 | gpd-bibliographer        | tier-2        | tier-3      | tier-3        | tier-2   | tier-1          |
 | gpd-explainer            | tier-1        | tier-2      | tier-1        | tier-1   | tier-1          |
 | gpd-review-reader        | tier-2        | tier-2      | tier-2        | tier-2   | tier-2          |
@@ -137,45 +133,15 @@ Profiles affect agent behavior, not just model selection. When a profile is acti
 | **review**        | Reproduction-focused. Every step cross-references the specific literature source it implements. Documents deviations from published methods. Adds provenance annotation to every computed quantity.                        |
 | **paper-writing** | Narrative execution. Organizes computation output for direct inclusion in manuscript. Generates clean intermediate expressions suitable for equations in text. Prioritizes readable variable names and well-commented derivation files. |
 
-### gpd-phase-researcher
+### gpd-researcher
 
-| Profile           | Behavioral Change                                                                                                                                                                                    |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **deep-theory**   | Deep literature dive. Reads primary sources (not just reviews). Traces the provenance of key equations back to original derivations. Identifies all assumptions behind each method, including implicit ones. |
-| **numerical**     | Implementation-focused research. Prioritizes finding working code, validated algorithms, and published benchmarks. Evaluates numerical stability and convergence properties of each candidate method. |
-| **exploratory**   | Breadth-first survey. Scans across subfields for analogous techniques. Prioritizes finding 5+ candidate approaches over fully understanding any single one. Reports a ranked shortlist with trade-offs. |
-| **review**        | Verification-oriented research. For each method found, identifies what independent checks exist (sum rules, limiting cases, conservation laws). Prioritizes methods with built-in validation pathways. |
-| **paper-writing** | Context-gathering research. Focuses on how the planned work relates to prior literature. Identifies the key references that must be cited. Maps the narrative gap the paper will fill.                 |
-
-### gpd-project-researcher
-
-| Profile           | Behavioral Change                                                                                                                                                                           |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **deep-theory**   | Thorough domain survey. Maps the full theoretical landscape around the problem: known exact results, rigorous bounds, open conjectures. Identifies which results are proven vs widely believed. |
-| **numerical**     | Computational landscape survey. Catalogs existing codes, published benchmarks, available datasets. Identifies state-of-the-art numerical methods and their limitations for the problem class. |
-| **exploratory**   | Maximum breadth. Surveys adjacent fields for cross-pollination opportunities. Identifies unconventional approaches (e.g., machine learning for physics, information-theoretic methods). Casts a wide net. |
-| **review**        | Gap-identification focus. Maps what is established vs contested vs unknown. Identifies specific claims in the literature that lack independent verification. Flags reproducibility concerns. |
-| **paper-writing** | Lightweight survey. Quick identification of the 10-15 most relevant references. Focuses on positioning the project within the existing literature rather than exhaustive coverage.            |
-
-### gpd-research-synthesizer
-
-| Profile           | Behavioral Change                                                                                                                                                                                  |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **deep-theory**   | Maximum detail in synthesis. Preserves all mathematical subtleties, convention choices, and proof structures. Synthesis document is a complete technical reference, not a summary.                   |
-| **numerical**     | Results-focused synthesis. Emphasizes numerical values, convergence data, error budgets. Organizes by computed quantity rather than by research phase. Tables and figures over prose.                |
-| **exploratory**   | High-level synthesis. Distills findings into key insights and open questions. Drops technical detail in favor of conceptual clarity. Highlights the most promising directions for further work.      |
-| **review**        | Verification-chain synthesis. Organizes results by what has been verified, how it was verified, and what remains unverified. Maps the chain of logical dependencies between results.                |
-| **paper-writing** | Narrative synthesis. Organizes findings into a story arc suitable for a paper. Identifies the main result, supporting results, and context. Drafts section-level outlines alongside the synthesis. |
-
-### gpd-literature-reviewer
-
-| Profile           | Behavioral Change                                                                                                                                                                                          |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **deep-theory**   | Full citation depth. Traces citation networks back to seminal papers. Reads and summarizes key derivations from primary sources. Identifies where different groups disagree and why.                        |
-| **numerical**     | Benchmark-focused review. Prioritizes papers that provide numerical benchmarks, validation data, or code. Catalogs published values with uncertainties for comparison. Identifies reproducibility status.   |
-| **exploratory**   | Broad survey. Covers more papers at lower depth. Focuses on identifying the landscape of approaches rather than deeply understanding any single one. Produces a categorized bibliography.                   |
-| **review**        | Critical review. Evaluates the strength of evidence for each claim in the literature. Identifies papers with weak methodology, unchecked assumptions, or results that have not been independently reproduced. |
-| **paper-writing** | Citation-completeness review. Ensures all relevant prior work is identified for proper attribution. Focuses on what must be cited vs what is useful context. Identifies the key 5-10 references to discuss in detail. |
+| Profile           | Behavioral Change |
+| ----------------- | ----------------- |
+| **deep-theory**   | Trace load-bearing equations to primary sources, expose assumptions and convention changes, and preserve proof structure during synthesis. |
+| **numerical**     | Prioritize validated algorithms, working implementations, benchmarks, convergence behavior, uncertainty, and reproducibility. |
+| **exploratory**   | Search broadly across adjacent fields, then rank promising approaches with evidence, applicability, and tradeoffs. |
+| **review**        | Stress-test claim support, disagreements, hidden assumptions, independent checks, and reproducibility gaps. |
+| **paper-writing** | Gather and synthesize the evidence needed for positioning, attribution, narrative continuity, and claim support. |
 
 ### gpd-bibliographer
 
@@ -272,14 +238,11 @@ Formal derivations require the executor to carry out multi-step mathematical rea
 **Why tier-1 for gpd-verifier in numerical and review?**
 Verification in physics requires checking dimensional consistency, limiting cases, conservation laws, and convergence behavior. These are reasoning-intensive tasks where tier-3 or even tier-2 may miss subtle errors (e.g., a sign error in a commutator, an off-by-one in an index contraction).
 
-**Why tier-1 for gpd-research-synthesizer in paper-writing?**
-Synthesizing research into a coherent narrative requires understanding which results are important, how they connect, and what story they tell. This is high-level reasoning about physics, not just summarization.
-
-**Why tier-3 for gpd-research-mapper?**
-Read-only exploration of project artifacts (simulation configs, data files, existing notebooks). No heavy physics derivation required, just structured output from file contents.
+**Why keep gpd-researcher capable across profiles?**
+The same thin role now handles surveys, phase research, literature review, project mapping, and synthesis. Its context is smaller, but its source evaluation and physics reasoning remain load-bearing.
 
 **Why tier-1 for gpd-paper-writer in deep-theory and paper-writing?**
 Writing physics papers requires understanding the narrative arc, choosing which intermediate steps to include, and presenting results clearly. In deep-theory mode, mathematical exposition must be precise. In paper-writing mode, narrative quality is paramount.
 
-**Why tier-1 for gpd-literature-reviewer in exploratory?**
+**Why tier-1 for gpd-researcher in exploratory?**
 Exploratory literature reviews require creative search strategies, recognizing connections between subfields, and assessing the reliability of competing claims. This is reasoning-intensive work.
