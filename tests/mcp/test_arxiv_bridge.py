@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import runpy
 import warnings
-from contextlib import asynccontextmanager
 
 import pytest
 
@@ -33,63 +32,44 @@ def test_load_settings_uses_current_home_for_default_storage_root(
 
 
 @pytest.mark.asyncio
-async def test_bridge_open_spawns_upstream_server_with_storage_path(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
-    from gpd.mcp.servers import arxiv_bridge as module
+async def test_bridge_open_uses_native_mcp2_session(tmp_path) -> None:
     from gpd.mcp.servers.arxiv_bridge import ArxivBridge, ArxivBridgeConfig
-
-    observed: dict[str, object] = {}
-
-    class FakeSession:
-        async def __aenter__(self):
-            observed["session_entered"] = True
-            return self
-
-        async def __aexit__(self, exc_type, exc, tb):
-            observed["session_exited"] = True
-
-        async def initialize(self):
-            observed["initialized"] = True
-
-    @asynccontextmanager
-    async def fake_stdio_client(server_params, errlog=None):
-        observed["command"] = server_params.command
-        observed["args"] = list(server_params.args)
-        yield ("read-stream", "write-stream")
-
-    monkeypatch.setattr(module, "stdio_client", fake_stdio_client)
-    monkeypatch.setattr(module, "ClientSession", lambda read_stream, write_stream: FakeSession())
 
     bridge = ArxivBridge(ArxivBridgeConfig(storage_path=tmp_path.resolve()))
 
     async with bridge.open() as opened:
         assert opened is bridge
         assert bridge._session is not None
-
-    assert observed["command"] == module.sys.executable
-    assert observed["args"] == ["-m", "arxiv_mcp_server", "--storage-path", str(tmp_path.resolve())]
-    assert observed["initialized"] is True
-    assert observed["session_entered"] is True
-    assert observed["session_exited"] is True
+        result = await bridge.list_tools()
+        assert [tool.name for tool in result.tools] == [
+            "search_papers",
+            "download_paper",
+            "list_papers",
+            "read_paper",
+            "get_abstract",
+            "download_source",
+        ]
+    assert bridge._session is None
 
 
 @pytest.mark.asyncio
 async def test_bridge_advertises_live_upstream_tools_and_adds_local_download_source() -> None:
-    from mcp.types import ListToolsResult, Tool
+    from mcp_types import ListToolsResult, Tool
 
     from gpd.mcp.servers.arxiv_bridge import ArxivBridge, ArxivBridgeConfig
 
     class FakeSession:
-        async def list_tools(self, cursor=None):
+        async def list_tools(self, *, params=None):
             return ListToolsResult(
                 tools=[
-                    Tool(name="search_papers", inputSchema={"type": "object"}),
-                    Tool(name="download_paper", inputSchema={"type": "object"}),
-                    Tool(name="read_paper", inputSchema={"type": "object"}),
-                    Tool(name="get_abstract", inputSchema={"type": "object"}),
-                    Tool(name="semantic_search", inputSchema={"type": "object"}),
-                    Tool(name="download_source", inputSchema={"type": "object", "properties": {"upstream": {}}}),
+                    Tool(name="search_papers", input_schema={"type": "object"}),
+                    Tool(name="download_paper", input_schema={"type": "object"}),
+                    Tool(name="read_paper", input_schema={"type": "object"}),
+                    Tool(name="get_abstract", input_schema={"type": "object"}),
+                    Tool(name="semantic_search", input_schema={"type": "object"}),
+                    Tool(name="download_source", input_schema={"type": "object", "properties": {"upstream": {}}}),
                 ],
-                nextCursor="next-page",
+                next_cursor="next-page",
             )
 
     bridge = ArxivBridge(ArxivBridgeConfig())
@@ -109,25 +89,25 @@ async def test_bridge_advertises_live_upstream_tools_and_adds_local_download_sou
         "get_abstract",
         "download_source",
     ]
-    assert result.tools[-1].inputSchema["properties"]["paper_id"]["description"].startswith("arXiv paper identifier")
+    assert result.tools[-1].input_schema["properties"]["paper_id"]["description"].startswith("arXiv paper identifier")
     assert result.tools[-1].annotations is not None
-    assert result.tools[-1].annotations.readOnlyHint is False
-    assert result.tools[-1].annotations.destructiveHint is True
-    assert result.tools[-1].annotations.idempotentHint is False
-    assert result.tools[-1].annotations.openWorldHint is True
-    assert result.nextCursor == "next-page"
+    assert result.tools[-1].annotations.read_only_hint is False
+    assert result.tools[-1].annotations.destructive_hint is True
+    assert result.tools[-1].annotations.idempotent_hint is False
+    assert result.tools[-1].annotations.open_world_hint is True
+    assert result.next_cursor == "next-page"
 
 
 @pytest.mark.asyncio
 async def test_download_source_schema_rejects_whitespace_only_paper_id() -> None:
     from jsonschema import Draft202012Validator
-    from mcp.types import ListToolsResult, Tool
+    from mcp_types import ListToolsResult, Tool
 
     from gpd.mcp.servers.arxiv_bridge import ArxivBridge, ArxivBridgeConfig
 
     class FakeSession:
-        async def list_tools(self, cursor=None):
-            return ListToolsResult(tools=[Tool(name="search_papers", inputSchema={"type": "object"})])
+        async def list_tools(self, *, params=None):
+            return ListToolsResult(tools=[Tool(name="search_papers", input_schema={"type": "object"})])
 
     bridge = ArxivBridge(ArxivBridgeConfig())
     bridge._session = FakeSession()  # type: ignore[assignment]
@@ -136,7 +116,7 @@ async def test_download_source_schema_rejects_whitespace_only_paper_id() -> None
     finally:
         bridge._session = None
 
-    schema = next(tool.inputSchema for tool in result.tools if tool.name == "download_source")
+    schema = next(tool.input_schema for tool in result.tools if tool.name == "download_source")
     paper_id = schema["properties"]["paper_id"]
     validator = Draft202012Validator(schema)
 
@@ -148,15 +128,16 @@ async def test_download_source_schema_rejects_whitespace_only_paper_id() -> None
 
 @pytest.mark.asyncio
 async def test_bridge_preserves_upstream_pagination_and_only_adds_download_source_on_first_page() -> None:
-    from mcp.types import ListToolsResult, Tool
+    from mcp_types import ListToolsResult, Tool
 
     from gpd.mcp.servers.arxiv_bridge import ArxivBridge, ArxivBridgeConfig
 
     class FakeSession:
-        async def list_tools(self, cursor=None):
+        async def list_tools(self, *, params=None):
+            cursor = params.cursor if params else None
             return ListToolsResult(
-                tools=[Tool(name="list_papers", inputSchema={"type": "object"})],
-                nextCursor="cursor-2" if cursor is None else None,
+                tools=[Tool(name="list_papers", input_schema={"type": "object"})],
+                next_cursor="cursor-2" if cursor is None else None,
             )
 
     bridge = ArxivBridge(ArxivBridgeConfig())
@@ -168,25 +149,25 @@ async def test_bridge_preserves_upstream_pagination_and_only_adds_download_sourc
         bridge._session = None
 
     assert [tool.name for tool in first.tools] == ["list_papers", "download_source"]
-    assert first.nextCursor == "cursor-2"
+    assert first.next_cursor == "cursor-2"
     assert [tool.name for tool in second.tools] == ["list_papers"]
-    assert second.nextCursor is None
+    assert second.next_cursor is None
 
 
 @pytest.mark.asyncio
 async def test_bridge_proxies_upstream_tool_calls_without_rewriting() -> None:
-    from mcp.types import CallToolResult, ListToolsResult, TextContent, Tool
+    from mcp_types import CallToolResult, ListToolsResult, TextContent, Tool
 
     from gpd.mcp.servers.arxiv_bridge import ArxivBridge, ArxivBridgeConfig
 
     class FakeSession:
-        async def list_tools(self, cursor=None):
-            return ListToolsResult(tools=[Tool(name="download_paper", inputSchema={"type": "object"})])
+        async def list_tools(self, *, params=None):
+            return ListToolsResult(tools=[Tool(name="download_paper", input_schema={"type": "object"})])
 
         async def call_tool(self, name, arguments):
             return CallToolResult(
                 content=[TextContent(type="text", text=f"{name}:{arguments['paper_id']}")],
-                structuredContent={"tool": name, "arguments": arguments},
+                structured_content={"tool": name, "arguments": arguments},
             )
 
     bridge = ArxivBridge(ArxivBridgeConfig(backend="arxiv-only"))
@@ -196,7 +177,7 @@ async def test_bridge_proxies_upstream_tool_calls_without_rewriting() -> None:
     finally:
         bridge._session = None
 
-    assert result.structuredContent == {"tool": "download_paper", "arguments": {"paper_id": "2401.12345"}}
+    assert result.structured_content == {"tool": "download_paper", "arguments": {"paper_id": "2401.12345"}}
 
 
 @pytest.mark.asyncio
@@ -226,11 +207,11 @@ async def test_bridge_download_source_returns_structured_metadata(monkeypatch: p
 
     result = await bridge.call_tool("download_source", {"paper_id": "2401.12345"})
 
-    assert result.isError is False
-    assert result.structuredContent is not None
-    assert result.structuredContent["schema_version"] == 1
-    assert result.structuredContent["tool"] == "download_source"
-    assert result.structuredContent["result"]["arxiv_id"] == "2401.12345"
+    assert result.is_error is False
+    assert result.structured_content is not None
+    assert result.structured_content["schema_version"] == 1
+    assert result.structured_content["tool"] == "download_source"
+    assert result.structured_content["result"]["arxiv_id"] == "2401.12345"
     assert "Downloaded source archive" in result.content[0].text
 
 
@@ -260,24 +241,24 @@ async def test_bridge_validates_download_source_arguments(
     bridge = ArxivBridge(ArxivBridgeConfig())
     result = await bridge.call_tool("download_source", arguments)
 
-    assert result.isError is True
-    assert result.structuredContent is not None
-    assert result.structuredContent["schema_version"] == 1
-    assert message in result.structuredContent["error"]
+    assert result.is_error is True
+    assert result.structured_content is not None
+    assert result.structured_content["schema_version"] == 1
+    assert message in result.structured_content["error"]
     assert message in result.content[0].text
 
 
 @pytest.mark.asyncio
 async def test_bridge_proxies_prompts() -> None:
-    from mcp.types import GetPromptResult, ListPromptsResult, Prompt
+    from mcp_types import GetPromptResult, ListPromptsResult, Prompt
 
     from gpd.mcp.servers.arxiv_bridge import ArxivBridge, ArxivBridgeConfig
 
     prompt = Prompt(name="deep-paper-analysis")
 
     class FakeSession:
-        async def list_prompts(self, cursor=None):
-            return ListPromptsResult(prompts=[prompt], nextCursor=None)
+        async def list_prompts(self, *, params=None):
+            return ListPromptsResult(prompts=[prompt], next_cursor=None)
 
         async def get_prompt(self, name, arguments=None):
             return GetPromptResult(description=name, messages=[])
@@ -386,7 +367,7 @@ def _make_fake_session(call_outputs=None, call_log=None):
 
     class FakeSession:
         async def call_tool(self, name, arguments):
-            from mcp.types import CallToolResult, TextContent
+            from mcp_types import CallToolResult, TextContent
 
             call_log.append((name, dict(arguments) if arguments else {}))
             if call_outputs is None:
@@ -398,7 +379,7 @@ def _make_fake_session(call_outputs=None, call_log=None):
                 return output
             text, is_error = output
             return CallToolResult(
-                isError=is_error,
+                is_error=is_error,
                 content=[TextContent(type="text", text=text)],
             )
 
@@ -547,7 +528,7 @@ async def test_search_papers_short_circuits_to_openalex(
 
     assert translator_called, "OpenAlex translator must be invoked"
     assert log == [], "upstream session must not be called when OpenAlex returns results"
-    assert result.isError is None or result.isError is False
+    assert result.is_error is None or result.is_error is False
     payload = result.content[0].text
     assert "2401.12345" in payload
 
@@ -662,7 +643,7 @@ async def test_get_abstract_error_payload_does_not_get_confirmation_header(
 ) -> None:
     """An upstream payload of the form
         {"status": "error", "message": "...", "paper_id": "invalid"}
-    with isError=False must NOT be wrapped with a "Returned arxiv:invalid —
+    with is_error=False must NOT be wrapped with a "Returned arxiv:invalid —
     canonical paper served" header. The header is a positive assertion of
     success and prepending it in front of an error payload actively misleads
     the model (it is the exact failure mode the header was added to prevent
@@ -686,7 +667,7 @@ async def test_get_abstract_error_payload_does_not_get_confirmation_header(
         lambda _args: {"status": "error", "paper_id": "invalid", "title": "", "authors": [], "abstract": "", "categories": [], "published": "", "pdf_url": "", "message": "lookup failed"},
     )
 
-    import mcp.types as types
+    import mcp_types as types
 
     class FakeSession:
         async def call_tool(self, name, arguments):
@@ -748,7 +729,7 @@ async def test_download_paper_hits_ar5iv_first(
 
     assert log == [], "upstream session must not be called when ar5iv hits"
     assert gcs_called == [], "GCS must not be called when ar5iv hits"
-    assert result.isError is None or result.isError is False
+    assert result.is_error is None or result.is_error is False
     payload = _json.loads(result.content[0].text)
     assert payload["status"] == "success"
     assert payload["source"] == "html-ar5iv"
@@ -1039,7 +1020,7 @@ async def test_rate_limit_in_payload_surfaces_as_iserror(
         bridge._session = None
 
     assert len(log) == 1, "bridge must fail fast on rate-limit, no in-bridge retry"
-    assert result.isError is True, "rate-limit must surface as MCP isError"
+    assert result.is_error is True, "rate-limit must surface as MCP isError"
 
 
 @pytest.mark.asyncio
@@ -1080,7 +1061,7 @@ async def test_rate_limit_surfaces_as_iserror_when_failure_log_prepopulated(
         bridge._session = None
 
     assert len(log) == 1
-    assert result.isError is True
+    assert result.is_error is True
 
 
 @pytest.mark.asyncio

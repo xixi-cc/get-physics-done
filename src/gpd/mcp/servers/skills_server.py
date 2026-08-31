@@ -18,7 +18,7 @@ from functools import cache, lru_cache
 from pathlib import Path
 from typing import Annotated
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 from pydantic import Field
 
 from gpd import registry as content_registry
@@ -54,7 +54,7 @@ from gpd.mcp.servers import (
 
 logger = configure_mcp_logging("gpd-skills")
 
-mcp = FastMCP("gpd-skills")
+mcp = MCPServer("gpd-skills")
 _GENERIC_ROUTE_TOKENS = frozenset(
     {
         "analysis",

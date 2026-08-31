@@ -12,7 +12,7 @@ Usage:
 from pathlib import Path
 from typing import Annotated
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 from pydantic import Field, WithJsonSchema
 
 from gpd.core.errors import PatternError
@@ -39,7 +39,7 @@ from gpd.mcp.servers import (
 
 logger = configure_mcp_logging("gpd-patterns")
 
-mcp = FastMCP("gpd-patterns")
+mcp = MCPServer("gpd-patterns")
 
 _PATTERN_MUTATION_TOOL_ANNOTATIONS = mutating_tool_annotations(destructive=False, idempotent=False)
 _PATTERN_SEED_TOOL_ANNOTATIONS = mutating_tool_annotations(destructive=False, idempotent=True)

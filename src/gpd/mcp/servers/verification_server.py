@@ -16,7 +16,7 @@ from collections.abc import Iterable
 from pathlib import Path
 from typing import Annotated
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 from pydantic import BaseModel, ConfigDict, Field, WithJsonSchema, create_model
 from pydantic import ValidationError as PydanticValidationError
 
@@ -83,7 +83,7 @@ from gpd.mcp.verification_contract_policy import (
 
 logger = configure_mcp_logging("gpd-verification")
 
-mcp = FastMCP("gpd-verification")
+mcp = MCPServer("gpd-verification")
 
 RUN_CONTRACT_CHECK_SCHEMA_SIZE_BUDGET_BYTES = 80_000
 

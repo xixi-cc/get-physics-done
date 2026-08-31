@@ -1,6 +1,6 @@
 {
   "name": "gpd-arxiv",
-  "description": "Optional arXiv bridge for arxiv-mcp-server. Advertises the baseline upstream tools search_papers, download_paper, list_papers, read_paper, get_abstract, forwards only tools exposed by the live upstream server, and adds GPD download_source for raw source archives.",
+  "description": "Optional MCP-2-native arXiv bridge. Advertises the fixed research tools search_papers, download_paper, list_papers, read_paper, get_abstract and adds GPD download_source for raw source archives.",
   "transport": "stdio",
   "command": "gpd-mcp-arxiv",
   "args": [],
@@ -27,8 +27,8 @@
     },
     "expect": "contains paper"
   },
-  "capability_surface": "baseline_dynamic_upstream",
-  "dynamic_upstream_capabilities": true,
+  "capability_surface": "fixed_native",
+  "dynamic_upstream_capabilities": false,
   "baseline_upstream_capabilities": [
     "search_papers",
     "download_paper",
@@ -51,5 +51,5 @@
   },
   "optional": true,
   "availability": "conditional",
-  "availability_condition": "Available only when the optional Python module 'arxiv_mcp_server' is installed."
+  "availability_condition": "Available only when the optional Python module 'arxiv' is installed."
 }

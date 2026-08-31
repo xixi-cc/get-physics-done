@@ -1,7 +1,7 @@
 """GPD Protocols MCP server — exposes physics computation protocols via MCP tools.
 
 Loads protocol files from specs/references/protocols/, parses YAML frontmatter
-and markdown body, and serves them via FastMCP tools.
+and markdown body, and serves them via MCPServer tools.
 
 Entry point: python -m gpd.mcp.servers.protocols_server
 Console script: gpd-mcp-protocols
@@ -14,7 +14,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Annotated
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 from pydantic import Field
 
 from gpd.core.observability import gpd_span
@@ -400,7 +400,7 @@ def _get_store() -> ProtocolStore:
         return _store
 
 
-mcp = FastMCP("gpd-protocols")
+mcp = MCPServer("gpd-protocols")
 _PROTOCOL_USAGE_CAUTION = (
     "Protocol content is methodological guidance only. Do not claim any step, checkpoint, artifact, or result was "
     "completed unless it was actually executed or observed. Missing inputs remain blockers, not invitations to improvise."

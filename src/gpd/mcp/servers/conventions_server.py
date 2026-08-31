@@ -15,7 +15,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Annotated, TypeVar
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 from pydantic import Field, WithJsonSchema
 
 from gpd.contracts import ConventionLock
@@ -57,7 +57,7 @@ T = TypeVar("T")
 
 logger = configure_mcp_logging("gpd-conventions")
 
-mcp = FastMCP("gpd-conventions")
+mcp = MCPServer("gpd-conventions")
 
 _CONVENTION_MUTATION_TOOL_ANNOTATIONS = mutating_tool_annotations(destructive=True, idempotent=False)
 
