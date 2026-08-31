@@ -10771,6 +10771,7 @@ def _install_single_runtime(
     *,
     is_global: bool,
     target_dir_override: str | None = None,
+    projection_profile: str | None = None,
 ) -> dict[str, object]:
     """Install GPD for a single runtime. Returns install result dict."""
     from contextlib import nullcontext
@@ -10787,12 +10788,17 @@ def _install_single_runtime(
 
     defer_rollback = getattr(adapter, "defer_install_rollback_discard", None)
     rollback_context = defer_rollback() if callable(defer_rollback) else nullcontext()
+    install_kwargs: dict[str, object] = {
+        "is_global": is_global,
+        "explicit_target": target_dir_override is not None,
+    }
+    if projection_profile is not None:
+        install_kwargs.update(adapter.install_projection_kwargs(projection_profile))
     with rollback_context:
         result = adapter.install(
             gpd_root,
             dest,
-            is_global=is_global,
-            explicit_target=target_dir_override is not None,
+            **install_kwargs,
         )
     install_rollback = result.pop(_INSTALL_RESULT_ROLLBACK_KEY, None)
     result[_INSTALL_RESULT_ADAPTER_KEY] = adapter
@@ -11105,6 +11111,11 @@ def install(
     local_install: bool = typer.Option(False, "--local", help="Install into the local runtime config dir"),
     global_install: bool = typer.Option(False, "--global", help="Install into the global runtime config dir"),
     target_dir: str | None = typer.Option(None, "--target-dir", help=_INSTALL_TARGET_DIR_HELP),
+    projection: str | None = typer.Option(
+        None,
+        "--projection",
+        help="Adapter-owned command discovery profile for a single selected runtime.",
+    ),
     force_statusline: bool = typer.Option(False, "--force-statusline", help="Overwrite existing statusline config"),
     skip_readiness_check: bool = typer.Option(
         False, "--skip-readiness-check", help="Skip runtime readiness preflight (for embedded/sidecar use)"
@@ -11139,6 +11150,15 @@ def install(
         selected = _prompt_runtimes()
 
     _validate_target_dir_runtime_selection("install", selected, target_dir)
+    if projection is not None:
+        if len(selected) != 1:
+            _error("--projection requires exactly one selected runtime")
+        try:
+            projection = _get_adapter_or_error(selected[0], action="install projection").normalize_install_projection(
+                projection
+            )
+        except ValueError as exc:
+            _error(str(exc))
 
     # Resolve location
     if target_dir:
@@ -11234,7 +11254,13 @@ def install(
             adapter = _get_adapter_or_error(rt, action="install")
             task = progress.add_task(f"Installing {adapter.display_name}...", total=None)
             try:
-                result = _install_single_runtime(rt, is_global=is_global, target_dir_override=target_dir)
+                install_runtime_kwargs: dict[str, object] = {
+                    "is_global": is_global,
+                    "target_dir_override": target_dir,
+                }
+                if projection is not None:
+                    install_runtime_kwargs["projection_profile"] = projection
+                result = _install_single_runtime(rt, **install_runtime_kwargs)
                 install_adapter = result.pop(_INSTALL_RESULT_ADAPTER_KEY, adapter)
                 install_rollback = result.pop(_INSTALL_RESULT_ROLLBACK_KEY, None)
                 result_target = Path(str(result.get("target") or adapter.resolve_target_dir(is_global, _get_cwd())))

@@ -17,6 +17,7 @@ Hooks, feature flags, and agent role registrations go into config.toml
 
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import os
@@ -45,6 +46,7 @@ from gpd.adapters.install_utils import (
     compile_markdown_for_runtime,
     convert_tool_references_in_body,
     expand_tilde,
+    file_hash,
     get_global_dir,
     hook_python_interpreter,
     managed_hook_paths,
@@ -99,9 +101,45 @@ _GPD_AGENT_ROLE_FILE_MARKER = "# Managed by Get Physics Done (GPD)."
 _GPD_CODEX_SKILL_MARKER = "<!-- Managed by Get Physics Done (GPD). -->"
 _GPD_CODEX_AGENT_FILE_MARKER = _GPD_CODEX_SKILL_MARKER
 _MANIFEST_CODEX_SKILLS_DIR_KEY = "codex_skills_dir"
+_MANIFEST_CODEX_PROJECTION_PROFILE_KEY = "codex_projection_profile"
+_MANIFEST_CODEX_IMPLICIT_SKILL_DIRS_KEY = "codex_implicit_skill_dirs"
+_MANIFEST_CODEX_EXPLICIT_ONLY_SKILL_DIRS_KEY = "codex_explicit_only_skill_dirs"
+_MANIFEST_CODEX_PROJECTION_ROUTER_DIR_KEY = "codex_projection_router_dir"
+_MANIFEST_CANONICAL_COMMAND_FINGERPRINT_KEY = "canonical_command_fingerprint"
 _CODEX_DEFAULT_SANDBOX_MODE = "workspace-write"
 _CODEX_YOLO_APPROVAL_POLICY = "never"
 _CODEX_YOLO_SANDBOX_MODE = "danger-full-access"
+_CODEX_PROJECTION_PROFILES = ("full", "lean")
+_CODEX_DEFAULT_PROJECTION_PROFILE = "full"
+_CODEX_PROJECTION_ROUTER_SKILL = "gpd-router"
+_CODEX_LEAN_IMPLICIT_COMMAND_SKILLS = frozenset(
+    {
+        "gpd-autonomous",
+        "gpd-discuss-phase",
+        "gpd-execute-phase",
+        "gpd-help",
+        "gpd-map-research",
+        "gpd-new-project",
+        "gpd-plan-phase",
+        "gpd-progress",
+        "gpd-quick",
+        "gpd-resume-work",
+        "gpd-route",
+        "gpd-settings",
+        "gpd-start",
+        "gpd-suggest-next",
+        "gpd-verify-work",
+    }
+)
+
+
+def normalize_codex_projection_profile(value: str | None) -> str:
+    """Return one validated Codex command-discovery projection profile."""
+    normalized = (value or _CODEX_DEFAULT_PROJECTION_PROFILE).strip().lower()
+    if normalized not in _CODEX_PROJECTION_PROFILES:
+        expected = ", ".join(_CODEX_PROJECTION_PROFILES)
+        raise ValueError(f"Unknown Codex projection profile {value!r}; expected one of: {expected}")
+    return normalized
 
 
 def _codex_runtime_config_shape_is_valid(config: dict[str, object]) -> bool:
@@ -897,6 +935,15 @@ class CodexAdapter(RuntimeAdapter):
     def runtime_name(self) -> str:
         return "codex"
 
+    @property
+    def install_projection_profiles(self) -> tuple[str, ...]:
+        """Command-discovery projections supported by the Codex installer."""
+        return _CODEX_PROJECTION_PROFILES
+
+    def normalize_install_projection(self, value: str) -> str:
+        """Validate one Codex command-discovery projection."""
+        return normalize_codex_projection_profile(value)
+
     def project_markdown_surface(
         self,
         content: str,
@@ -946,6 +993,7 @@ class CodexAdapter(RuntimeAdapter):
         is_global: bool = True,
         skills_dir: Path | None = None,
         explicit_target: bool = False,
+        projection_profile: str = _CODEX_DEFAULT_PROJECTION_PROFILE,
     ) -> dict[str, object]:
         """Full GPD installation into a Codex CLI configuration directory.
 
@@ -954,14 +1002,29 @@ class CodexAdapter(RuntimeAdapter):
         """
         prev_skills_dir = getattr(self, "_skills_dir", None)
         prev_generated_skill_dirs = getattr(self, "_generated_skill_dirs", None)
+        prev_projection_profile = getattr(self, "_projection_profile", None)
+        prev_implicit_skill_dirs = getattr(self, "_implicit_skill_dirs", None)
+        prev_explicit_only_skill_dirs = getattr(self, "_explicit_only_skill_dirs", None)
+        prev_projection_router_dir = getattr(self, "_projection_router_dir", None)
+        prev_canonical_command_fingerprint = getattr(self, "_canonical_command_fingerprint", None)
         self._skills_dir = _resolve_codex_skills_dir(target_dir, is_global=is_global, skills_dir=skills_dir)
         self._generated_skill_dirs = ()
+        self._projection_profile = normalize_codex_projection_profile(projection_profile)
+        self._implicit_skill_dirs = ()
+        self._explicit_only_skill_dirs = ()
+        self._projection_router_dir = None
+        self._canonical_command_fingerprint = ""
         try:
             _validate_codex_skills_dir(target_dir, self._skills_dir, require_owner_dir=skills_dir is None)
             return super().install(gpd_root, target_dir, is_global=is_global, explicit_target=explicit_target)
         finally:
             self._skills_dir = prev_skills_dir
             self._generated_skill_dirs = prev_generated_skill_dirs
+            self._projection_profile = prev_projection_profile
+            self._implicit_skill_dirs = prev_implicit_skill_dirs
+            self._explicit_only_skill_dirs = prev_explicit_only_skill_dirs
+            self._projection_router_dir = prev_projection_router_dir
+            self._canonical_command_fingerprint = prev_canonical_command_fingerprint
 
     # --- Template method hooks ---
 
@@ -990,6 +1053,8 @@ class CodexAdapter(RuntimeAdapter):
         if isinstance(skills_dir, Path):
             tracked_skill_dirs = set(_load_manifest_codex_cleanup_skill_dirs(target_dir))
             planned_skill_dirs = _planned_codex_skill_dirs(gpd_root / "commands", "gpd")
+            if getattr(self, "_projection_profile", _CODEX_DEFAULT_PROJECTION_PROFILE) == "lean":
+                planned_skill_dirs.add(_CODEX_PROJECTION_ROUTER_SKILL)
             for skill_name in sorted(tracked_skill_dirs | planned_skill_dirs):
                 paths.append(skills_dir / skill_name)
         return tuple(paths)
@@ -998,7 +1063,14 @@ class CodexAdapter(RuntimeAdapter):
         commands_src = gpd_root / "commands"
         launcher = self._gpd_shell_launcher(target_dir)
         self._skills_dir.mkdir(parents=True, exist_ok=True)
-        generated_skill_dirs = _copy_commands_as_skills(
+        (
+            generated_skill_dirs,
+            canonical_skill_dirs,
+            implicit_skill_dirs,
+            explicit_only_skill_dirs,
+            projection_router_dir,
+            canonical_command_fingerprint,
+        ) = _copy_commands_as_skills(
             commands_src,
             self._skills_dir,
             "gpd",
@@ -1008,13 +1080,18 @@ class CodexAdapter(RuntimeAdapter):
             self._current_install_scope_flag(),
             launcher=launcher,
             explicit_target=getattr(self, "_install_explicit_target", False),
+            projection_profile=getattr(self, "_projection_profile", _CODEX_DEFAULT_PROJECTION_PROFILE),
         )
         self._generated_skill_dirs = tuple(sorted(generated_skill_dirs))
+        self._implicit_skill_dirs = tuple(sorted(implicit_skill_dirs))
+        self._explicit_only_skill_dirs = tuple(sorted(explicit_only_skill_dirs))
+        self._projection_router_dir = projection_router_dir
+        self._canonical_command_fingerprint = canonical_command_fingerprint
         if verify_installed(self._skills_dir):
             logger.info("Installed command skills")
         else:
             failures.append("command skills")
-        return len(self._generated_skill_dirs)
+        return len(canonical_skill_dirs)
 
     def _install_content(self, gpd_root: Path, target_dir: Path, path_prefix: str, failures: list[str]) -> None:
         """Install shared specs content with Codex runtime-aware shell rewrites."""
@@ -1116,6 +1193,9 @@ class CodexAdapter(RuntimeAdapter):
             "target": str(target_dir),
             "skills_dir": str(self._skills_dir),
             "skills": len(getattr(self, "_generated_skill_dirs", ())),
+            "projectionProfile": getattr(self, "_projection_profile", _CODEX_DEFAULT_PROJECTION_PROFILE),
+            "implicitSkills": len(getattr(self, "_implicit_skill_dirs", ())),
+            "explicitOnlySkills": len(getattr(self, "_explicit_only_skill_dirs", ())),
             "mcpServers": mcp_count,
             "agentRoles": agent_role_count,
         }
@@ -1420,12 +1500,23 @@ class CodexAdapter(RuntimeAdapter):
             metadata={
                 _MANIFEST_CODEX_SKILLS_DIR_KEY: str(self._skills_dir),
                 _manifest_codex_generated_skill_dirs_key(): list(getattr(self, "_generated_skill_dirs", ())),
+                _MANIFEST_CODEX_PROJECTION_PROFILE_KEY: getattr(
+                    self, "_projection_profile", _CODEX_DEFAULT_PROJECTION_PROFILE
+                ),
+                _MANIFEST_CODEX_IMPLICIT_SKILL_DIRS_KEY: list(getattr(self, "_implicit_skill_dirs", ())),
+                _MANIFEST_CODEX_EXPLICIT_ONLY_SKILL_DIRS_KEY: list(getattr(self, "_explicit_only_skill_dirs", ())),
+                _MANIFEST_CODEX_PROJECTION_ROUTER_DIR_KEY: getattr(self, "_projection_router_dir", None),
+                _MANIFEST_CANONICAL_COMMAND_FINGERPRINT_KEY: getattr(self, "_canonical_command_fingerprint", ""),
             },
             install_scope=self._current_install_scope_flag(),
             explicit_target=getattr(self, "_install_explicit_target", False),
         )
         files = manifest.get("files")
         if isinstance(files, dict):
+            for skill_name in getattr(self, "_generated_skill_dirs", ()):
+                openai_yaml = self._skills_dir / skill_name / "agents" / "openai.yaml"
+                if openai_yaml.is_file():
+                    files[f"skills/{skill_name}/agents/openai.yaml"] = file_hash(openai_yaml)
             for relpath in list(files):
                 normalized = normalize_manifest_relpath(relpath)
                 if normalized is None:
@@ -1604,7 +1695,8 @@ def _copy_commands_as_skills(
     *,
     launcher: str,
     explicit_target: bool = False,
-) -> set[str]:
+    projection_profile: str = _CODEX_DEFAULT_PROJECTION_PROFILE,
+) -> tuple[set[str], set[str], set[str], set[str], str | None, str]:
     """Copy commands as Codex skill directories.
 
     Codex expects: ~/.agents/skills/gpd-help/SKILL.md
@@ -1623,7 +1715,11 @@ def _copy_commands_as_skills(
 
     live_backup: Path | None = None
     generated_skill_dirs: set[str] = set()
-    planned_skill_dirs = _planned_codex_skill_dirs(src_dir, prefix)
+    normalized_profile = normalize_codex_projection_profile(projection_profile)
+    canonical_skill_dirs = _planned_codex_skill_dirs(src_dir, prefix)
+    planned_skill_dirs = set(canonical_skill_dirs)
+    if normalized_profile == "lean":
+        planned_skill_dirs.add(_CODEX_PROJECTION_ROUTER_SKILL)
     prior_install_skill_dirs = _load_manifest_codex_cleanup_skill_dirs(workflow_target_dir)
     _assert_no_unowned_planned_codex_skill_collisions(
         skills_dir,
@@ -1650,6 +1746,15 @@ def _copy_commands_as_skills(
             launcher=launcher,
             explicit_target=explicit_target,
         )
+        implicit_skill_dirs, explicit_only_skill_dirs, projection_router_dir = _apply_codex_projection_profile(
+            staged_skills_dir,
+            canonical_skill_dirs=canonical_skill_dirs,
+            projection_profile=normalized_profile,
+            launcher=launcher,
+            path_prefix=path_prefix,
+        )
+        if projection_router_dir is not None:
+            generated_skill_dirs.add(projection_router_dir)
 
         if skills_dir.exists():
             live_backup = staging_root / f"{skills_dir.name}.backup"
@@ -1670,7 +1775,88 @@ def _copy_commands_as_skills(
                 shutil.rmtree(staging_root)
             except OSError:
                 logger.warning("Failed to clean staging skills dir %s", staging_root)
-    return generated_skill_dirs
+    canonical_command_fingerprint = _canonical_codex_command_fingerprint(src_dir, canonical_skill_dirs)
+    return (
+        generated_skill_dirs,
+        canonical_skill_dirs,
+        implicit_skill_dirs,
+        explicit_only_skill_dirs,
+        projection_router_dir,
+        canonical_command_fingerprint,
+    )
+
+
+def _apply_codex_projection_profile(
+    skills_dir: Path,
+    *,
+    canonical_skill_dirs: set[str],
+    projection_profile: str,
+    launcher: str,
+    path_prefix: str,
+) -> tuple[set[str], set[str], str | None]:
+    """Apply Codex discovery metadata without removing canonical command skills."""
+    if projection_profile == "full":
+        return set(canonical_skill_dirs), set(), None
+
+    implicit_skill_dirs = set(_CODEX_LEAN_IMPLICIT_COMMAND_SKILLS & canonical_skill_dirs)
+    explicit_only_skill_dirs = canonical_skill_dirs - implicit_skill_dirs
+    for skill_name in sorted(explicit_only_skill_dirs):
+        _write_codex_skill_invocation_policy(skills_dir / skill_name, allow_implicit_invocation=False)
+
+    router_dir = skills_dir / _CODEX_PROJECTION_ROUTER_SKILL
+    router_dir.mkdir(parents=True, exist_ok=False)
+    (router_dir / "SKILL.md").write_text(
+        _render_codex_projection_router_skill(launcher=launcher, path_prefix=path_prefix),
+        encoding="utf-8",
+    )
+    _write_codex_skill_invocation_policy(router_dir, allow_implicit_invocation=True)
+    return implicit_skill_dirs, explicit_only_skill_dirs, _CODEX_PROJECTION_ROUTER_SKILL
+
+
+def _write_codex_skill_invocation_policy(skill_dir: Path, *, allow_implicit_invocation: bool) -> None:
+    """Write the product-owned invocation policy for one generated skill."""
+    agents_dir = skill_dir / "agents"
+    agents_dir.mkdir(parents=True, exist_ok=True)
+    value = "true" if allow_implicit_invocation else "false"
+    (agents_dir / "openai.yaml").write_text(
+        f"policy:\n  allow_implicit_invocation: {value}\n",
+        encoding="utf-8",
+    )
+
+
+def _render_codex_projection_router_skill(*, launcher: str, path_prefix: str) -> str:
+    """Render the lean projection's non-canonical, read-only discovery router."""
+    snippet_path = _codex_runtime_snippet_path(path_prefix)
+    return (
+        "---\n"
+        f"name: {_CODEX_PROJECTION_ROUTER_SKILL}\n"
+        "description: Route GPD research workflow requests to the matching canonical GPD command without "
+        "performing the research task itself.\n"
+        "---\n"
+        "<codex_runtime_notes>\n"
+        f"Ref: `{snippet_path}#runtime-shell-bridge`; bridge `{launcher}`; labels `gpd ...`/`$gpd-...`.\n"
+        "</codex_runtime_notes>\n\n"
+        f"{_GPD_CODEX_SKILL_MARKER}\n"
+        "Route only requests that clearly ask to use GPD or an existing GPD project. Use the GPD skills MCP "
+        "`route_skill` result as advisory routing, then load the suggested canonical command with `get_skill` "
+        "or invoke its explicit `$gpd-*` skill. Preserve the user's scope and authorization. Do not perform "
+        "scientific work, write project state, or invent a command. If routing tools are unavailable or no route "
+        "is clear, use `$gpd-start` for project entry or `$gpd-help` for the command index.\n"
+    )
+
+
+def _canonical_codex_command_fingerprint(src_dir: Path, canonical_skill_dirs: set[str]) -> str:
+    """Fingerprint canonical command names and source bytes independently of projection profile."""
+    digest = hashlib.sha256()
+    for source_path in sorted(src_dir.rglob("*.md")):
+        digest.update(source_path.relative_to(src_dir).as_posix().encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(source_path.read_bytes())
+        digest.update(b"\0")
+    for skill_name in sorted(canonical_skill_dirs):
+        digest.update(skill_name.encode("utf-8"))
+        digest.update(b"\0")
+    return digest.hexdigest()
 
 
 def _copy_preserved_skill_entry(src: Path, dest: Path) -> None:

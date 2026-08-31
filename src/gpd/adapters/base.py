@@ -421,6 +421,26 @@ class RuntimeAdapter(abc.ABC):
         return self.runtime_descriptor.selection_aliases
 
     @property
+    def install_projection_profiles(self) -> tuple[str, ...]:
+        """Optional command-discovery projections accepted during install."""
+        return ()
+
+    def normalize_install_projection(self, value: str) -> str:
+        """Validate one adapter-owned install projection name."""
+        normalized = value.strip().lower()
+        profiles = self.install_projection_profiles
+        if not profiles:
+            raise ValueError(f"{self.display_name} does not support install projections")
+        if normalized not in profiles:
+            expected = ", ".join(profiles)
+            raise ValueError(f"Unknown {self.display_name} projection {value!r}; expected one of: {expected}")
+        return normalized
+
+    def install_projection_kwargs(self, value: str) -> dict[str, object]:
+        """Return adapter install keywords for one validated projection."""
+        return {"projection_profile": self.normalize_install_projection(value)}
+
+    @property
     def command_prefix(self) -> str:
         """Runtime-native command prefix."""
         return self.runtime_descriptor.command_prefix

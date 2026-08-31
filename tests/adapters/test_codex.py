@@ -13,6 +13,8 @@ import pytest
 
 from gpd.adapters import base as base_adapter
 from gpd.adapters.codex import (
+    _CODEX_LEAN_IMPLICIT_COMMAND_SKILLS,
+    _CODEX_PROJECTION_ROUTER_SKILL,
     CodexAdapter,
     _configure_config_toml,
     _convert_codex_tool_name,
@@ -21,6 +23,7 @@ from gpd.adapters.codex import (
     _normalize_codex_questioning,
     _remove_gpd_notify_config,
     _tracked_codex_generated_skill_dirs,
+    normalize_codex_projection_profile,
 )
 from gpd.adapters.install_utils import (
     COMPACT_WORKFLOW_COMMAND_SHIM_SENTINEL,
@@ -28,7 +31,7 @@ from gpd.adapters.install_utils import (
     file_hash,
     hook_python_interpreter,
 )
-from gpd.registry import load_agents_from_dir
+from gpd.registry import list_commands, load_agents_from_dir
 from tests.adapters.projection_test_utils import (
     assert_compact_help_bridge_shim,
     assert_compact_staged_command_shim,
@@ -169,6 +172,48 @@ def test_codex_command_runtime_note_injection_is_idempotent() -> None:
 
     assert once == twice
     _assert_codex_runtime_note_guidance(twice, launcher)
+
+
+def test_codex_projection_profile_validation_is_closed() -> None:
+    assert normalize_codex_projection_profile(None) == "full"
+    assert normalize_codex_projection_profile(" FULL ") == "full"
+    assert normalize_codex_projection_profile("lean") == "lean"
+    with pytest.raises(ValueError, match="Unknown Codex projection profile"):
+        normalize_codex_projection_profile("minimal")
+
+
+def test_real_lean_projection_preserves_every_canonical_command_for_explicit_invocation(tmp_path: Path) -> None:
+    gpd_root = Path(__file__).resolve().parents[2] / "src" / "gpd"
+    target = tmp_path / ".codex"
+    target.mkdir()
+    skills = tmp_path / "skills"
+    skills.mkdir()
+
+    result = CodexAdapter().install(
+        gpd_root,
+        target,
+        is_global=False,
+        skills_dir=skills,
+        projection_profile="lean",
+    )
+    manifest = json.loads((target / "gpd-file-manifest.json").read_text(encoding="utf-8"))
+    canonical = {f"gpd-{name}" for name in list_commands()}
+    implicit = set(manifest["codex_implicit_skill_dirs"])
+    explicit_only = set(manifest["codex_explicit_only_skill_dirs"])
+
+    assert len(canonical) == 71
+    assert result["commands"] == len(canonical)
+    assert result["skills"] == len(canonical) + 1
+    assert implicit == _CODEX_LEAN_IMPLICIT_COMMAND_SKILLS
+    assert len(explicit_only) == 56
+    assert implicit | explicit_only == canonical
+    assert implicit.isdisjoint(explicit_only)
+    assert all((skills / skill_name / "SKILL.md").is_file() for skill_name in canonical)
+    assert all(
+        (skills / skill_name / "agents" / "openai.yaml").read_text(encoding="utf-8")
+        == "policy:\n  allow_implicit_invocation: false\n"
+        for skill_name in explicit_only
+    )
 
 
 def test_codex_command_projection_downgrades_non_runnable_shell_examples(tmp_path: Path) -> None:
@@ -578,6 +623,129 @@ class TestInstall:
         assert len(gpd_skills) > 0
         for skill_dir in gpd_skills:
             assert (skill_dir / "SKILL.md").exists()
+
+    def test_full_projection_is_default_and_preserves_current_skill_surface(
+        self,
+        adapter: CodexAdapter,
+        gpd_root: Path,
+        tmp_path: Path,
+    ) -> None:
+        target = tmp_path / ".codex"
+        target.mkdir()
+        skills = tmp_path / "skills"
+        skills.mkdir()
+
+        result = adapter.install(gpd_root, target, is_global=False, skills_dir=skills)
+        manifest = json.loads((target / "gpd-file-manifest.json").read_text(encoding="utf-8"))
+        canonical = {"gpd-help", "gpd-sub-deep"}
+
+        assert result["commands"] == len(canonical)
+        assert result["skills"] == len(canonical)
+        assert result["projectionProfile"] == "full"
+        assert result["implicitSkills"] == len(canonical)
+        assert result["explicitOnlySkills"] == 0
+        assert manifest["codex_projection_profile"] == "full"
+        assert set(manifest["codex_implicit_skill_dirs"]) == canonical
+        assert manifest["codex_explicit_only_skill_dirs"] == []
+        assert manifest["codex_projection_router_dir"] is None
+        assert len(manifest["canonical_command_fingerprint"]) == 64
+        assert not (skills / _CODEX_PROJECTION_ROUTER_SKILL).exists()
+        assert not any(skills.glob("gpd-*/agents/openai.yaml"))
+
+    def test_lean_projection_keeps_all_commands_and_marks_noncore_skills_explicit_only(
+        self,
+        adapter: CodexAdapter,
+        gpd_root: Path,
+        tmp_path: Path,
+    ) -> None:
+        target = tmp_path / ".codex"
+        target.mkdir()
+        skills = tmp_path / "skills"
+        skills.mkdir()
+
+        result = adapter.install(
+            gpd_root,
+            target,
+            is_global=False,
+            skills_dir=skills,
+            projection_profile="lean",
+        )
+        manifest = json.loads((target / "gpd-file-manifest.json").read_text(encoding="utf-8"))
+        canonical = {"gpd-help", "gpd-sub-deep"}
+        implicit = canonical & _CODEX_LEAN_IMPLICIT_COMMAND_SKILLS
+        explicit_only = canonical - implicit
+
+        assert result["commands"] == len(canonical)
+        assert result["skills"] == len(canonical) + 1
+        assert result["projectionProfile"] == "lean"
+        assert result["implicitSkills"] == len(implicit)
+        assert result["explicitOnlySkills"] == len(explicit_only)
+        assert set(manifest["codex_implicit_skill_dirs"]) == implicit
+        assert set(manifest["codex_explicit_only_skill_dirs"]) == explicit_only
+        assert implicit | explicit_only == canonical
+        assert implicit.isdisjoint(explicit_only)
+        assert manifest["codex_projection_router_dir"] == _CODEX_PROJECTION_ROUTER_SKILL
+        assert set(manifest["codex_generated_skill_dirs"]) == canonical | {_CODEX_PROJECTION_ROUTER_SKILL}
+
+        explicit_policy = skills / "gpd-sub-deep" / "agents" / "openai.yaml"
+        assert explicit_policy.read_text(encoding="utf-8") == ("policy:\n  allow_implicit_invocation: false\n")
+        assert "skills/gpd-sub-deep/agents/openai.yaml" in manifest["files"]
+        assert not (skills / "gpd-help" / "agents" / "openai.yaml").exists()
+
+        router = skills / _CODEX_PROJECTION_ROUTER_SKILL
+        router_text = (router / "SKILL.md").read_text(encoding="utf-8")
+        assert f"name: {_CODEX_PROJECTION_ROUTER_SKILL}" in router_text
+        assert "route_skill" in router_text
+        assert "get_skill" in router_text
+        assert _has_line_with_terms(router_text, "scientific", "work")
+        assert (router / "agents" / "openai.yaml").read_text(encoding="utf-8") == (
+            "policy:\n  allow_implicit_invocation: true\n"
+        )
+        assert f"skills/{_CODEX_PROJECTION_ROUTER_SKILL}/agents/openai.yaml" in manifest["files"]
+
+    def test_reinstall_from_lean_to_full_removes_router_and_explicit_only_policies(
+        self,
+        adapter: CodexAdapter,
+        gpd_root: Path,
+        tmp_path: Path,
+    ) -> None:
+        target = tmp_path / ".codex"
+        target.mkdir()
+        skills = tmp_path / "skills"
+        skills.mkdir()
+
+        adapter.install(gpd_root, target, skills_dir=skills, projection_profile="lean")
+        lean_manifest = json.loads((target / "gpd-file-manifest.json").read_text(encoding="utf-8"))
+        assert (skills / _CODEX_PROJECTION_ROUTER_SKILL).is_dir()
+        assert (skills / "gpd-sub-deep" / "agents" / "openai.yaml").is_file()
+
+        adapter.install(gpd_root, target, skills_dir=skills, projection_profile="full")
+        manifest = json.loads((target / "gpd-file-manifest.json").read_text(encoding="utf-8"))
+
+        assert manifest["codex_projection_profile"] == "full"
+        assert not (skills / _CODEX_PROJECTION_ROUTER_SKILL).exists()
+        assert not (skills / "gpd-sub-deep" / "agents" / "openai.yaml").exists()
+        assert set(manifest["codex_generated_skill_dirs"]) == {"gpd-help", "gpd-sub-deep"}
+        assert manifest["canonical_command_fingerprint"] == lean_manifest["canonical_command_fingerprint"]
+
+    def test_lean_projection_refuses_unowned_router_collision(
+        self,
+        adapter: CodexAdapter,
+        gpd_root: Path,
+        tmp_path: Path,
+    ) -> None:
+        target = tmp_path / ".codex"
+        target.mkdir()
+        skills = tmp_path / "skills"
+        router = skills / _CODEX_PROJECTION_ROUTER_SKILL
+        router.mkdir(parents=True)
+        (router / "SKILL.md").write_text("user-owned router", encoding="utf-8")
+
+        with pytest.raises(RuntimeError, match="existing unowned skill path"):
+            adapter.install(gpd_root, target, skills_dir=skills, projection_profile="lean")
+
+        assert (router / "SKILL.md").read_text(encoding="utf-8") == "user-owned router"
+        assert not (target / "gpd-file-manifest.json").exists()
 
     def test_reinstall_preserves_untracked_user_owned_gpd_skills(
         self,
@@ -2059,6 +2227,28 @@ class TestUninstall:
         )
         assert len(gpd_skills) == 0
         assert any("skills" in item for item in result["removed"])
+
+    def test_uninstall_removes_lean_router_and_preserves_foreign_skill(
+        self,
+        adapter: CodexAdapter,
+        gpd_root: Path,
+        tmp_path: Path,
+    ) -> None:
+        target = tmp_path / ".codex"
+        target.mkdir()
+        skills = tmp_path / "skills"
+        skills.mkdir()
+        foreign = skills / "custom-keep"
+        foreign.mkdir()
+        (foreign / "SKILL.md").write_text("keep", encoding="utf-8")
+
+        adapter.install(gpd_root, target, skills_dir=skills, projection_profile="lean")
+        assert (skills / _CODEX_PROJECTION_ROUTER_SKILL).is_dir()
+
+        adapter.uninstall(target, skills_dir=skills)
+
+        assert not any(path.name.startswith("gpd-") for path in skills.iterdir() if path.is_dir())
+        assert (foreign / "SKILL.md").read_text(encoding="utf-8") == "keep"
 
     def test_uninstall_preserves_untracked_gpd_skill_dir(
         self,
