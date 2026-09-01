@@ -152,7 +152,7 @@ class TestConfigKeyContracts:
     def test_supported_config_keys_are_writable_aliases_only(self) -> None:
         keys = supported_config_keys()
 
-        assert len(keys) == 41
+        assert len(keys) == 42
         assert all(section not in keys for section in ("execution", "workflow", "git"))
         assert {
             "execution.review_cadence": "review_cadence",

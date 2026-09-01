@@ -27,6 +27,7 @@ __all__ = [
     "MODEL_PROFILES",
     "AutonomyMode",
     "BranchingStrategy",
+    "CognitiveProfile",
     "ExecutionPreferences",
     "GPDProjectConfig",
     "ModelProfile",
@@ -69,6 +70,13 @@ class ResearchMode(StrEnum):
     BALANCED = "balanced"
     EXPLOIT = "exploit"
     ADAPTIVE = "adaptive"
+
+
+class CognitiveProfile(StrEnum):
+    """Whether ordinary cognition stays in the main context or uses legacy roles."""
+
+    CLASSIC = "classic"
+    BASE_MODEL_FIRST = "base-model-first"
 
 
 class ModelProfile(StrEnum):
@@ -319,6 +327,7 @@ class GPDProjectConfig(BaseModel):
     autonomy: AutonomyMode = AutonomyMode.SUPERVISED
     review_cadence: ReviewCadence = ReviewCadence.DENSE
     research_mode: ResearchMode = ResearchMode.BALANCED
+    cognitive_profile: CognitiveProfile = CognitiveProfile.CLASSIC
 
     # Workflow toggles
     commit_docs: bool = True
@@ -429,6 +438,7 @@ def _enum_value(value: object) -> object:
 
 _CONFIG_KEY_DESCRIPTORS: tuple[_ConfigKeyDescriptor, ...] = (
     _ConfigKeyDescriptor("model_profile", ("model_profile",)),
+    _ConfigKeyDescriptor("cognitive_profile", ("cognitive_profile",)),
     _ConfigKeyDescriptor("autonomy", ("autonomy",)),
     _ConfigKeyDescriptor(
         "review_cadence",

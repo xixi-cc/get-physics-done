@@ -2964,6 +2964,7 @@ def _config_to_dict(cfg: GPDProjectConfig) -> dict:
         "autonomy": str(cfg.autonomy.value),
         "review_cadence": str(cfg.review_cadence.value),
         "research_mode": str(cfg.research_mode.value),
+        "cognitive_profile": str(cfg.cognitive_profile.value),
         "commit_docs": cfg.commit_docs,
         "branching_strategy": str(cfg.branching_strategy.value),
         "phase_branch_template": cfg.phase_branch_template,
@@ -3242,6 +3243,7 @@ def init_execute_phase(
         "autonomy": config["autonomy"],
         "review_cadence": config["review_cadence"],
         "research_mode": config["research_mode"],
+        "cognitive_profile": config["cognitive_profile"],
         "parallelization": config["parallelization"],
         "max_unattended_minutes_per_plan": config["max_unattended_minutes_per_plan"],
         "max_unattended_minutes_per_wave": config["max_unattended_minutes_per_wave"],
@@ -3631,6 +3633,7 @@ def init_plan_phase(
         "commit_docs": config["commit_docs"],
         "autonomy": config["autonomy"],
         "research_mode": config["research_mode"],
+        "cognitive_profile": config["cognitive_profile"],
         # Phase info
         "phase_found": phase_info is not None,
         "phase_dir": phase_info["directory"] if phase_info else None,

@@ -223,6 +223,7 @@ EXECUTE_PHASE_INIT_FIELDS = frozenset(
 )
 PLAN_PHASE_BASE_INIT_FIELDS = frozenset(
     {
+        "cognitive_profile",
         "researcher_model",
         "planner_model",
         "checker_model",

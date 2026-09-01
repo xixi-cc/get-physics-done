@@ -11,6 +11,9 @@
       "autonomy",
       "research_mode"
     ],
+    "cognitive_routing": [
+      "cognitive_profile"
+    ],
     "checker_controls": [
       "checker_model",
       "plan_checker_enabled"
@@ -176,6 +179,7 @@
       "required_init_field_groups": [
         "planner_model_context",
         "planning_controls",
+        "cognitive_routing",
         "checker_controls",
         "phase_target_context",
         "contract_gate_status",
