@@ -24,6 +24,9 @@
       "phase_slug",
       "plans"
     ],
+    "cognitive_routing": [
+      "cognitive_profile"
+    ],
     "phase_bootstrap_route": [
       "phase_found",
       "phase_dir",
@@ -520,6 +523,7 @@
       ],
       "required_init_field_groups": [
         "execution_phase_base",
+        "cognitive_routing",
         "plan_progress",
         "contract_gate_status",
         "reference_runtime_context",

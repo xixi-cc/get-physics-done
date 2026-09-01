@@ -184,6 +184,7 @@ NEW_MILESTONE_INIT_FIELDS = frozenset(
 )
 EXECUTE_PHASE_INIT_FIELDS = frozenset(
     {
+        "cognitive_profile",
         "executor_model",
         "verifier_model",
         "commit_docs",
