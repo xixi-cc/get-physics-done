@@ -11,6 +11,24 @@ bounded review gate is justified by current evidence.
 
 ## Shared Rules
 
+Every automatic route uses the canonical `ReviewRouteDecision` shape:
+
+```yaml
+schema_version: 1
+route: run | skip | checkpoint
+review_kind: research | plan | verifier | proof | citation | referee
+reason_codes: []
+subject_fingerprint: sha256:...
+evidence_fingerprint: sha256:...
+deduplicated_against: null
+uncleared_risks: []
+status_ceiling: working | candidate
+```
+
+The deterministic route helper compares structured facts and fingerprints. It
+does not assess the scientific conclusion. A `skip` decision never promotes a
+claim; promotion remains owned by the applicable accepted independent check.
+
 1. Do not activate an independent agent solely because the profile is
    `deep-theory`, the phase contains equations, or an optional artifact is
    absent.
@@ -23,9 +41,9 @@ bounded review gate is justified by current evidence.
    at the first-result, pre-fanout, plan-checker, and verifier gates unless the
    result, assumptions, convention lock, source anchor, or dependent claim has
    materially changed.
-5. Record each automatic decision as `auto_route: run|skip`, its trigger or
-   skip reason, the result fingerprint or artifact used for deduplication, and
-   any uncleared risk. Do not interrupt the user for a clean automatic skip.
+5. Record each automatic decision with the canonical route shape, its reason
+   codes, fingerprints, any reused review ID, and uncleared risks. Do not
+   interrupt the user for a clean automatic skip.
 6. Skipping an independent agent does not promote evidence. Ordinary outputs
    remain `working` or `candidate`; only an applicable accepted check may
    promote them to `validated`, `independently_confirmed`, or publication-ready.
