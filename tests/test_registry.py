@@ -479,7 +479,7 @@ class TestParseAgentFile:
             == "orchestrator"
         )
         assert skeptical_rigor_guardrails_section() in agent.system_prompt
-        assert agent.system_prompt.rstrip().endswith("disconfirming check still needed.")
+        assert agent.system_prompt.rstrip().endswith("weakest remaining check.")
 
     def test_agent_file_invalid_frontmatter_raises_with_path(self, tmp_path: Path) -> None:
         f = tmp_path / "broken.md"

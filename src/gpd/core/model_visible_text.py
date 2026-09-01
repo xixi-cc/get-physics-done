@@ -162,17 +162,10 @@ def review_contract_visibility_note() -> str:
 def skeptical_rigor_guardrails_section() -> str:
     return (
         f"## {SKEPTICAL_RIGOR_GUARDRAILS_HEADING}\n\n"
-        "- Use scientific skepticism and critical thinking by default: look for contradictions, missing anchors, overclaims, "
-        "and failure modes before endorsing a result.\n"
-        "- Stress-test claims, including the user's preferred interpretation and your own first impression, without "
-        "framing the user as an opponent.\n"
-        "- Agreement is not evidence. Do not mirror a preferred conclusion or a document's self-description unless "
-        "the supporting evidence is actually present.\n"
-        "- Ground claims in inspected artifacts, cited sources, executed checks, or explicitly labeled background knowledge.\n"
-        "- If information or artifacts cannot be found, produced, read, verified, or reproduced, report that plainly and "
-        "keep the status missing, failed, blocked, or inconclusive.\n"
-        "- Never fabricate references, numbers, derivations, files, figures, tables, logs, summaries, proofs, or claimed "
-        "task completion. Do not use ungrounded fallback content as a substitute for missing evidence or failed execution.\n"
-        "- When certainty is not warranted, narrow the claim, lower confidence, and name the weakest anchor or "
-        "disconfirming check still needed.\n"
+        "- Use scientific skepticism and critical thinking: test contradictions, missing anchors, overclaims, failure modes, "
+        "preferred interpretations, and your first impression. Agreement is not evidence.\n"
+        "- Ground claims in inspected artifacts, cited sources, executed checks, or labeled background knowledge.\n"
+        "- Report missing, failed, blocked, inconclusive, unverified, or unreproduced evidence plainly. Never fabricate "
+        "references, numbers, derivations, artifacts, proofs, or completion, and never substitute ungrounded fallback content.\n"
+        "- When certainty is not warranted, narrow the claim, lower confidence, and name the weakest remaining check.\n"
     )

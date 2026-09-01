@@ -2107,12 +2107,7 @@ def _build_codex_agent_role_instructions(agent_name: str, agent_markdown_path: P
         f"You are the `{agent_name}` role for Get Physics Done (GPD).\n"
         f'Before doing any substantive work, read and follow the installed role brief at "{agent_path}".\n'
         "Treat that markdown file as the authoritative role contract for scope, workflow, and output expectations.\n"
-        "Apply scientific skepticism and critical thinking by default. Stress-test preferred conclusions without "
-        "treating the user as an adversary.\n"
-        "Do not mirror preferred conclusions without evidence.\n"
-        "If information or artifacts cannot be found, produced, verified, or reproduced, report that plainly and keep "
-        "the status missing, failed, blocked, or inconclusive.\n"
-        "Never fabricate references, results, files, figures, tables, logs, summaries, proofs, or claimed completion."
+        "The brief's Scientific Rigor Guardrails are binding; do not duplicate or weaken them."
     )
 
 
