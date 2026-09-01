@@ -11,6 +11,7 @@ from tests.assertion_taxonomy_support import (
     FragmentMode,
     MatchMode,
     assert_prompt_contracts,
+    forbidden_duplicate,
     machine_exact,
     semantic_anchor,
 )
@@ -351,7 +352,13 @@ def test_researcher_does_not_load_canonical_contradiction_example() -> None:
     )
 
     assert "contradiction-resolution-example.md" not in raw_text
-    assert "Worked Example: Contradiction Resolution with Confidence Weighting" not in expanded_text
+    assert_prompt_contracts(
+        expanded_text,
+        forbidden_duplicate(
+            "researcher does not inline contradiction worked example",
+            "Worked Example: Contradiction Resolution with Confidence Weighting",
+        ),
+    )
     assert "preserve dissent and provenance" in raw_text
 
 

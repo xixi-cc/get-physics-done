@@ -13,6 +13,7 @@ context_cost: medium
 GPD adapts its research strategy along an explore↔exploit spectrum. The research mode controls how broadly the system searches for approaches vs how deeply it executes a known methodology.
 
 Explore and adaptive modes widen comparison and tangent surfacing, but they do **not** silently create git-backed hypothesis branches. Alternatives become branches only after an explicit tangent decision.
+Flag complementary approaches as tangent candidates for optional parallel investigation; only explicit tangent decisions become hypothesis branches or parallel plans.
 
 ## Mode Definitions
 

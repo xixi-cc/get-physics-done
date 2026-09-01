@@ -614,7 +614,9 @@ def _assert_cost_posture_semantics(output: str) -> None:
     assert _COST_TEST_RUNTIME in output
     assert "review" in output
     assert "runtime defaults" in output
-    assert "tier-1=13, tier-2=10, tier-3=1" in output
+    expected_mix = _profile_tier_mix("review")
+    expected_text = ", ".join(f"{tier}={count}" for tier, count in expected_mix.items())
+    assert expected_text in output
     assert "Advisory only; counts profile-to-tier assignments" in output
     assert "set-tier-models" in output
 

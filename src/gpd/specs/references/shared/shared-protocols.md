@@ -411,3 +411,5 @@ The LLM Physics Error Catalog documents error patterns specific to language mode
 ## Research Agent Shared Protocol
 
 The consolidated `gpd-researcher` uses modes for project survey, phase research, literature review, project mapping, and synthesis. Its default scientific contract is `references/shared/scientific-constitution.md`. Load `references/research/researcher-shared.md` only for a specific unresolved search or confidence-calibration detail; it is not default prompt context.
+
+The five durable research outputs live under `GPD/literature/ (5 files)`; existing-project structural analysis belongs under `GPD/research-map/` through `map-research`.

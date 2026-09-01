@@ -629,7 +629,13 @@ def test_research_agents_delegate_file_templates_to_canonical_templates() -> Non
     synthesizer = (AGENTS_DIR / "gpd-researcher.md").read_text(encoding="utf-8")
     summary_template = (TEMPLATES_DIR / "research-project" / "SUMMARY.md").read_text(encoding="utf-8")
 
-    assert "canonical template if one is named" in project_researcher
+    assert_prompt_contracts(
+        project_researcher,
+        semantic_anchor(
+            "researcher delegates named output shapes to canonical templates",
+            "canonical template if one is named",
+        ),
+    )
     assert "# Research Summary: [Project Name]" not in project_researcher
     assert "### Governing Theory" not in project_researcher
     assert "## FEASIBILITY.md (feasibility mode only)" not in project_researcher
