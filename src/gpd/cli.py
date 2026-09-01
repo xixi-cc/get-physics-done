@@ -3612,6 +3612,32 @@ def diagnostics_prompt_surface(
     _print_prompt_diagnostic_rendered(prompt_diagnostics.render_prompt_surface_table(report, top))
 
 
+@diagnostics_app.command("prompt-bom")
+def diagnostics_prompt_bom(
+    workflow: str = typer.Option(..., "--workflow", help="Staged workflow id."),
+    stage: str = typer.Option(..., "--stage", help="Workflow stage id."),
+    conditions: str = typer.Option(
+        "",
+        "--conditions",
+        help="Comma-separated conditional-authority selectors to include as eager.",
+    ),
+) -> None:
+    """Report a read-only, model-invisible staged prompt bill of materials."""
+    from gpd.core.thinning_prompt_bom import build_stage_prompt_bom
+
+    selected_conditions = tuple(part.strip() for part in conditions.split(",") if part.strip())
+    try:
+        payload = build_stage_prompt_bom(
+            workflow,
+            stage,
+            selected_conditions=selected_conditions,
+            specs_root=_prompt_diagnostic_repo_root() / "src" / "gpd" / "specs",
+        )
+    except (KeyError, ValueError) as exc:
+        _error(str(exc))
+    _output(payload)
+
+
 # ═══════════════════════════════════════════════════════════════════════════
 # query — Cross-phase dependency and search
 # ═══════════════════════════════════════════════════════════════════════════
