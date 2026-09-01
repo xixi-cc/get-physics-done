@@ -29,6 +29,7 @@ def test_prompt_bom_is_deterministic_and_matches_eager_authorities() -> None:
     assert stage.to_staged_loading_payload(manifest.workflow_id) == before
     assert first["totals"]["eager_chars"] > 0
     assert all(len(entry["sha256"]) == 64 for entry in first["entries"])
+    assert all(entry["diet_class"] in {"kernel", "jit-checklist", "archive-retrieval"} for entry in first["entries"])
 
 
 def test_prompt_bom_selects_only_named_conditional_authorities() -> None:

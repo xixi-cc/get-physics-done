@@ -7,6 +7,7 @@ import json
 from collections.abc import Iterable
 from pathlib import Path
 
+from gpd.core.reference_diet import classify_reference
 from gpd.core.workflow_staging import load_workflow_stage_manifest
 from gpd.specs import SPECS_DIR
 
@@ -48,6 +49,7 @@ def _authority_entry(
     text = raw.decode("utf-8")
     entry: dict[str, object] = {
         "authority": authority,
+        "diet_class": classify_reference(authority).value,
         "role": role,
         "eager": eager,
         "sha256": _sha256_bytes(raw),
