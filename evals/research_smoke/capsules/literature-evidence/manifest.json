@@ -4,6 +4,7 @@
   "task": "task.md",
   "reference_submission": "reference.json",
   "adversarial_submission": "adversarial.json",
+  "required_submission_fields": ["schema_version", "evidence", "links"],
   "oracles": [
     {
       "runner": "python",

@@ -18,6 +18,15 @@ uv run python -m evals.research_smoke.run theory-limit-recovery --variant advers
 ```
 
 The runner exits zero only when every selected submission passes. Candidate
-agents should emit the same JSON shapes as the fixture submissions; replacing a
-fixture with a recorded candidate artifact is deliberately left to the existing
-A/B bundle preparation layer.
+agents should emit the same JSON shapes as the fixture submissions and can be
+evaluated directly:
+
+```bash
+uv run python -m evals.research_smoke.run theory-limit-recovery \
+  --submission /path/to/candidate.json \
+  --result-output /path/to/evaluation.json
+```
+
+The manifest checks the capsule's required top-level fields before invoking its
+typed oracles. Candidate files remain read-only inputs and the result includes a
+shared `gpd.evaluation-result.v1` envelope.

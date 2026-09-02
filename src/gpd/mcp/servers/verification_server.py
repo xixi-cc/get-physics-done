@@ -20,8 +20,7 @@ from collections.abc import Iterable
 from typing import Annotated
 
 from mcp.server.mcpserver import MCPServer
-from pydantic import BaseModel, ConfigDict, Field, WithJsonSchema, create_model
-from pydantic import ValidationError as PydanticValidationError
+from pydantic import Field, WithJsonSchema
 
 from gpd.contracts import (
     CONTRACT_ACCEPTANCE_AUTOMATION_VALUES,

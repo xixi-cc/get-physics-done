@@ -35,7 +35,7 @@ Apply `INVENTORY_BUILD_INIT.staged_loading.field_access_instruction`; keep refer
 </step>
 
 <step name="load_protocol_bundle_handles">
-Use `protocol_bundle_load_manifest` as specialized-loading guidance. If bundles are selected, use `protocol_bundle_verifier_extensions` as the primary checklist surface; run `gpd --raw verify bundle-checklist <bundle-id> [<bundle-id> ...]` (passing `selected_protocol_bundle_ids`) only when extensions are missing or inconsistent. Bundle guidance may add checks, but it never replaces the plan contract or reduces anchor obligations.
+Use `protocol_bundle_load_manifest` as specialized-loading guidance. If bundles are selected, use `protocol_bundle_verifier_extensions` as the primary bundle-extension surface; run `gpd --raw verify bundle-checklist <bundle-id> [<bundle-id> ...]` (passing `selected_protocol_bundle_ids`) only when extensions are missing or inconsistent. Bundle guidance may add checks, but it never replaces the plan contract or reduces anchor obligations.
 
 For PLAN contracts with project-local anchors or prior-output paths, run `gpd --raw verify suggest-checks --contract <file|-> --project-dir DIR [--active-checks <id>,... ]`, fill the returned `request_template` completely, and run each applicable check with `gpd --raw verify contract-check --payload <file|-> [--project-dir DIR]`.
 </step>

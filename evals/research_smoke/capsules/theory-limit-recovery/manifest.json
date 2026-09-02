@@ -4,6 +4,7 @@
   "task": "task.md",
   "reference_submission": "reference.json",
   "adversarial_submission": "adversarial.json",
+  "required_submission_fields": ["identified_error", "affected_claim", "corrected_zero_mode"],
   "oracles": [
     {
       "runner": "python",
