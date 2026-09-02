@@ -186,7 +186,7 @@ Read `GPD/ROADMAP.md` for the current roadmap.
 Shallow mode: keep Phase 1 fully detailed (Goal, Depends on, Requirements, Contract Coverage, 2-5 Success Criteria, placeholder plans) and Phases 2+ as compact stubs only (title + one-line Goal + objective IDs + compact contract/anchor/proxy labels + `**Plans:** 0 plans` + a single `- [ ] TBD (run plan-phase N to break down)` entry). Do not promote Phases 2+ to full detail during revision unless the user's feedback explicitly requests it.
 
 Update the roadmap based on feedback. Edit files in place.
-Return completed with changes made and updated roadmap artifacts in the typed return.
+Return completed with changes made and updated roadmap artifacts in the typed return; include `GPD/REQUIREMENTS.md` in `gpd_return.files_written` and do not rely on runtime completion text alone.
 </revision>
 ", subagent_type="gpd-roadmapper", model="{roadmapper_model}", readonly=false, description="Revise roadmap")
 ```

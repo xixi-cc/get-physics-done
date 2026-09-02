@@ -170,6 +170,7 @@ NEW_MILESTONE_INIT_FIELDS = frozenset(
         "autonomy",
         "init_root_policy",
         "research_mode",
+        "cognitive_profile",
         "research_enabled",
         "current_milestone",
         "current_milestone_name",

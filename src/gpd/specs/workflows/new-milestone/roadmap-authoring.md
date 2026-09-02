@@ -1,10 +1,11 @@
 <purpose>
-Create the milestone roadmap through the roadmapper handoff and final artifact gate.
+Create the milestone roadmap in the current main context or through the
+compatible roadmapper handoff, then enforce the same final artifact gate.
 </purpose>
 
 <first_decision>
 First read `GPD/MILESTONES.md` for the next phase number, then run the fresh
-roadmap-authoring init before spawning the one-shot roadmapper.
+roadmap-authoring init before choosing the cognitive route.
 </first_decision>
 
 <process>
@@ -16,7 +17,7 @@ roadmap-authoring init before spawning the one-shot roadmapper.
  GPD >>> CREATING RESEARCH ROADMAP
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
->>> Spawning roadmapper...
+>>> Preparing roadmap authoring...
 ```
 
 **Starting phase number:** Read `GPD/MILESTONES.md` for the last phase number
@@ -34,12 +35,22 @@ fi
 
 Apply `ROADMAPPER_INIT.staged_loading.field_access_instruction` as the field policy for the fresh roadmap payload.
 
+Read `cognitive_profile` from this payload:
+
+- Under `base-model-first`, the current main model authors and revises the
+  roadmap by default, preserving the approved objectives and milestone context.
+- Use a fresh `gpd-roadmapper` under `classic`, when the user explicitly asks
+  for fresh isolation, or when measured context pressure requires it. Record
+  the concrete trigger; do not spawn merely because a roadmapper role exists.
+- Both routes use the same task packet, scoped writes, contract coverage,
+  approval loop, freshness checks, validators, shared-state restriction, and
+  commit/checkpoint policy.
+
 Use bootstrap init for milestone identity and contract gating. Use this
 late-stage init for the final handoff; do not reuse earlier survey/objective
 inputs.
 
-Apply the canonical runtime delegation convention already loaded above. Spawn the
-roadmapper with `gpd-roadmapper.md`, the current milestone identity, approved
+Build one roadmap task packet from the current milestone identity, approved
 objectives, project contract/gate status, effective reference intake,
 `reference_artifact_files`, prior-output handles, and these local requirements:
 start phases at `[N]`, map every objective exactly once, surface contract
@@ -47,6 +58,14 @@ coverage and unresolved context gaps, write `GPD/ROADMAP.md` and
 `GPD/REQUIREMENTS.md` immediately, return typed `gpd_return`, and never edit
 shared state directly.
 For each phase, include explicit contract coverage in `ROADMAP.md`.
+
+Under the ordinary `base-model-first` route, execute this packet in the current
+main context and write `GPD/ROADMAP.md` plus `GPD/REQUIREMENTS.md` directly. Do
+not invent a child id or typed child return. Validate the same artifact paths,
+scope, readability, and freshness before continuing.
+
+For a fresh-context route, load the conditional runtime delegation authority
+under `roadmapper_spawn_needed`, apply its convention, and spawn:
 
 ```
 task(
@@ -78,7 +97,7 @@ shared_state_policy: return_only
 
 This roadmapper contract is task-local. Do not widen the write scope or reuse it outside this handoff. The roadmapper does not own shared state; apply any accepted STATE.md updates in the main workflow with `gpd state` commands only after the roadmap artifacts pass the freshness gate.
 
-**Roadmapper child gate:**
+**Fresh roadmapper child gate:**
 
 ```yaml
 child_gate:
@@ -128,10 +147,11 @@ proof passes, then present a compact roadmap summary:
 - "Adjust phases" — Tell me what to change
 - "Review full file" — Show raw ROADMAP.md
 
-**If "Adjust":** Get notes, then respawn the roadmapper with a fresh revision
-continuation: read `gpd-roadmapper.md`, `GPD/ROADMAP.md`, and
-`GPD/REQUIREMENTS.md`; apply the user's notes in place; return typed
-`gpd_return` and updated roadmap artifacts.
+**If "Adjust":** Get notes, then revise through the same route: the current
+main context under `base-model-first`, otherwise a fresh roadmapper
+continuation that reads `gpd-roadmapper.md`, `GPD/ROADMAP.md`, and
+`GPD/REQUIREMENTS.md`, applies the user's notes in place, and returns typed
+`gpd_return` plus updated roadmap artifacts.
 
   **If the revision roadmapper agent fails to spawn or returns an error:** Treat the revision as incomplete. Do not compare old file contents as proof of success. Ask whether to retry the same continuation once or stop. If retrying, use a fresh continuation handoff that includes the current roadmap, requirements, and user notes.
 
@@ -175,7 +195,7 @@ Also available: `gpd:plan-phase [N]`, `gpd:suggest-next`
 - [ ] PROJECT.md updated with Current Milestone section
 - [ ] Objectives gathered and scoped per category
 - [ ] REQUIREMENTS.md created with REQ-IDs
-- [ ] gpd-roadmapper spawned with staged continuation context
+- [ ] Main-context or fresh-roadmapper route used with staged context
 - [ ] Roadmap files written immediately (not draft)
 - [ ] User feedback incorporated (if any)
 - [ ] ROADMAP.md phases continue from previous milestone

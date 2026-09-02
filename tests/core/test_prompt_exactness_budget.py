@@ -13,8 +13,9 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 EXACTNESS_TOTAL_BUDGETS = {
     # Phase 5 pass4 observed 517/5134 after semantic-helper migration.
     "brittle_prose_assertions": 525,
-    # Opt-in base-model-first routing adds three machine-contract anchors.
-    "exact_assertion_count": 5_168,
+    # Phase 3 cognitive routing adds explicit staged-field, conditional-authority,
+    # and compatibility anchors; prose route meaning stays in semantic helpers.
+    "exact_assertion_count": 5_181,
 }
 TAXONOMY_HELPER_TOTAL_FLOORS = {
     # Phase 8 observed 80 files and 735 helper calls; keep a small call-count cushion.

@@ -9,6 +9,7 @@ import yaml
 
 from gpd.core.child_handoff import ChildGateTuple, child_gate_tuple_from_payload
 from gpd.core.workflow_staging import validate_workflow_stage_manifest_payload
+from tests.assertion_taxonomy_support import assert_prompt_contracts, semantic_concept
 from tests.prompt_metrics_support import measure_prompt_surface
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -63,11 +64,19 @@ def test_new_milestone_command_stays_thin_and_only_eagerly_loads_the_workflow() 
     assert "@{GPD_INSTALL_DIR}/references/ui/ui-brand.md" not in command_text
     assert "@{GPD_INSTALL_DIR}/templates/project.md" not in command_text
     assert "@{GPD_INSTALL_DIR}/templates/requirements.md" not in command_text
-    assert "The workflow handles the full milestone initialization flow:" not in command_text
-    assert "Load local late authorities only at matching stages" in command_text
-    assert "questioning reference for guided milestone questions" in command_text
-    assert "project/requirements templates for those writes" in command_text
-    assert "UI brand for completion or status blocks" in command_text
+    assert_prompt_contracts(
+        command_text,
+        *semantic_concept(
+            "new-milestone late-authority discovery guidance",
+            required=(
+                "Load local late authorities only at matching stages",
+                "questioning reference for guided milestone questions",
+                "project/requirements templates for those writes",
+                "UI brand for completion or status blocks",
+            ),
+            forbidden=("The workflow handles the full milestone initialization flow:",),
+        ),
+    )
 
 
 def test_new_milestone_command_budget_tracks_the_workflow_without_wrapper_bloat() -> None:
@@ -149,5 +158,31 @@ def test_new_milestone_planning_stages_use_handles_instead_of_embedded_bodies() 
     assert "reference_artifact_files" in roadmap_source
     assert "Project content: {project_content}" not in survey_source
     assert "Project content: {project_content}" not in roadmap_source
-    assert "Active references: {active_reference_context}" not in survey_source
-    assert "Active references: {active_reference_context}" not in roadmap_source
+    for source in (survey_source, roadmap_source):
+        assert_prompt_contracts(
+            source,
+            *semantic_concept(
+                "new-milestone stages use reference handles instead of embedded context",
+                forbidden=("Active references: {active_reference_context}",),
+            ),
+        )
+
+
+def test_new_milestone_base_model_first_route_keeps_roadmap_gates() -> None:
+    manifest = _new_milestone_manifest()
+    source = ROADMAP_AUTHORITY.read_text(encoding="utf-8")
+
+    assert "cognitive_profile" not in manifest.stage("survey_objectives").required_init_fields
+    assert "cognitive_profile" in manifest.stage("roadmap_authoring").required_init_fields
+    assert_prompt_contracts(
+        source,
+        *semantic_concept(
+            "new-milestone cognitive route and shared gates",
+            required=(
+                "current main model authors and revises",
+                "fresh `gpd-roadmapper`",
+                "same task packet",
+                "not invent a child id",
+            ),
+        ),
+    )

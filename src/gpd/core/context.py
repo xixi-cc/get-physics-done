@@ -3785,6 +3785,7 @@ def init_new_milestone(cwd: Path, stage: str | None = None) -> dict:
         "commit_docs": config["commit_docs"],
         "autonomy": config["autonomy"],
         "research_mode": config["research_mode"],
+        "cognitive_profile": config["cognitive_profile"],
         "research_enabled": config["research"],
         # Current milestone
         "current_milestone": milestone["version"],
