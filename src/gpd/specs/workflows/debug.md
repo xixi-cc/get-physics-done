@@ -1,11 +1,13 @@
 <purpose>
-Orchestrate parallel investigation agents to diagnose research problems and find root causes.
+Diagnose research problems in the current main context when continuity is useful,
+or orchestrate parallel investigation agents when isolation or fanout is useful.
 
 After verification finds issues, spawn one investigation agent per issue. Each agent investigates independently with symptoms pre-filled from verification. Collect root causes, update `VERIFICATION.md` gaps with diagnosis, then hand off to `plan-phase --gaps` with actual diagnoses.
 
 Research problems include: calculation errors, numerical instabilities, theoretical inconsistencies, missing physics, wrong approximations, sign errors, convergence failures, unphysical results.
 
-Orchestrator stays lean: parse gaps, spawn agents, collect results, update verification.
+The route changes who performs the investigation, not the evidence, session-file,
+typed-return, approval, or verification-update contract.
 </purpose>
 
 <mode_detection>
@@ -72,7 +74,7 @@ With diagnosis: "Result disagrees with literature" -> "Missing factor of 2 from 
 <step name="route_mode">
 **Route before loading evidence:**
 
-- Interactive mode (direct user invocation): do not parse `VERIFICATION.md`. Run `gpd --raw init progress --include state,roadmap,config --no-project-reentry`, list active `GPD/debug/*.md` sessions when `$ARGUMENTS` is empty, gather the missing symptom fields with `ask_user`, and spawn one diagnosis-only `gpd-debugger`.
+- Interactive mode (direct user invocation): do not parse `VERIFICATION.md`. Run `gpd --raw init progress --include state,roadmap,config --no-project-reentry`, list active `GPD/debug/*.md` sessions when `$ARGUMENTS` is empty, gather the missing symptom fields with `ask_user`, and route one diagnosis-only investigation as described below.
 - Batch mode (verify-work handoff): parse `VERIFICATION.md` gaps and spawn one diagnosis-only `gpd-debugger` per gap.
 
 Interactive symptom fields: expected result, actual result, discrepancy character, parameter/regime where it breaks, and checks already tried. If an active session is resumed, the continuation prompt points the child to `GPD/debug/{slug}.md`; do not inline an `@GPD/debug/{slug}.md` attachment.
@@ -142,14 +144,34 @@ This runs in parallel - all issues investigated simultaneously.
 ```bash
 DEBUGGER_MODEL=$(gpd resolve-model gpd-debugger)
 AUTONOMY=$(gpd --raw config get autonomy 2>/dev/null | gpd json get .value --default supervised 2>/dev/null || echo "supervised")
+COGNITIVE_PROFILE=$(gpd --raw config get cognitive_profile 2>/dev/null | gpd json get .value --default classic 2>/dev/null || echo "classic")
 ```
+
+**Choose the cognitive route before dispatch:**
+
+- Under `base-model-first`, an ordinary single interactive issue is diagnosed
+  by the current main model so it can retain the live physical context.
+- Use a fresh `gpd-debugger` under `classic`, for batch/parallel diagnosis, when
+  the user explicitly requests independent isolation, or when measured context
+  pressure requires a fresh context. Record the concrete trigger; do not spawn
+  merely because a debugger role exists.
+- Both routes use the same filled investigation prompt, triage table,
+  `GPD/debug/{slug}.md` session artifact, root-cause-only scope, typed
+  `gpd_return`, checkpoint behavior, and downstream verification update.
 
 **Mode-aware behavior:**
 - `autonomy=supervised` (default): Pause after each debugger agent returns findings. Present the diagnosis to the user before proceeding to a fix.
 - `autonomy=balanced`: Spawn the debugger agents, collect findings, and apply routine fixes automatically. Pause only if there are multiple plausible root causes or the fix changes assumptions or scope.
 - `autonomy=yolo`: Spawn debuggers and continue automatically only after a specific evidence-backed root cause is identified. Do not apply a merely plausible fix.
 
-**Spawn investigation agents in parallel:**
+**Run the investigation:**
+
+For the ordinary interactive `base-model-first` route, execute the filled
+debug subagent prompt in the current main context. Write the same session file
+and produce the same typed return envelope. Do not self-promote a plausible
+hypothesis to a root cause: the evidence threshold below is unchanged.
+
+For a fresh-context route, spawn investigation agents in parallel:
 
 For each gap, fill the debug subagent prompt template (see `{GPD_INSTALL_DIR}/templates/debug-subagent-prompt.md` for the full template with placeholders, continuation format, and failure protocol) and spawn:
 @{GPD_INSTALL_DIR}/references/orchestration/runtime-delegation-note.md
