@@ -39,7 +39,7 @@ It covers:
 - `src/gpd/specs/references/**/*.md`: `243`
 - `src/gpd/adapters/*.py`: `15`
 - `src/gpd/hooks/*.py`: `11`
-- `src/gpd/mcp/*.py`: `5`
+- `src/gpd/mcp/*.py`: `6`
 - `src/gpd/mcp/integrations/*.py`: `2`
 - `src/gpd/mcp/servers/*.py`: `15`
 - `infra/gpd-*.json`: `8`

@@ -320,21 +320,20 @@ class TestBuiltinServerDescriptors:
     """Tests for public built-in MCP server descriptor metadata."""
 
     def test_descriptor_registry_does_not_import_optional_arxiv_runtime(self):
-        probe = subprocess.run(
+        subprocess.run(
             [
                 sys.executable,
                 "-c",
                 (
                     "import sys; import gpd.mcp.builtin_servers as b; "
-                    "assert 'gpd.mcp.servers.arxiv_bridge' not in sys.modules; "
-                    "assert b.build_public_descriptors()['gpd-arxiv']['capabilities']"
+                    "bad = 'gpd.mcp.servers.arxiv_bridge' in sys.modules or not "
+                    "b.build_public_descriptors()['gpd-arxiv']['capabilities']; raise SystemExit(1 if bad else 0)"
                 ),
             ],
-            check=False,
+            check=True,
             capture_output=True,
             text=True,
         )
-        assert probe.returncode == 0, probe.stderr
 
     def test_public_descriptor_prerequisites_are_runtime_neutral(self):
         from gpd.mcp.builtin_servers import build_public_descriptors

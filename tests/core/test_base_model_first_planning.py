@@ -10,17 +10,20 @@ WORKFLOWS = ROOT / "src" / "gpd" / "specs" / "workflows"
 
 
 def test_cognitive_profile_is_opt_in_and_configurable() -> None:
-    assert GPDProjectConfig().cognitive_profile is CognitiveProfile.CLASSIC
-    assert GPDProjectConfig(cognitive_profile="base-model-first").cognitive_profile is CognitiveProfile.BASE_MODEL_FIRST
-    assert "cognitive_profile" in supported_config_keys()
+    assert (
+        GPDProjectConfig().cognitive_profile,
+        GPDProjectConfig(cognitive_profile="base-model-first").cognitive_profile,
+        "cognitive_profile" in supported_config_keys(),
+    ) == (CognitiveProfile.CLASSIC, CognitiveProfile.BASE_MODEL_FIRST, True)
 
 
 def test_planner_stage_receives_cognitive_profile_without_changing_earlier_stages() -> None:
     manifest = load_workflow_stage_manifest("plan-phase")
 
-    assert "cognitive_profile" not in manifest.stage("phase_bootstrap").required_init_fields
-    assert "cognitive_profile" not in manifest.stage("research_routing").required_init_fields
-    assert "cognitive_profile" in manifest.stage("planner_authoring").required_init_fields
+    assert tuple(
+        "cognitive_profile" in manifest.stage(stage_id).required_init_fields
+        for stage_id in ("phase_bootstrap", "research_routing", "planner_authoring")
+    ) == (False, False, True)
 
 
 def test_base_model_first_planning_keeps_contract_and_independence_boundaries() -> None:

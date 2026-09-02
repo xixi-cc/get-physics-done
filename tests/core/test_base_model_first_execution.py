@@ -11,8 +11,10 @@ EXECUTOR_DISPATCH = ROOT / "src" / "gpd" / "specs" / "workflows" / "execute-phas
 def test_executor_dispatch_receives_cognitive_profile_only_when_needed() -> None:
     manifest = load_workflow_stage_manifest("execute-phase")
 
-    assert "cognitive_profile" not in manifest.stage("phase_bootstrap").required_init_fields
-    assert "cognitive_profile" in manifest.stage("executor_dispatch").required_init_fields
+    assert tuple(
+        "cognitive_profile" in manifest.stage(stage_id).required_init_fields
+        for stage_id in ("phase_bootstrap", "executor_dispatch")
+    ) == (False, True)
 
 
 def test_base_model_first_execution_preserves_isolation_and_science_gates() -> None:

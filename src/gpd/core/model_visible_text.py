@@ -116,11 +116,11 @@ def agent_visibility_note() -> str:
 def command_visibility_note() -> str:
     return render_model_visible_note(
         "Command YAML rules.",
-        "Strict booleans; omit empty optional fields.",
-        f"`{COMMAND_POLICY_PROMPT_WRAPPER_KEY}` (frontmatter `{COMMAND_POLICY_FRONTMATTER_KEY}`) uses integer "
-        "`schema_version: 1`; its string lists, dotted suffixes, and active values control intake and outputs.",
+        "Strict booleans; list fields are string lists; omit empty optional fields; suffix lists use dotted suffixes.",
+        f"`{COMMAND_POLICY_PROMPT_WRAPPER_KEY}` (frontmatter `{COMMAND_POLICY_FRONTMATTER_KEY}`) uses "
+        "`schema_version: 1`; typed command policy controls intake, supporting-context routing, and managed outputs.",
         f"`context_mode` is {_join_disjunction(VALID_CONTEXT_MODES)}; `allowed_tools` is a tool-name list; "
-        "`requires` accepts only `files`; `agent` is a canonical label.",
+        "`requires` accepts only `files`; `agent` must match a built-in canonical agent label exactly.",
         "`project_reentry_capable: true` requires `context_mode: project-required`.",
         "Any user-visible completion, checkpoint, blocked return, failed return, retry gate, or stop that expects later "
         "action must end with `## > Next Up`; include concrete GPD commands and `gpd:suggest-next` for project-backed recovery.",
@@ -130,14 +130,23 @@ def command_visibility_note() -> str:
 def review_contract_visibility_note() -> str:
     return render_model_visible_note(
         "Review-contract YAML rules.",
-        f"Use `{REVIEW_CONTRACT_PROMPT_WRAPPER_KEY}` with integer `schema_version: 1`; omit empty fields and treat "
-        "the active YAML values as authoritative.",
-        "Use only the closed mode/state/preflight vocabularies. Lists reject blanks and duplicates.",
-        "Each `conditional_requirements[].when` is unique and needs a non-empty requirement.",
-        "Each `scope_variants[].scope` is unique; `scope`/`activation` are non-empty and the variant needs an override "
-        "or preflight field.",
-        "Non-empty output/evidence/blocker override lists replace their top-level lists. Relaxed checks become "
-        "non-blocking, optional checks make missing inputs advisory, and active scope variants apply additively.",
+        f"Closed schema: `{REVIEW_CONTRACT_PROMPT_WRAPPER_KEY}` is the wrapper key; `schema_version` must be the integer `1`; "
+        "no extra keys. Omit empty optional fields.",
+        "`review_mode`, `required_state`, `preflight_checks`, `conditional_requirements[].when`, and scope-variant "
+        "preflight fields use closed review-contract vocabularies; active YAML values below are authoritative.",
+        "List fields when present: `required_outputs`, `required_evidence`, `blocking_conditions`, `preflight_checks`, "
+        "`stage_artifacts`, `scope_variants`.",
+        "`conditional_requirements[].preflight_checks` and `conditional_requirements[].blocking_preflight_checks` "
+        "are lists of valid preflight-check values when present.",
+        "Each `conditional_requirements[].when` value may appear at most once. List fields reject blank entries and "
+        "duplicates. Each conditional requirement needs one non-empty field.",
+        "`scope_variants[].scope`/`.activation` are non-empty strings; `scope_variants[].relaxed_preflight_checks`/"
+        "`.optional_preflight_checks` are lists of valid preflight-check values when present.",
+        "Scope override fields `required_outputs_override`, `required_evidence_override`, and "
+        "`blocking_conditions_override` are lists when present. Relaxed checks make named checks non-blocking; optional "
+        "checks make missing inputs advisory. Non-empty scope override lists replace matching top-level lists.",
+        "Each `scope_variants[].scope` may appear at most once. Each scope variant needs one non-empty override or "
+        "preflight field. Runtime applies active scope variants additively.",
     )
 
 
