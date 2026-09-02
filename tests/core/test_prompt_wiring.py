@@ -760,15 +760,13 @@ def test_reward_hacking_self_check_reference_exists_and_is_wired() -> None:
     # The workflow has been split into stage authorities; the integrity gate lives in the
     # publication-review-finalization stage authority (the same stage that owns
     # pre_submission_review).
-    publication_stage = (
-        WORKFLOWS_DIR / "write-paper" / "publication-review-finalization.md"
-    ).read_text(encoding="utf-8")
+    publication_stage = (WORKFLOWS_DIR / "write-paper" / "publication-review-finalization.md").read_text(
+        encoding="utf-8"
+    )
     assert "<reward_hacking_integrity_gate>" in publication_stage
     gate_idx = publication_stage.index("<reward_hacking_integrity_gate>")
     review_idx = publication_stage.index("<pre_submission_review>")
-    assert gate_idx < review_idx, (
-        "reward_hacking_integrity_gate must run before pre_submission_review"
-    )
+    assert gate_idx < review_idx, "reward_hacking_integrity_gate must run before pre_submission_review"
     assert "INTEGRITY-GATE.json" in publication_stage
     assert "overall_passed" in publication_stage
 
@@ -3497,7 +3495,13 @@ def test_phase_researcher_prompt_keeps_the_one_shot_handoff_and_return_contract_
     research_workflow = _workflow_authority_text("research-phase")
     research_command = (COMMANDS_DIR / "research-phase.md").read_text(encoding="utf-8")
 
-    _s(phase_researcher, "thin phase research handoff", "`phase-research`", "standard `gpd_return` envelope", "files_written")
+    _s(
+        phase_researcher,
+        "thin phase research handoff",
+        "`phase-research`",
+        "standard `gpd_return` envelope",
+        "files_written",
+    )
     _mf(
         research_workflow,
         "references/orchestration/continuation-boundary.md",
@@ -4902,7 +4906,9 @@ def test_publication_prompts_surface_strict_semantic_manuscript_gates() -> None:
         "artifact_discovery",
         "references/publication/publication-review-round-artifacts.md",
     )
-    _assert_loaded_authorities("write-paper", "paper_bootstrap", "references/publication/publication-bootstrap-preflight.md")
+    _assert_loaded_authorities(
+        "write-paper", "paper_bootstrap", "references/publication/publication-bootstrap-preflight.md"
+    )
     _assert_write_paper_publication_review_authorities()
     for content in (respond, arxiv):
         _ff(
@@ -5095,7 +5101,12 @@ def test_publication_command_contexts_surface_schema_docs_before_generation() ->
         "bootstrap",
         "references/publication/publication-bootstrap-preflight.md",
     )
-    _m(arxiv_workflow, "arxiv workflow staged schema docs", bootstrap_preflight_path, PUBLICATION_ROUND_ARTIFACTS_INCLUDE)
+    _m(
+        arxiv_workflow,
+        "arxiv workflow staged schema docs",
+        bootstrap_preflight_path,
+        PUBLICATION_ROUND_ARTIFACTS_INCLUDE,
+    )
     _f(
         arxiv_workflow,
         "arxiv workflow staged schema docs",

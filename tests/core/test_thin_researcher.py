@@ -31,8 +31,21 @@ def test_researcher_and_constitution_stay_compact_and_keep_scientific_invariants
 
     assert len(prompt.split()) <= 900
     assert len(constitution.split()) <= 1_200
-    assert all(mode in prompt for mode in ("project-survey", "phase-research", "literature-review", "project-map", "synthesis"))
-    assert all(term in constitution for term in ("assumptions", "dimensions", "limiting cases", "convergence", "uncertainty", "Never invent", "independent verification"))
+    assert all(
+        mode in prompt for mode in ("project-survey", "phase-research", "literature-review", "project-map", "synthesis")
+    )
+    assert all(
+        term in constitution
+        for term in (
+            "assumptions",
+            "dimensions",
+            "limiting cases",
+            "convergence",
+            "uncertainty",
+            "Never invent",
+            "independent verification",
+        )
+    )
     assert "shared-protocols.md" not in prompt
     assert "physics-subfields.md" not in prompt
     assert "project-types/" not in prompt
