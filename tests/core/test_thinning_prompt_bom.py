@@ -32,6 +32,16 @@ def test_prompt_bom_is_deterministic_and_matches_eager_authorities() -> None:
     assert all(entry["diet_class"] in {"kernel", "jit-checklist", "archive-retrieval"} for entry in first["entries"])
 
 
+def test_prompt_bom_totals_count_duplicate_loading_reasons_once() -> None:
+    payload = build_stage_prompt_bom("plan-phase", "planner_authoring", specs_root=SPECS)
+    eager_entries = [entry for entry in payload["entries"] if entry["eager"]]
+    unique = {entry["authority"]: entry for entry in eager_entries}
+
+    assert len(eager_entries) > len(unique)
+    assert payload["totals"]["eager_entry_count"] == len(unique)
+    assert payload["totals"]["eager_chars"] == sum(entry["chars"] for entry in unique.values())
+
+
 def test_prompt_bom_selects_only_named_conditional_authorities() -> None:
     manifest = load_workflow_stage_manifest("plan-phase", specs_root=SPECS)
     stage = manifest.stage("checker_revision")

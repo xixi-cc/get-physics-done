@@ -104,7 +104,12 @@ def build_stage_prompt_bom(
             continue
         entries.append(_authority_entry(root, authority, role="must_not_eager", eager=False))
 
-    eager_entries = [entry for entry in entries if entry["eager"]]
+    # A mode path can also be listed as a loaded authority. Count each model-visible
+    # body once even when the manifest records more than one loading reason.
+    eager_entries_by_authority = {
+        str(entry["authority"]): entry for entry in entries if entry["eager"]
+    }
+    eager_entries = list(eager_entries_by_authority.values())
     payload = stage.to_staged_loading_payload(manifest.workflow_id)
     return {
         "schema_version": SCHEMA_VERSION,

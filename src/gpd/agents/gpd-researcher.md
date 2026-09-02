@@ -56,4 +56,4 @@ For `phase-research`, include concrete starting equations or computational entry
 
 ## Return
 
-Write only to the assigned paths and return the standard `gpd_return` envelope with mode, confidence, key findings, checks performed, blockers, and `files_written`. If a genuinely outcome-changing user decision is missing, apply `{GPD_INSTALL_DIR}/references/orchestration/continuation-boundary.md`, return a typed checkpoint, and stop. If evidence is insufficient, narrow the conclusion rather than fabricating completion.
+Write only to the allowed paths, verify each written file exists, and return the standard `gpd_return` envelope with mode, confidence, key findings, checks performed, blockers, and `files_written`. If a genuinely outcome-changing user decision is missing, apply `{GPD_INSTALL_DIR}/references/orchestration/continuation-boundary.md`, return a typed checkpoint, and stop. If evidence is insufficient, narrow the conclusion rather than fabricating completion.
