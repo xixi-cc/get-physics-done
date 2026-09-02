@@ -528,6 +528,7 @@ WRITE_PAPER_INIT_FIELDS = frozenset(
         "project_exists",
         "autonomy",
         "research_mode",
+        "cognitive_profile",
         "write_paper_argument_input",
         *PROJECT_CONTRACT_GATE_FIELDS,
         *WRITE_PAPER_PUBLICATION_BOOTSTRAP_FIELDS,

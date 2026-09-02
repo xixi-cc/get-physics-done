@@ -4173,6 +4173,7 @@ def init_write_paper(cwd: Path, subject: str | None = None, stage: str | None = 
         "project_exists": _path_exists(effective_cwd, f"{PLANNING_DIR_NAME}/{PROJECT_FILENAME}"),
         "autonomy": config["autonomy"],
         "research_mode": config["research_mode"],
+        "cognitive_profile": config["cognitive_profile"],
         "platform": _detect_platform(effective_cwd),
     }
     base_result["write_paper_argument_input"] = subject.strip() if isinstance(subject, str) else ""
