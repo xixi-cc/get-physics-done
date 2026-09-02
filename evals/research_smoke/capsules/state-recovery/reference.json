@@ -1,0 +1,6 @@
+{
+  "resume_authority": "GPD/.continue-here.md",
+  "preserved_blockers": ["unvalidated-critical-fit"],
+  "claim_status": "inconclusive",
+  "next_action": "rerun-critical-fit-validation"
+}

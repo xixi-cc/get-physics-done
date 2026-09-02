@@ -233,6 +233,9 @@ Scoped reference artifact file handles: {reference_artifact_files}
 
 <output>
 Write `GPD/literature/{slug}-REVIEW.md` and `GPD/literature/{slug}-CITATION-SOURCES.json`.
+For authoritative in-scope claims, also write `{slug}-CLAIM-EVIDENCE.json`
+(`EvidenceBundle` v1) with decisive page/equation/figure/data locators and
+scoped links; omit it for standalone reviews.
 </output>
 
 <citation_sidecar_contract>
@@ -245,6 +248,7 @@ write_scope:
   allowed_paths:
     - GPD/literature/{slug}-REVIEW.md
     - GPD/literature/{slug}-CITATION-SOURCES.json
+    - GPD/literature/{slug}-CLAIM-EVIDENCE.json
 expected_artifacts:
   - GPD/literature/{slug}-REVIEW.md
   - GPD/literature/{slug}-CITATION-SOURCES.json

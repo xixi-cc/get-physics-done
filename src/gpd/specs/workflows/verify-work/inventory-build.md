@@ -1,12 +1,8 @@
 <purpose>
 Delegate phase verification to one fresh `gpd-verifier` and gate the produced report.
 </purpose>
-<first_route>
-First fail closed if project, roadmap, contract, proof, or anchor readiness is
-unusable; only then delegate one fresh verifier and gate its report.
-</first_route>
 <philosophy>
-Do not duplicate verifier policy. Fail closed before delegation if project, roadmap, contract, or proof readiness is unusable. The wrapper gates artifacts and routes; the verifier owns scientific status. Every child handoff is one-shot and file-producing success requires fresh expected artifacts.
+Fail closed on unusable project, contract, proof, or anchor state. One fresh verifier owns scientific status; its child handoff is one-shot and wrapper-gated.
 </philosophy>
 <shared_contract_floor>
 **Project Contract Gate:** {project_contract_gate}
@@ -15,15 +11,13 @@ Do not duplicate verifier policy. Fail closed before delegation if project, road
 **Contract Intake:** {contract_intake}
 **Effective Reference Intake:** {effective_reference_intake}
 
-Treat `project_contract` as authoritative only when `project_contract_gate.authoritative` is true. A visible-but-blocked contract must be repaired before it is used as authoritative verification scope.
-Treat `effective_reference_intake` as the structured source of carry-forward anchors; `active_references`, `citation_source_files`, and `citation_source_warnings` are compact routing handles, not rendered evidence bodies.
-Do NOT skip contract-critical anchors.
+Treat `project_contract` as authoritative only when `project_contract_gate.authoritative` is true. A visible-but-blocked contract must be repaired before authoritative verification scope. `effective_reference_intake` is the structured source of carry-forward anchors; `active_references` and citation fields are compact routing handles. Keep bodies lazy and anchor obligations explicit.
 </shared_contract_floor>
 
 <process>
 
 <step name="load_anchor_context">
-Load inventory-building before using anchor, protocol-bundle, state, or verifier-handoff fields:
+Load this stage before using anchor, bundle, state, or verifier-handoff fields:
 
 ```bash
 INVENTORY_BUILD_INIT=$(gpd --raw init verify-work "${PHASE_ARG}" --stage inventory_build)
@@ -34,18 +28,14 @@ fi
 ```
 
 <field_access>
-Apply `INVENTORY_BUILD_INIT.staged_loading.field_access_instruction` before
-reading `INVENTORY_BUILD_INIT`. Use reference/citation handles without inlining
-rendered prose or bodies.
+Apply `INVENTORY_BUILD_INIT.staged_loading.field_access_instruction`; keep reference bodies lazy.
 </field_access>
 
-- If it names a benchmark, prior artifact, or must-read reference, verification must explicitly check it or report why it could not.
-- Stable knowledge docs that appear through handle/status fields are reviewed background synthesis: use them to clarify definitions, assumptions, and caveats only when they agree with stronger sources, and never as decisive evidence on their own.
-- Background literature may be reduced by mode; anchor checks may not.
+- Check every named benchmark, prior artifact, and must-read anchor or report why it could not be checked. Stable knowledge docs are reviewed background synthesis: use them only with stronger sources, never as decisive evidence.
 </step>
 
 <step name="load_protocol_bundle_handles">
-Use `protocol_bundle_load_manifest` as specialized-loading guidance. If bundles are selected, use `protocol_bundle_verifier_extensions` as the primary checklist surface; call `get_bundle_checklist(selected_protocol_bundle_ids)` only when extensions are missing or inconsistent. Bundle guidance may add checks, but it never replaces the plan contract or reduces anchor obligations.
+Use `protocol_bundle_load_manifest` for targeted loading and `protocol_bundle_verifier_extensions` as the primary bundle-extension surface; call `get_bundle_checklist` only if extensions are missing. Bundles cannot replace contract or anchor checks.
 
 For PLAN contracts with project-local anchors or prior-output paths, call `suggest_contract_checks(contract, project_dir=...)`, fill the returned `request_template` completely, and run each applicable check with `run_contract_check(request=..., project_dir=...)`.
 </step>
@@ -53,22 +43,19 @@ For PLAN contracts with project-local anchors or prior-output paths, call `sugge
 <step name="delegate_verification">
 ## Delegate Verification
 
-Spawn `gpd-verifier` once with scoped write. It owns target extraction, evidence mapping, proof policy, checks, decisive comparisons, canonical status, suggested contract checks, and the gap ledger.
-
-Pass the project contract, proof freshness summary, reference handles, and protocol bundle handoff fields into the handoff so the verifier can build its own authoritative ledger.
-Point it at `{GPD_INSTALL_DIR}/references/verification/verification-status-authority.md`. Presentation headings are non-authority; route through the verifier tuple plus canonical report status.
+Spawn `gpd-verifier` once with scoped write. Pass `project_contract` only when `project_contract_gate.authoritative`; keep `active_references` as handles. It owns checks, evidence mapping, comparisons, canonical status, and gaps under `verification-status-authority.md`. Keep decisive comparison gaps legible at claim / acceptance-test / reference level; presentation headings are non-authority. Checkpoint for researcher input.
 
 > Verifier checkpoints use `references/orchestration/continuation-boundary.md`; the wrapper starts a fresh continuation after the user responds.
 
-Use `verification_report_finalizer_bridge` as the canonical report finalizer bridge for passed, `human_needed`, `expert_needed`, and typed non-gap outcomes. Gap-only conservative reports may use `verification_report_skeleton_bridge`; stronger statuses must run `gpd verification-report finalize` with a typed patch JSON plus body-only evidence and pass `gpd validate verification-contract` before the wrapper routes on the report.
+Use `verification_report_finalizer_bridge` for non-gap outcomes; gap-only reports may use `verification_report_skeleton_bridge`. Validate every canonical report before routing.
 
 Set `VERIFIER_HANDOFF_STARTED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")` immediately before spawning.
 
-Prompt: "First, read {GPD_AGENTS_DIR}/gpd-verifier.md for your role and instructions." Then verify Phase {phase_number}; use `Verification flags from the normalized parser: $VERIFY_FLAG_TEXT`; treat `--dimensional`, `--limits`, `--convergence`, and `--regression` as optional-breadth narrowing only.
+Prompt: "First, read {GPD_AGENTS_DIR}/gpd-verifier.md for your role and instructions." Verify Phase {phase_number}. Verification flags from the normalized parser: $VERIFY_FLAG_TEXT; flags narrow optional breadth only.
 
-Read with `file_read`: `${PHASE_DIR_ABS}/${phase_number}-VERIFICATION.md`, all PLAN/SUMMARY/`*-PROOF-REDTEAM.md` files in `${PHASE_DIR_ABS}/`, `${PROJECT_ROOT}/GPD/STATE.md`, and `${PROJECT_ROOT}/GPD/ROADMAP.md`.
+Read the phase verification, PLAN/SUMMARY/proof-redteam artifacts, STATE, and ROADMAP.
 
-Pass the staged contract/gate values, `contract_intake`, `effective_reference_intake`, compact reference handles, and `{phase_proof_review_status}`. Do not pass `active_reference_context`, `protocol_bundle_context`, or `reference_artifacts_content` from this stage.
+Pass staged contract/gate values, compact handles, and `{phase_proof_review_status}`; do not pass rendered reference or protocol bodies.
 
 <selected_protocol_bundle_ids>
 {selected_protocol_bundle_ids}
@@ -82,14 +69,27 @@ Pass the staged contract/gate values, `contract_intake`, `effective_reference_in
 {protocol_bundle_verifier_extensions}
 </protocol_bundle_verifier_extensions>
 
-Treat `project_contract` as authoritative only when `project_contract_gate.authoritative` is true. Use `protocol_bundle_verifier_extensions` as primary bundle-extension surface. Keep decisive comparison gaps legible at the claim / acceptance-test / reference level. If user input is required, return checkpoint state and stop.
-Schema finalization is bounded: validator pass returns; after the second validator failure total, including the initial failure and one repair rerun, return `gpd_return.status: blocked` with latest errors. Stop after two schema-only repair failures.
+Schema finalization is bounded: validator pass returns; after the second validator failure total, including the initial failure and one repair rerun, return `gpd_return.status: blocked` with latest errors.
+
+Run an explicitly named oracle instead of paraphrasing it:
+
+```bash
+gpd --raw verify oracle "$ORACLE_SPEC" \
+  --result-output "${PHASE_DIR_ABS}/oracle-results/${ORACLE_ID}.json"
+```
+
+For literature evidence, add `--evidence-bundle "$EVIDENCE_BUNDLE"
+--bundle-output "${PHASE_DIR_ABS}/evidence/${ORACLE_ID}-EVIDENCE.json"`.
+Record observed/expected/tolerance; failed/error stay non-passed. Passing proves
+only the encoded check. Never invent an oracle spec.
 
 <spawn_contract>
 write_scope:
   mode: scoped_write
   allowed_paths:
     - ${PHASE_DIR_ABS}/${phase_number}-VERIFICATION.md
+    - ${PHASE_DIR_ABS}/oracle-results/*.json
+    - ${PHASE_DIR_ABS}/evidence/*.json
 expected_artifacts:
   - ${PHASE_DIR_ABS}/${phase_number}-VERIFICATION.md
 shared_state_policy: return_only

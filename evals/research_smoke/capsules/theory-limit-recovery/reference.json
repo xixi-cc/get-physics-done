@@ -1,0 +1,5 @@
+{
+  "identified_error": "missing-boundary-term",
+  "affected_claim": "zero-mode-normalization",
+  "corrected_zero_mode": 0.0
+}

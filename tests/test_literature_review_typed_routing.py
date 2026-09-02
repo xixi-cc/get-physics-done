@@ -22,10 +22,13 @@ def test_literature_review_workflow_routes_on_typed_status_and_artifact_gate() -
     assert "GPD/literature/{slug}-REVIEW.md" in workflow
     assert "GPD/literature/{slug}-CITATION-SOURCES.json" in workflow
     assert "GPD/literature/{slug}-CITATION-AUDIT.md" in workflow
-    assert "all three paths are named in `files_written` and present/readable on disk" in workflow
     assert_prompt_contracts(
         workflow,
         machine_exact("literature-review checkpoint route", "checkpoint: include the decision question"),
+        *semantic_concept(
+            "literature evidence artifact gate",
+            required=("CITATION-SOURCES.json", "CITATION-AUDIT.md", "EVIDENCE.json", "present", "named"),
+        ),
     )
     assert "blocked/failed: list the missing artifact" in workflow
 

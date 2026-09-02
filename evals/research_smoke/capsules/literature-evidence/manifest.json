@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "category": "source_writing_review",
+  "task": "task.md",
+  "reference_submission": "reference.json",
+  "adversarial_submission": "adversarial.json",
+  "oracles": [
+    {
+      "runner": "python",
+      "oracle_id": "claim-evidence-links",
+      "check_id": "5.6",
+      "claim_id": "claim-long-wave-instability",
+      "callable_ref": "evals.research_smoke.oracles:literature_evidence_audit",
+      "inject_submission": true
+    }
+  ]
+}
