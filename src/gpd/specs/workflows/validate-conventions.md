@@ -184,8 +184,8 @@ from the report before routing it:
   autonomy/write boundary.
 - Spawn `gpd-notation-coordinator` under `classic`, for an explicit fresh
   isolation request, unresolved physical-meaning ambiguity, or cross-source or
-  cross-subfield conflict. Keep that handoff thin: the coordinator owns the
-  ambiguous repair policy, not this workflow.
+  cross-subfield conflict. Keep that handoff thin and use the same scope: the
+  coordinator owns the ambiguous repair policy, not this workflow.
 - Never infer a convention value from prose merely to keep the main-context
   route. An uncertain repair remains a checkpoint or fresh independent handoff.
 

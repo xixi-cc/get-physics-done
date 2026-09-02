@@ -359,11 +359,15 @@ def test_new_project_roadmapper_spawn_contract_uses_direct_shared_state_and_arti
         "new-project roadmapper task parameters and state contract",
         'subagent_type="gpd-roadmapper"',
         'model="{roadmapper_model}"',
+    )
+    _assert_machine(
+        content,
+        "new-project roadmapper packet state contract",
         "gpd_return.files_written",
         "GPD/REQUIREMENTS.md",
     )
     _assert_semantic(
-        task.text,
+        content,
         "new-project roadmapper direct write and completion gate",
         "Write files immediately (ROADMAP.md, STATE.md, update REQUIREMENTS.md traceability)",
         "do not rely on runtime completion text alone.",
@@ -695,14 +699,22 @@ def test_new_project_roadmapper_uses_spawn_contract_and_artifact_gate() -> None:
     roadmapper = _find_single_task(path, "gpd-roadmapper")
     gate = _child_gate(content, "project_roadmapper")
 
-    _assert_spawn_contract(roadmapper, ("GPD/ROADMAP.md", "GPD/STATE.md"), shared_state_policy="direct")
+    _assert_spawn_contract(content, ("GPD/ROADMAP.md", "GPD/STATE.md"), shared_state_policy="direct")
     _assert_machine(
-        roadmapper.text,
+        content,
         "new-project roadmapper state and reference paths",
         "GPD/REQUIREMENTS.md",
         "gpd_return.files_written",
         "GPD/literature/SUMMARY.md",
         "allowed_paths:",
+    )
+    _assert_machine(
+        roadmapper.text,
+        "new-project roadmapper fresh task parameters",
+        "prompt=ROADMAP_TASK_PACKET",
+        'subagent_type="gpd-roadmapper"',
+        'model="{roadmapper_model}"',
+        "readonly=false",
     )
     assert _artifact_paths(gate) == ("GPD/ROADMAP.md", "GPD/STATE.md", "GPD/REQUIREMENTS.md")
     _assert_semantic(
@@ -717,7 +729,7 @@ def test_new_project_notation_coordinator_uses_explicit_model_and_spawn_contract
     path = WORKFLOWS_DIR / "new-project.md"
     content = _read(path)
     start = content.index("## 8.5. Establish Conventions")
-    end = content.index("**Notation-coordinator child gate:**", start)
+    end = content.index("**Convention artifact gate**", start)
     notation_section = content[start:end]
 
     assert _find_single_task(path, "gpd-notation-coordinator")
@@ -766,7 +778,8 @@ def test_validate_conventions_uses_one_shot_delegation_and_artifact_gating_for_r
         "next_actions",
         "gpd-notation-coordinator",
         "same scope",
-        "coordinator owns the repair policy",
+        "coordinator owns",
+        "ambiguous repair policy",
         "gpd_return.status: completed",
         "gpd_return.files_written",
     )

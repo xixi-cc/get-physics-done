@@ -125,6 +125,20 @@ Route the packet:
 - `classic` or recorded fresh-isolation override: spawn `gpd-roadmapper` with
   this packet, `model="{roadmapper_model}"`, and `readonly=false`.
 
+```text
+ROADMAPPER_RETURN=$(task(
+  prompt=ROADMAP_TASK_PACKET,
+  subagent_type="gpd-roadmapper",
+  model="{roadmapper_model}",
+  readonly=false,
+  description="Create research roadmap"
+))
+```
+
+Run this task block only for the classic/fresh route. On the main-context
+route, set `ROADMAPPER_RETURN` to the orchestrator-owned typed envelope after
+executing the packet directly.
+
 **Roadmap artifact gate** (a child id exists only on the fresh route):
 
 ```yaml

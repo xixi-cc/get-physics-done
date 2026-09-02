@@ -477,7 +477,6 @@ def test_runtime_delegation_note_is_loaded_once_per_workflow() -> None:
     workflows_using_short_references = {
         "audit-milestone.md",
         "explain.md",
-        "new-milestone.md",
         "quick.md",
     }
     workflows_using_manifest_conditional_references = {
