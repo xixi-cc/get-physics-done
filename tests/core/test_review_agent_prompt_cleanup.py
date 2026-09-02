@@ -8,7 +8,6 @@ from tests.assertion_taxonomy_support import (
     assert_prompt_contracts,
     machine_exact,
     semantic_anchor,
-    semantic_concept,
 )
 from tests.markdown_test_support import yaml_fence_bodies
 from tests.prompt_metrics_support import count_unfenced_heading

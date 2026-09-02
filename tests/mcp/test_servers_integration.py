@@ -492,9 +492,7 @@ class TestSkillsServerIntegration:
         assert {
             "gpd-research-phase",
             "gpd-researcher",
-            "gpd-researcher",
             "gpd-literature-review",
-            "gpd-researcher",
         }.issubset(names)
         assert all(skill["category"] == "research" for skill in result["skills"])
 
