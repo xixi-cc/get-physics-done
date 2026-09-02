@@ -133,6 +133,7 @@ NEW_PROJECT_INIT_FIELDS = frozenset(
         "researcher_model",
         "synthesizer_model",
         "roadmapper_model",
+        "cognitive_profile",
         "commit_docs",
         "autonomy",
         "research_mode",

@@ -291,6 +291,26 @@ def test_new_project_split_stages_load_templates_at_write_boundaries() -> None:
         assert f"Load `{template_path}` only when writing `{output_path}`." not in command_text
 
 
+def test_new_project_base_model_first_routes_keep_fresh_compatibility_paths() -> None:
+    roadmap = _read_stage_authority("roadmap-authoring.md")
+    conventions = _read_stage_authority("conventions-handoff.md")
+
+    assert_prompt_contracts(
+        roadmap,
+        semantic_anchor(
+            "roadmap route keeps main-context continuity and fresh isolation",
+            ("base-model-first", "current main model", "classic", "fresh-isolation", "do not invent a child id"),
+        ),
+    )
+    assert_prompt_contracts(
+        conventions,
+        semantic_anchor(
+            "convention route is registry first but preserves independent conflict handling",
+            ("registry-first", "base-model-first", "cross-source", "classic", "supervised no-write checkpoint"),
+        ),
+    )
+
+
 def test_new_project_stage_contract_loader_is_cached() -> None:
     first = stage_contract_module.load_new_project_stage_contract()
     second = stage_contract_module.load_new_project_stage_contract()

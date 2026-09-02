@@ -1,6 +1,7 @@
 <purpose>
-Create the full-mode research roadmap through the `gpd-roadmapper` handoff,
-artifact gate, approval loop, commit, and checkpoint.
+Create the full-mode research roadmap in the main context for ordinary
+`base-model-first` work, or through the compatible `gpd-roadmapper` handoff;
+then apply the same artifact gate, approval loop, commit, and checkpoint.
 </purpose>
 
 @{GPD_INSTALL_DIR}/references/orchestration/runtime-delegation-note.md
@@ -26,6 +27,13 @@ fi
 
 Follow `ROADMAPPER_INIT.staged_loading.field_access_instruction`; `<INIT>` there means `ROADMAPPER_INIT`. Convention authorities remain unavailable.
 
+Read `cognitive_profile` from that payload. Under `base-model-first`, the
+current main model authors and revises the roadmap from the task packet below;
+do not spawn a roadmapper merely to restate it. Under `classic`, or when the
+user explicitly requests fresh isolation, use the roadmapper handoff. The
+route does not change write scope, contract authority, approval, freshness,
+validation, commit, or checkpoint gates.
+
 If `project_contract_gate.authoritative` is false,
 `project_contract_load_info.status` starts with `blocked`, or
 `project_contract_validation.valid` is false, stop and route back to the
@@ -43,10 +51,12 @@ GPD >>> CREATING RESEARCH ROADMAP
 >>> Spawning roadmapper...
 ```
 
-Apply the canonical runtime delegation convention already loaded above.
+Apply the canonical runtime delegation convention already loaded above only
+when the selected route uses a fresh roadmapper.
 
-```
-task(prompt="First, read {GPD_AGENTS_DIR}/gpd-roadmapper.md for your role and instructions.
+```text
+ROADMAP_TASK_PACKET:
+First, read {GPD_AGENTS_DIR}/gpd-roadmapper.md only on the classic/fresh route.
 
 <planning_context>
 
@@ -106,10 +116,16 @@ expected_artifacts:
   - GPD/REQUIREMENTS.md
 shared_state_policy: direct
 </spawn_contract>
-", subagent_type="gpd-roadmapper", model="{roadmapper_model}", readonly=false, description="Create research roadmap")
 ```
 
-**Roadmapper child gate:**
+Route the packet:
+
+- `base-model-first`: execute `ROADMAP_TASK_PACKET` in the current main
+  context and return the same typed `gpd_return`; do not invent a child id.
+- `classic` or recorded fresh-isolation override: spawn `gpd-roadmapper` with
+  this packet, `model="{roadmapper_model}"`, and `readonly=false`.
+
+**Roadmap artifact gate** (a child id exists only on the fresh route):
 
 ```yaml
 child_gate:
@@ -152,8 +168,9 @@ commit directly. Otherwise ask:
 - "Adjust phases" - Tell me what to change
 - "Review full file" - Show raw ROADMAP.md
 
-If the user chooses `Adjust phases`, get notes and respawn the roadmapper with a
-revision continuation:
+If the user chooses `Adjust phases`, get notes and use the same selected route
+for a revision continuation (main context for `base-model-first`, fresh
+roadmapper for `classic` or a recorded isolation override):
 
 ```
 task(prompt="First, read {GPD_AGENTS_DIR}/gpd-roadmapper.md for your role and instructions.
@@ -174,11 +191,12 @@ Return completed with changes made and updated roadmap artifacts in the typed re
 ", subagent_type="gpd-roadmapper", model="{roadmapper_model}", readonly=false, description="Revise roadmap")
 ```
 
-If the revision roadmapper fails to spawn or returns an error, compare
+If a fresh revision roadmapper fails to spawn or returns an error, compare
 `GPD/ROADMAP.md` with the pre-revision content. If the artifact changed, present
 the revised roadmap. If it did not change, retry the revision agent once; if the
 roadmap still does not update, stop and surface that the revision handoff
-failed. Do not fork a second manual roadmap-editing path in the main context.
+failed. On the main-context route, a failed artifact/return tuple also stops;
+do not manufacture a successful child handoff.
 
 Loop until user approval, with a maximum of 3 revision iterations. After 3,
 commit the current version with the user's notes recorded as open questions in

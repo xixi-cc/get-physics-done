@@ -3703,6 +3703,7 @@ def init_new_project(cwd: Path, stage: str | None = None) -> dict:
         "commit_docs": config["commit_docs"],
         "autonomy": config["autonomy"],
         "research_mode": config["research_mode"],
+        "cognitive_profile": config["cognitive_profile"],
         **base_result,
     }
 

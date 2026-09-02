@@ -25,9 +25,9 @@ STAGE_FIRST_TURN_ACTIVE_BUDGET = {"lines": 2_200, "chars": 104_500}
 STAGED_WORKFLOW_DIAGNOSTIC_COUNT = 16
 STAGE_EAGER_CHAR_BUDGET = 855_000
 PHASE2_STAGE_EAGER_CHAR_BASELINE = 772_803
-# Two low-pressure scalar selectors expose the opt-in cognitive profile at the
-# planner-authoring and executor-dispatch stages; bulky-field caps stay fixed.
-STAGE_SELECTED_INIT_FIELD_BUDGET = 2_507
+# Four low-pressure scalar selectors expose the opt-in cognitive profile at the
+# planner, executor, roadmap, and convention stages; bulky-field caps stay fixed.
+STAGE_SELECTED_INIT_FIELD_BUDGET = 2_509
 STAGE_SELECTED_INIT_CONTENT_FIELD_BUDGET = 12
 REFERENCE_ARTIFACTS_CONTENT_SELECTION_BUDGET = 3
 STAGE_HIGH_PRESSURE_INIT_FIELD_BUDGET = 525
