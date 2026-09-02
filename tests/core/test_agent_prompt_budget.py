@@ -58,7 +58,7 @@ AGENT_BASELINES = {
     "gpd-review-reader": (52, 3_166),
     "gpd-review-significance": (54, 2_790),
     "gpd-roadmapper": (415, 22_017),
-    "gpd-verifier": (355, 24_913),
+    "gpd-verifier": (205, 14_930),
 }
 PHASE5_PRE_CUT_LARGE_NON_EXECUTOR_AGENT_CHARS = {
     "gpd-referee": 29_921,
