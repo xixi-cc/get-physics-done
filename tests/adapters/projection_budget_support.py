@@ -78,7 +78,6 @@ SELECTED_AGENT_PROJECTION_BUDGETS = {
     "gpd-experiment-designer": {"lines": 460, "chars": 27_000},
     "gpd-plan-checker": {"lines": 450, "chars": 25_500},
     **TARGET_AGENT_PROJECTION_BUDGETS,
-    "gpd-researcher": {"lines": 380, "chars": 17_000},
     "gpd-researcher": {"lines": 460, "chars": 25_000},
     "gpd-verifier": {"lines": 440, "chars": 30_000},
 }

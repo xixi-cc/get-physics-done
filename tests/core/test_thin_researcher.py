@@ -4,7 +4,6 @@ from pathlib import Path
 
 from gpd import registry
 
-
 ROOT = Path(__file__).resolve().parents[2]
 AGENTS = ROOT / "src" / "gpd" / "agents"
 WORKFLOWS = ROOT / "src" / "gpd" / "specs" / "workflows"
