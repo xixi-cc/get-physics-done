@@ -68,3 +68,23 @@ def test_validate_conventions_stays_thin_and_avoids_legacy_checker_routing() -> 
     assert "consistency_status" not in workflow
     assert "CONSISTENT" not in workflow
     assert "INCONSISTENT" not in workflow
+
+
+def test_validate_conventions_repairs_only_unambiguous_registry_diffs_in_main_context() -> None:
+    workflow = _read(WORKFLOWS_DIR / "validate-conventions.md")
+
+    assert_prompt_contracts(
+        workflow,
+        *semantic_concept(
+            "validate-conventions risk-routed notation repair",
+            required=(
+                "base-model-first",
+                "direct registry-first repair",
+                "exact, unambiguous diff",
+                "does not alter physical meaning",
+                "cross-source or",
+                "cross-subfield conflict",
+                "uncertain repair remains a checkpoint",
+            ),
+        ),
+    )

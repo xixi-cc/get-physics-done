@@ -59,6 +59,27 @@ def test_workflow_preset_config_bundle_contains_only_writable_config_keys() -> N
     }
 
 
+def test_theory_preset_keeps_deep_reasoning_and_uses_risk_triggered_review() -> None:
+    bundle = get_workflow_preset_config_bundle("theory")
+
+    assert bundle == {
+        "autonomy": "balanced",
+        "research_mode": "adaptive",
+        "model_profile": "deep-theory",
+        "execution.review_cadence": "sparse",
+        "execution.max_unattended_minutes_per_plan": 120,
+        "execution.max_unattended_minutes_per_wave": 240,
+        "execution.checkpoint_after_n_tasks": 8,
+        "execution.checkpoint_after_first_load_bearing_result": True,
+        "execution.checkpoint_before_downstream_dependent_tasks": "auto",
+        "parallelization": False,
+        "planning.commit_docs": True,
+        "workflow.research": "auto",
+        "workflow.plan_checker": "auto",
+        "workflow.verifier": "auto",
+    }
+
+
 def test_preview_workflow_preset_application_reports_change_contract() -> None:
     raw_config = {
         "autonomy": "balanced",

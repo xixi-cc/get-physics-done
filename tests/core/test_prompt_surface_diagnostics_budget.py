@@ -24,8 +24,14 @@ STAGE_FIRST_TURN_BUDGET = {"lines": 3_180, "chars": 134_000}
 STAGE_FIRST_TURN_ACTIVE_BUDGET = {"lines": 2_200, "chars": 104_500}
 STAGED_WORKFLOW_DIAGNOSTIC_COUNT = 16
 STAGE_EAGER_CHAR_BUDGET = 855_000
-PHASE2_STAGE_EAGER_CHAR_BASELINE = 772_803
-STAGE_SELECTED_INIT_FIELD_BUDGET = 2_505
+# Phase 3 adds explicit main-model/fresh-context route contracts and retains an
+# executable classic roadmapper task while keeping the hard ceiling below.
+# Keep this comparison as a local ratchet.
+PHASE2_STAGE_EAGER_CHAR_BASELINE = 774_396
+# The new-milestone roadmap-authoring stage adds the low-pressure scalar
+# cognitive-profile selector to both its init and selected-field inventories;
+# content/high-pressure/bulky-field caps stay fixed.
+STAGE_SELECTED_INIT_FIELD_BUDGET = 2_511
 STAGE_SELECTED_INIT_CONTENT_FIELD_BUDGET = 12
 REFERENCE_ARTIFACTS_CONTENT_SELECTION_BUDGET = 3
 STAGE_HIGH_PRESSURE_INIT_FIELD_BUDGET = 525

@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "evidence": [
+    {
+      "id": "ref-dispersion",
+      "kind": "paper",
+      "locator": {"source": "arXiv:2601.00001v2", "equation": "12"},
+      "title": "Linear dispersion benchmark"
+    },
+    {
+      "id": "ref-limitation",
+      "kind": "paper",
+      "locator": {"source": "doi:10.1000/limit", "page": "8"},
+      "title": "Nonlinear limitation"
+    }
+  ],
+  "links": [
+    {
+      "claim_id": "claim-long-wave-instability",
+      "evidence_id": "ref-dispersion",
+      "relation": "supports",
+      "scope": "linearized model with positive activity coefficient"
+    },
+    {
+      "claim_id": "claim-long-wave-instability",
+      "evidence_id": "ref-limitation",
+      "relation": "limits",
+      "scope": "does not establish the nonlinear saturated state"
+    }
+  ]
+}

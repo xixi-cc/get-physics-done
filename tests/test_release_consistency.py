@@ -78,12 +78,13 @@ _ARXIV_EXTRA_PREREQUISITE = (
 )
 _EXPECTED_OPTIONAL_DEPENDENCIES = {
     "paper": ["cairosvg>=2.7.0", "pypdf>=5.0"],
-    "arxiv": ["arxiv-mcp-server[pdf]>=0.4.11", "arxiv>=2.4.1", "httpx>=0.27", "cairosvg>=2.7.0", "pypdf>=5.0"],
+    "arxiv": ["arxiv>=2.4.1", "httpx>=0.27", "pymupdf4llm>=0.0.17", "cairosvg>=2.7.0", "pypdf>=5.0"],
 }
 _OPTIONAL_IMPORT_MODULE_TO_DEPENDENCY = {
     "arxiv": "arxiv",
     "cairosvg": "cairosvg",
     "httpx": "httpx",
+    "pymupdf4llm": "pymupdf4llm",
     "pypdf": "pypdf",
 }
 _EXPECTED_OPTIONAL_IMPORT_LOCATIONS = {
@@ -94,13 +95,14 @@ _EXPECTED_OPTIONAL_IMPORT_LOCATIONS = {
         "src/gpd/mcp/servers/_arxiv_gcs.py",
         "src/gpd/mcp/servers/arxiv_translators.py",
     },
+    "pymupdf4llm": {"src/gpd/mcp/servers/_arxiv_gcs.py"},
     "pypdf": {"src/gpd/core/artifact_text.py", "src/gpd/mcp/paper/compiler.py"},
 }
 _EXPECTED_OPTIONAL_DEPENDENCY_EXTRAS = {
     "arxiv": {"arxiv"},
-    "arxiv-mcp-server": {"arxiv"},
     "cairosvg": {"arxiv", "paper"},
     "httpx": {"arxiv"},
+    "pymupdf4llm": {"arxiv"},
     "pypdf": {"arxiv", "paper"},
 }
 _EXPECTED_BUILD_BACKEND_REQUIREMENT = "hatchling==1.29.0"
@@ -1475,7 +1477,7 @@ def test_public_runtime_dependency_surface_stays_curated() -> None:
     optional = project.get("optional-dependencies", {})
 
     assert _normalized_dependency_names(dependencies) == _expected_runtime_dependency_names()
-    assert "mcp>=1.27.0" in dependencies
+    assert "mcp>=2.1.1,<3" in dependencies
     assert not any(item.startswith("mcp[") for item in dependencies)
     assert optional == _EXPECTED_OPTIONAL_DEPENDENCIES
 
@@ -1493,7 +1495,7 @@ def test_uv_lock_tracks_runtime_dependency_extras() -> None:
 
     assert [item for item in dependencies if isinstance(item, dict) and item.get("name") == "mcp"] == [{"name": "mcp"}]
     assert [item for item in requires_dist if isinstance(item, dict) and item.get("name") == "mcp"] == [
-        {"name": "mcp", "specifier": ">=1.27.0"}
+        {"name": "mcp", "specifier": ">=2.1.1,<3"}
     ]
 
 
@@ -1548,10 +1550,7 @@ def test_optional_publication_imports_stay_explicitly_declared_integrations() ->
         assert module_name in _EXPECTED_OPTIONAL_IMPORT_LOCATIONS
         assert _EXPECTED_OPTIONAL_DEPENDENCY_EXTRAS[dependency_name] <= optional_extras_by_dependency[dependency_name]
 
-    bridge_constants = _string_constant_assignments(repo_root, "src/gpd/mcp/servers/arxiv_bridge.py")
-    assert bridge_constants["UPSTREAM_ARXIV_MODULE"] == "arxiv_mcp_server"
     assert "arxiv-mcp-server" not in runtime_requirement_names
-    assert _EXPECTED_OPTIONAL_DEPENDENCY_EXTRAS["arxiv-mcp-server"] <= optional_extras_by_dependency["arxiv-mcp-server"]
 
 
 def test_registry_command_surface_rewrite_surfaces_live_registry_errors(monkeypatch: pytest.MonkeyPatch) -> None:

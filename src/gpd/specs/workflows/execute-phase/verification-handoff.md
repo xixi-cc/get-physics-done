@@ -47,6 +47,15 @@ Keep `{GPD_INSTALL_DIR}/workflows/verify-phase.md` child-readable. Do not eagerl
 <step name="verifier_eligibility">
 If `verifier_enabled` is false, skip only the generic post-execution verifier for non-proof phases. Proof-bearing work still needs fresh passing proof-redteam artifacts; missing, stale, malformed, or non-passing artifacts fail closed.
 
+If `verifier_enabled` is `auto`, load
+`references/orchestration/risk-triggered-review.md` and apply its Verifier Auto
+Route to accepted execution, proof-redteam, first-result, and consistency
+evidence. Record `auto_route: run|skip`, the concrete trigger or skip reason,
+and any fresh equivalent check used for deduplication. A clean skip does not
+prompt the user and does not create a placeholder verification report. Keep
+the result at `working` or `candidate` status and do not take a closeout route
+that requires validated or independently-confirmed evidence.
+
 Do not treat a disabled generic verifier as permission to close the phase. Closeout still requires the structured readiness gate and any proof/consistency gates that apply.
 </step>
 

@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "category": "state_authority_recovery",
+  "task": "task.md",
+  "reference_submission": "reference.json",
+  "adversarial_submission": "adversarial.json",
+  "oracles": [
+    {
+      "runner": "python",
+      "oracle_id": "recovery-authority",
+      "check_id": "5.17",
+      "claim_id": "claim-critical-fit",
+      "callable_ref": "evals.research_smoke.oracles:recovery_audit",
+      "inject_submission": true
+    }
+  ]
+}

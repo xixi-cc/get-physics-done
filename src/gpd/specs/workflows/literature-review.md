@@ -9,7 +9,7 @@ Do not load this index as a stage authority.
 - `review_bootstrap` -> `workflows/literature-review/review-bootstrap.md`
   Topic intake, project-aware preflight, contract-gate visibility, scope confirmation, and deferred reference-artifact policy.
 - `scope_locked` -> `workflows/literature-review/scope-locked.md`
-  Scoped reference artifact loading, literature-reviewer handoff, review and citation-sidecar artifact gate, and checkpoint routing.
+  Scoped reference artifact loading, gpd-researcher literature-review mode handoff, review and citation-sidecar artifact gate, and checkpoint routing.
 - `review_handoff` -> `workflows/literature-review/review-handoff.md`
   Bibliographer handoff, citation audit, citation repair, and fresh audit gate.
 - `completion_gate` -> `workflows/literature-review/completion-gate.md`

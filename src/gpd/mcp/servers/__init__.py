@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import copy
 import importlib
+import json
 import logging
 import os
 import re
@@ -12,7 +13,8 @@ import sys
 from collections.abc import Mapping
 from pathlib import Path
 
-from mcp.types import ToolAnnotations
+from mcp.server.mcpserver.exceptions import ToolError, UnexpectedToolError
+from mcp_types import CallToolResult, TextContent, ToolAnnotations
 from pydantic import ConfigDict, create_model
 from pydantic import ValidationError as PydanticValidationError
 
@@ -39,10 +41,10 @@ def mcp_tool_annotations(
     """Return MCP tool annotations with one shared naming convention."""
 
     return ToolAnnotations(
-        readOnlyHint=read_only,
-        destructiveHint=destructive,
-        idempotentHint=idempotent,
-        openWorldHint=open_world,
+        read_only_hint=read_only,
+        destructive_hint=destructive,
+        idempotent_hint=idempotent,
+        open_world_hint=open_world,
     )
 
 
@@ -176,7 +178,7 @@ def run_mcp_server(mcp: object, description: str) -> None:
     This function eliminates that boilerplate.
 
     Args:
-        mcp: A FastMCP instance.
+        mcp: An MCPServer instance.
         description: CLI description string.
     """
     parser = argparse.ArgumentParser(description=description)
@@ -184,17 +186,19 @@ def run_mcp_server(mcp: object, description: str) -> None:
     parser.add_argument("--host", default=None)
     parser.add_argument("--port", type=int, default=None)
     args = parser.parse_args()
-    if args.host:
-        mcp.settings.host = args.host  # type: ignore[union-attr]
-    if args.port is not None:
-        mcp.settings.port = args.port  # type: ignore[union-attr]
-    mcp.run(transport=args.transport)  # type: ignore[union-attr]
+    transport_options: dict[str, object] = {}
+    if args.transport != "stdio":
+        if args.host:
+            transport_options["host"] = args.host
+        if args.port is not None:
+            transport_options["port"] = args.port
+    mcp.run(transport=args.transport, **transport_options)  # type: ignore[union-attr]
 
 
 def published_tool_input_schema(tool: object) -> dict[str, object] | None:
-    """Return the currently published input schema for a FastMCP tool-like object."""
+    """Return the currently published input schema for an MCPServer tool-like object."""
 
-    for attribute in ("inputSchema", "parameters"):
+    for attribute in ("input_schema", "parameters"):
         schema = getattr(tool, attribute, None)
         if isinstance(schema, dict):
             return schema
@@ -209,10 +213,10 @@ def _set_tool_attribute(tool: object, attribute: str, value: object) -> None:
 
 
 def set_published_tool_input_schema(tool: object, schema: dict[str, object]) -> None:
-    """Write a published input schema onto both public and private FastMCP surfaces."""
+    """Write a published input schema onto both public and private MCPServer surfaces."""
 
-    if hasattr(tool, "inputSchema"):
-        _set_tool_attribute(tool, "inputSchema", copy.deepcopy(schema))
+    if hasattr(tool, "input_schema"):
+        _set_tool_attribute(tool, "input_schema", copy.deepcopy(schema))
     if hasattr(tool, "parameters"):
         _set_tool_attribute(tool, "parameters", copy.deepcopy(schema))
 
@@ -275,20 +279,7 @@ def tighten_registered_tool_contracts(mcp: object) -> None:
     """Publish strict top-level tool schemas and stable validation envelopes."""
 
     strict_schemas_by_name: dict[str, dict[str, object]] = {}
-
-    def _build_strict_call(original_call, allowed_keys):
-        async def _strict_call_fn_with_arg_validation(
-            fn, fn_is_async, arguments_to_validate, arguments_to_pass_directly
-        ):
-            unknown_keys = sorted(str(key) for key in arguments_to_validate if key not in allowed_keys)
-            if unknown_keys:
-                return stable_mcp_error(f"Unsupported arguments: {', '.join(unknown_keys)}")
-            try:
-                return await original_call(fn, fn_is_async, arguments_to_validate, arguments_to_pass_directly)
-            except PydanticValidationError as exc:
-                return stable_mcp_error(exc)
-
-        return _strict_call_fn_with_arg_validation
+    allowed_keys_by_name: dict[str, set[str]] = {}
 
     for tool in mcp._tool_manager.list_tools():  # type: ignore[attr-defined]
         arg_model = tool.fn_metadata.arg_model
@@ -299,17 +290,14 @@ def tighten_registered_tool_contracts(mcp: object) -> None:
         )
         strict_schema = strict_model.model_json_schema(by_alias=True)
         strict_schemas_by_name[str(tool.name)] = strict_schema
-        set_published_tool_input_schema(tool, strict_schema)
-        allowed_keys = {
+        allowed_keys_by_name[str(tool.name)] = {
             key
             for field_name, field_info in arg_model.model_fields.items()
             for key in (field_name, field_info.alias)
             if key is not None
         }
-        original_call = tool.fn_metadata.call_fn_with_arg_validation
-        object.__setattr__(
-            tool.fn_metadata, "call_fn_with_arg_validation", _build_strict_call(original_call, allowed_keys)
-        )
+        set_published_tool_input_schema(tool, strict_schema)
+        object.__setattr__(tool.fn_metadata, "arg_model", strict_model)
 
     original_list_tools = mcp.list_tools
 
@@ -323,6 +311,34 @@ def tighten_registered_tool_contracts(mcp: object) -> None:
         return tools
 
     mcp.list_tools = _list_tools_with_strict_schemas
+
+    original_call_tool = mcp.call_tool
+
+    async def _call_tool_with_stable_validation(name, arguments, context=None):
+        unknown_keys = sorted(
+            str(key) for key in (arguments or {}) if key not in allowed_keys_by_name.get(str(name), set())
+        )
+        if unknown_keys:
+            payload = stable_mcp_error(f"Unsupported arguments: {', '.join(unknown_keys)}")
+            return CallToolResult(
+                content=[TextContent(type="text", text=json.dumps(payload, sort_keys=True))],
+                structured_content=dict(payload),
+                is_error=True,
+            )
+        try:
+            return await original_call_tool(name, arguments, context)
+        except ToolError as exc:
+            if isinstance(exc, UnexpectedToolError):
+                raise
+            cause = exc.__cause__
+            payload = stable_mcp_error(cause if isinstance(cause, PydanticValidationError) else exc)
+            return CallToolResult(
+                content=[TextContent(type="text", text=json.dumps(payload, sort_keys=True))],
+                structured_content=dict(payload),
+                is_error=True,
+            )
+
+    mcp.call_tool = _call_tool_with_stable_validation
 
 
 __all__ = [

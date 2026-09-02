@@ -1614,12 +1614,18 @@ def test_validate_workflow_stage_manifest_payload_loads_new_milestone_manifest()
     )
     assert manifest.stage("roadmap_authoring").loaded_authorities == (
         "workflows/new-milestone/roadmap-authoring.md",
-        "references/orchestration/runtime-delegation-note.md",
     )
     assert {
         conditional.when: conditional.authorities
         for conditional in manifest.stage("roadmap_authoring").conditional_authorities
-    } == {"roadmap_artifact_template_write": ("templates/project.md", "templates/requirements.md")}
+    } == {
+        "roadmapper_spawn_needed": ("references/orchestration/runtime-delegation-note.md",),
+        "roadmap_artifact_template_write": ("templates/project.md", "templates/requirements.md"),
+    }
+    assert "references/orchestration/runtime-delegation-note.md" in manifest.stage(
+        "roadmap_authoring"
+    ).must_not_eager_load
+    assert "cognitive_profile" in manifest.stage("roadmap_authoring").required_init_fields
     assert "templates/project.md" in manifest.stage("roadmap_authoring").must_not_eager_load
     assert "templates/requirements.md" in manifest.stage("roadmap_authoring").must_not_eager_load
     assert "requirements_content" not in manifest.stage("roadmap_authoring").required_init_fields

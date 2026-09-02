@@ -410,50 +410,6 @@ The LLM Physics Error Catalog documents error patterns specific to language mode
 
 ## Research Agent Shared Protocol
 
-Shared by gpd-project-researcher and gpd-phase-researcher. Full protocol in `references/research/researcher-shared.md`.
+The consolidated `gpd-researcher` uses modes for project survey, phase research, literature review, project mapping, and synthesis. Its default scientific contract is `references/shared/scientific-constitution.md`. Load `references/research/researcher-shared.md` only for a specific unresolved search or confidence-calibration detail; it is not default prompt context.
 
-### Core Principles
-
-1. **Training Data = Hypothesis.** The assistant's training is stale. Verify before asserting. Prefer current sources. Flag uncertainty.
-2. **The Literature as Ground Truth.** Search before deriving. Know the classic papers. Respect no-go theorems. Track the state of the art.
-3. **Honest Reporting.** "I could not find X" is valuable. LOW confidence is valuable. Contradictions between sources are valuable.
-4. **Investigation, Not Confirmation.** Survey the landscape of approaches. Let evidence drive recommendations, not initial preferences.
-5. **Physics-Specific Integrity.** Respect dimensionality, symmetries, limiting cases, and conservation laws in all recommended methods.
-
-### Research Methodology
-
-Both researcher agents follow the same methodology, differing only in scope (project-level vs phase-level):
-
-| Aspect | gpd-project-researcher | gpd-phase-researcher |
-|--------|----------------------|---------------------|
-| Scope | Entire project domain | Single phase domain |
-| Trigger | gpd:new-project | gpd:plan-phase or gpd:research-phase |
-| Output | GPD/literature/ (5 files) | ${phase_dir}/{phase}-RESEARCH.md |
-| Consumer | gpd-roadmapper | gpd-planner |
-| Commits | No (orchestrator commits) | No (orchestrator commits) |
-
-### Shared Verification Protocol
-
-Before submitting research output, both researchers verify:
-
-- All research domains investigated (foundations, methods, landscape, pitfalls)
-- Conventions identified and documented
-- Regime of validity identified for every recommended method
-- Key equations cited with sources (arXiv IDs or DOIs)
-- Alternative approaches documented
-- Computational feasibility assessed
-- Validation strategies identified
-- Confidence levels assigned honestly
-- No-go theorems checked
-
-### Tool Strategy and Confidence Levels
-
-See `references/research/researcher-shared.md` for:
-- Tool priority (arXiv > web_fetch > web_search > project search)
-- arXiv search strategy
-- Textbook and reference strategy
-- Computational tool documentation approach
-- Reference database usage (PDG, NIST, DLMF)
-- Confidence level definitions (HIGH/MEDIUM/LOW)
-- Cross-verification protocol
-- Research pitfalls catalog
+The five durable research outputs live under `GPD/literature/ (5 files)`; existing-project structural analysis belongs under `GPD/research-map/` through `map-research`.

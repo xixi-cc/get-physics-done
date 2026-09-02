@@ -55,7 +55,7 @@ decisive prior evidence or an explicit approach lock. Supervised reviews
 @{GPD_INSTALL_DIR}/references/orchestration/model-profile-resolution.md
 
 ```bash
-RESEARCHER_MODEL=$(gpd resolve-model gpd-phase-researcher)
+RESEARCHER_MODEL=$(gpd resolve-model gpd-researcher)
 ```
 
 ## Step 1: Validate Phase

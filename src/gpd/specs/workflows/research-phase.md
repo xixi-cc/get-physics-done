@@ -8,7 +8,7 @@ The active authority is selected by `research-phase-stage-manifest.json`. Do not
 - `phase_bootstrap` -> `workflows/research-phase/phase-bootstrap.md`
   Phase argument validation, staged bootstrap init, existing research routing, phase context gathering, and model-profile setup.
 - `research_handoff` -> `workflows/research-phase/research-handoff.md`
-  Reference/contract handoff refresh, `gpd-phase-researcher` spawn, `RESEARCH.md` artifact gate, typed return routing, and continuation handoff.
+  Reference/contract handoff refresh, `gpd-researcher` spawn, `RESEARCH.md` artifact gate, typed return routing, and continuation handoff.
 </stage_authority_index>
 
 <stage_loading_rule>

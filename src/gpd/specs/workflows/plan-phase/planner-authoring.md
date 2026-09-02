@@ -29,7 +29,14 @@ fi
 # Apply INIT.staged_loading.field_access_instruction before using this payload.
 ```
 
-## 8. Spawn gpd-planner Agent
+## 8. Choose Main-Context or Fresh-Planner Authoring
+
+Read `cognitive_profile` from the staged init payload:
+
+- `base-model-first`: the current main model authors the plan directly from the same `filled_prompt`, with the same scoped paths and validators below. This is the default route for this profile; do not spawn `gpd-planner` merely to restate the planning task.
+- `classic`: use the fresh `gpd-planner` handoff below.
+
+The route changes who writes the draft, not the plan contract, proof policy, checker risk route, write scope, or promotion gate. An explicit user request for a fresh independent planner overrides `base-model-first` for this run.
 
 Display banner:
 
@@ -38,7 +45,7 @@ Display banner:
  GPD > PLANNING PHASE {X}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-* Spawning planner...
+* Authoring plan ({main context | fresh planner})...
 ```
 
 Planner prompt:
@@ -83,6 +90,8 @@ Do not restate template-owned contract gates, tangent control, tool-requirement 
 
 ```
 PLANNER_HANDOFF_STARTED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+# classic, or an explicit fresh-planner request:
 PLANNER_RETURN=$(
 task(
   prompt="First, read {GPD_AGENTS_DIR}/gpd-planner.md for your role and instructions.\n\n" + filled_prompt + "\n\n<spawn_contract>\nwrite_scope:\n  mode: scoped_write\n  allowed_paths:\n    - \"{phase_dir}/*-PLAN.md\"\nexpected_artifacts:\n  - \"readable {phase_dir}/*-PLAN.md named in gpd_return.files_written\"\nshared_state_policy: return_only\n</spawn_contract>",
@@ -92,6 +101,13 @@ task(
   description="Plan Phase {phase}"
 )
 )
+
+# base-model-first:
+# Use filled_prompt in the current context, write only ${PHASE_DIR}/*-PLAN.md,
+# then build MAIN_CONTEXT_PLAN_RETURN with `gpd return skeleton --role planner
+# --status completed --file <each fresh plan>`. Set PLANNER_RETURN to that
+# orchestrator-owned envelope for the common validators below. Do not invent a
+# child id or represent the main-context route as an independent review.
 ```
 
 Run this `child_gate`; shared gate and continuation rules live in `references/orchestration/child-artifact-gate.md` and `references/orchestration/continuation-boundary.md`.
@@ -130,7 +146,7 @@ Planner return validation and main-context fallback are separate paths. The shar
 
 If the user chooses Main-context plan or any manual bounded authoring branch, it is not an override: set `PLANNER_HANDOFF_STARTED_AT`, write only `${PHASE_DIR}/*-PLAN.md`, set `FRESH_PLAN_FILES` to the newly created path(s), and run one gate with a complete orchestrator-owned fenced YAML `MAIN_CONTEXT_PLAN_RETURN`. No full planner/checker loop is required for this fallback unless requested, but a failing gate means `status: blocked`, not `planned_ready`/`green`, and no `gpd:execute-phase` route.
 
-- **`gpd_return.status: completed`:** Accept only after the planner gate tuple passes, then display plan count. In `AUTONOMY=supervised`, show draft plans and get user confirmation before checker or next-step output. If `--skip-verify` or `plan_checker_enabled` is false, skip to step 13 only when no proof-bearing plans were written; proof-bearing plans still need checker review or an equivalent main-context audit. Otherwise: step 10.
+- **`gpd_return.status: completed`:** Accept only after the planner gate tuple passes, then display plan count. In `AUTONOMY=supervised`, show draft plans and get user confirmation before checker or next-step output. If `plan_checker_enabled` is `auto`, load `references/orchestration/risk-triggered-review.md`, apply its Plan-Checker Auto Route to the fresh plan set, and record `auto_route: run|skip` plus the concrete trigger or skip reason. A clean skip does not prompt the user. If `--skip-verify`, `plan_checker_enabled` is false, or the auto route selected `skip`, skip to step 13 only when no proof-bearing plans were written; proof-bearing plans still need checker review or an equivalent independent proof audit. Otherwise: step 10.
 - **`gpd_return.status: checkpoint`:** Use step 9b. Do not route planner checkpoints into the checker revision loop.
 - **`gpd_return.status: blocked` or `failed`:** Show attempts, offer: Add context / Retry / Manual
 

@@ -612,7 +612,7 @@ def _score_proof_bearing_checker_audit_visibility() -> PlanningReplayOutcome:
     assert "Bootstrap proof invariant" in bootstrap
     assert "`--skip-verify` never waives proof-bearing plan audit" in bootstrap_flat
     assert "planner and checker stages own the detailed" in bootstrap_flat
-    assert "proof-bearing plans still need checker review or an equivalent main-context audit" in planner
+    assert "proof-bearing plans still need checker review or an equivalent independent proof audit" in planner
     assert "Proof-obligation audit path" in checker
     assert "sibling `{plan_id}-PROOF-REDTEAM.md` review artifact" in checker_flat
     assert "Anti-bypass language" in checker

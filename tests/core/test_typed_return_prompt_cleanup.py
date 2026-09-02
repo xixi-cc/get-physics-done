@@ -14,12 +14,13 @@ from tests.assertion_taxonomy_support import (
 )
 from tests.core.test_spawn_contracts import _find_single_task
 from tests.markdown_test_support import yaml_fence_bodies
+from tests.workflow_authority_support import workflow_authority_text
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 WORKFLOWS_DIR = REPO_ROOT / "src/gpd/specs/workflows"
 ROADMAPPER = REPO_ROOT / "src/gpd/agents/gpd-roadmapper.md"
 PLANNER = REPO_ROOT / "src/gpd/agents/gpd-planner.md"
-PHASE_RESEARCHER = REPO_ROOT / "src/gpd/agents/gpd-phase-researcher.md"
+PHASE_RESEARCHER = REPO_ROOT / "src/gpd/agents/gpd-researcher.md"
 EXECUTOR_COMPLETION = REPO_ROOT / "src/gpd/specs/references/execution/executor-completion.md"
 
 
@@ -50,9 +51,10 @@ def test_roadmapper_prompt_example_includes_complete_base_return_fields() -> Non
 
 def test_new_project_roadmapper_task_block_requires_requirements_freshness_and_named_files_written() -> None:
     roadmapper_task = _find_single_task(WORKFLOWS_DIR / "new-project.md", "gpd-roadmapper")
+    workflow = workflow_authority_text(WORKFLOWS_DIR, "new-project")
 
     assert_prompt_contracts(
-        roadmapper_task.text,
+        workflow,
         machine_exact(
             "new-project roadmapper freshness fields",
             ("gpd_return.files_written", "GPD/REQUIREMENTS.md"),
@@ -61,6 +63,13 @@ def test_new_project_roadmapper_task_block_requires_requirements_freshness_and_n
             "new-project roadmapper artifact freshness semantics",
             ("do not rely on runtime completion text alone.", "Write files first, then return."),
             match=MatchMode.CASEFOLD_NORMALIZED,
+        ),
+    )
+    assert_prompt_contracts(
+        roadmapper_task.text,
+        machine_exact(
+            "new-project fresh roadmapper task routing",
+            ("prompt=ROADMAP_TASK_PACKET", 'subagent_type="gpd-roadmapper"'),
         ),
     )
 
@@ -87,25 +96,10 @@ def test_planner_tangent_guidance_routes_on_typed_checkpoint_status() -> None:
 def test_phase_researcher_machine_readable_return_is_typed_first() -> None:
     researcher = _read(PHASE_RESEARCHER)
 
-    assert_prompt_contracts(
-        researcher,
-        machine_exact(
-            "phase researcher typed return fields",
-            (
-                "gpd_return:",
-                "status: completed",
-                "files_written:\n    - GPD/phases/03-spectral-form-factor/03-RESEARCH.md",
-                "issues: []",
-                'next_actions:\n    - "gpd:plan-phase 03-spectral-form-factor"',
-                "confidence: HIGH",
-            ),
-        ),
-        *semantic_concept(
-            "phase researcher presentation headings are not routing",
-            required="Headings above are presentation only; route on gpd_return.status.",
-            forbidden="Mapping: RESEARCH COMPLETE → completed, RESEARCH BLOCKED → blocked",
-        ),
-    )
+    assert "standard `gpd_return` envelope" in researcher
+    assert "files_written" in researcher
+    assert "`phase-research`" in researcher
+    assert "## RESEARCH COMPLETE" not in researcher
 
 
 def test_executor_completion_spawned_handoff_example_keeps_base_fields_and_extensions() -> None:

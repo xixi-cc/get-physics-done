@@ -998,31 +998,21 @@ def _render_compact_staged_command_shim(
         f'{COMPACT_STAGED_COMMAND_SHIM_SENTINEL} command="{public_label}" workflow="{workflow_id}" '
         f'first_stage="{first_stage_id}" stage_count="{stage_count}" '
         f'payload_contract_version="{_COMPACT_STAGED_PAYLOAD_CONTRACT_VERSION}">\n'
-        f"source: `workflows/{workflow_id}.md` is loaded by staged init, not inlined.\n"
-        f"{_runtime_label_rule_for_public_label(public_label, workflow_id)}\n\n"
+        f"source: staged init loads `workflows/{workflow_id}.md`.\n"
+        f"{_runtime_label_rule_for_public_label(public_label, workflow_id)}\n"
         "```yaml\n"
         "stage_loader:\n"
-        f"  workflow_id: {workflow_id}\n"
-        f"  first_stage_id: {first_stage_id}\n"
-        f"  stage_count: {stage_count}\n"
-        f"  payload_contract_version: {_COMPACT_STAGED_PAYLOAD_CONTRACT_VERSION}\n"
-        "  payload_root: payload.staged_loading\n"
         f"  required_staged_loading_keys: [{required_keys}]\n"
         f"  optional_staged_loading_keys: [{optional_keys}]\n"
-        "  raw_stage_loader_command: local_helper_bash_fence_below\n"
-        "  fail_closed_on: [nonzero_init, missing_staged_loading, missing_required_keys, unknown_next_stage]\n"
-        "stage_rules:\n"
-        "  required_init_fields: parse only fields named by the active staged_loading payload\n"
-        "  authorities: read eager_authorities only; keep must_not_eager_load lazy\n"
-        "  routing: use next_stages only; reload with --stage before later-stage work\n"
-        "  constraints: honor allowed_tools, writes_allowed, produced_state, checkpoints\n"
+        "  fail_closed_on: [init_error, missing_payload_or_keys, unknown_next_stage]\n"
         "```\n\n"
-        "raw_stage_loader_command:\n\n"
         "```bash\n"
         f"{init_command}\n"
         "```\n\n"
-        f"{_compact_staged_argument_note(workflow_id)} Treat the returned JSON as the only active-stage payload; "
-        "do not guess missing fields or invent workflow state."
+        f"{_compact_staged_argument_note(workflow_id)} The returned `payload.staged_loading` is authoritative: "
+        "load only `eager_authorities` and named required fields; keep `must_not_eager_load` lazy; follow only "
+        "`next_stages`; reload before later-stage work; enforce tools, writes, produced state, and checkpoints. "
+        "Never infer absent state."
         f"{bundle_hint}\n"
         "</gpd_staged_bootstrap_shim>"
     )
@@ -1048,11 +1038,8 @@ def _compact_staged_protocol_bundle_jit_hint(manifest: object) -> str:
     rendered_fields = ", ".join(f"`{field}`" for field in bundle_fields)
     return (
         "<protocol_bundle_jit>\n"
-        f"When an active stage names {rendered_fields} in `staged_loading.required_init_fields`, use those init "
-        "payload fields as the selected-bundle loading map. Keep bundle guidance JIT: follow only the handles, "
-        "load manifests, and rendered context fields named by the active payload, do not inline protocol bundle "
-        "catalogs during bootstrap, and keep unselected bundles absent.\n"
-        f"Bundle-aware stages: {rendered_stages}.\n"
+        f"For stages {rendered_stages}, fields {rendered_fields} select the JIT bundle. Follow only payload-named "
+        "handles/manifests/context; do not inline catalogs or load unselected bundles.\n"
         "</protocol_bundle_jit>"
     )
 

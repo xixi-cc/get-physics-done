@@ -11,6 +11,9 @@
       "autonomy",
       "research_mode"
     ],
+    "cognitive_routing": [
+      "cognitive_profile"
+    ],
     "checker_controls": [
       "checker_model",
       "plan_checker_enabled"
@@ -132,7 +135,16 @@
         "workflows/plan-phase/research-routing.md",
         "references/orchestration/runtime-delegation-note.md"
       ],
+      "conditional_authorities": [
+        {
+          "when": "workflow_research_auto",
+          "authorities": [
+            "references/orchestration/risk-triggered-review.md"
+          ]
+        }
+      ],
       "must_not_eager_load": [
+        "references/orchestration/risk-triggered-review.md",
         "references/ui/ui-brand.md",
         "templates/phase-prompt.md",
         "templates/plan-contract-schema.md",
@@ -167,6 +179,7 @@
       "required_init_field_groups": [
         "planner_model_context",
         "planning_controls",
+        "cognitive_routing",
         "checker_controls",
         "phase_target_context",
         "contract_gate_status",
@@ -185,7 +198,16 @@
         "workflows/plan-phase/planner-authoring.md",
         "templates/planner-subagent-prompt.md"
       ],
+      "conditional_authorities": [
+        {
+          "when": "workflow_plan_checker_auto",
+          "authorities": [
+            "references/orchestration/risk-triggered-review.md"
+          ]
+        }
+      ],
       "must_not_eager_load": [
+        "references/orchestration/risk-triggered-review.md",
         "references/ui/ui-brand.md",
         "templates/phase-prompt.md",
         "templates/plan-contract-schema.md",

@@ -39,7 +39,7 @@ def init_map_research(
         pass
 
     result = {
-        "mapper_model": deps.resolve_model(effective_cwd, "gpd-research-mapper", config),
+        "mapper_model": deps.resolve_model(effective_cwd, "gpd-researcher", config),
         "init_root_policy": InitRootPolicy.PROJECT_SCOPED.value,
         "workspace_root": requested_cwd.as_posix(),
         "project_root": effective_cwd.as_posix(),

@@ -12,6 +12,9 @@
       "research_mode",
       "write_paper_argument_input"
     ],
+    "cognitive_route": [
+      "cognitive_profile"
+    ],
     "contract_reference_context": [
       "project_contract_gate",
       "project_contract_load_info",
@@ -293,6 +296,7 @@
       ],
       "required_init_field_groups": [
         "workspace_context",
+        "cognitive_route",
         "contract_reference_gate_context",
         "publication_subject_context",
         "publication_intake_context",

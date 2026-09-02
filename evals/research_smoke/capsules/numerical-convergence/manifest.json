@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "category": "numerical_computation",
+  "task": "task.md",
+  "reference_submission": "reference.json",
+  "adversarial_submission": "adversarial.json",
+  "oracles": [
+    {
+      "runner": "python",
+      "oracle_id": "convergence-trend",
+      "check_id": "5.5",
+      "claim_id": "claim-converged-benchmark",
+      "callable_ref": "evals.research_smoke.oracles:convergence_audit",
+      "inject_submission": true
+    },
+    {
+      "runner": "numeric-tolerance",
+      "oracle_id": "benchmark-value",
+      "check_id": "5.16",
+      "claim_id": "claim-converged-benchmark",
+      "observed_field": "reported_limit",
+      "expected": 0.5,
+      "atol": 0.01,
+      "rtol": 0.0
+    }
+  ]
+}

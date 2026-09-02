@@ -69,34 +69,12 @@ def test_referee_late_loads_optional_review_protocol_detail() -> None:
 
 
 def test_project_researcher_uses_presentation_only_heading_mapping_and_base_fields_first() -> None:
-    source = _read_agent("gpd-project-researcher.md")
+    source = _read_agent("gpd-researcher.md")
 
-    assert_prompt_contracts(
-        source,
-        machine_exact(
-            "project researcher return fields",
-            (
-                "gpd_return:",
-                "status: completed",
-                "files_written:\n    - GPD/literature/SUMMARY.md",
-                "confidence: HIGH",
-            ),
-        ),
-        *semantic_concept(
-            "project researcher typed status routing",
-            required="Route on `gpd_return.status` per the status-routing role kit.",
-            forbidden="Mapping: RESEARCH COMPLETE → completed, RESEARCH BLOCKED → blocked",
-        ),
-    )
-    return_example = next(block for block in yaml_fence_bodies(source) if "  confidence: HIGH" in block)
-    assert_prompt_contracts(
-        return_example,
-        machine_exact(
-            "project researcher base fields precede confidence extension",
-            ("  next_actions:", "  confidence: HIGH"),
-            mode=FragmentMode.ORDERED,
-        ),
-    )
+    assert "standard `gpd_return` envelope" in source
+    assert "files_written" in source
+    assert "`project-survey`" in source
+    assert "## RESEARCH COMPLETE" not in source
 
 
 def test_plan_checker_uses_typed_status_and_drops_nested_return_payload_examples() -> None:

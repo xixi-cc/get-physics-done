@@ -133,6 +133,7 @@ NEW_PROJECT_INIT_FIELDS = frozenset(
         "researcher_model",
         "synthesizer_model",
         "roadmapper_model",
+        "cognitive_profile",
         "commit_docs",
         "autonomy",
         "research_mode",
@@ -169,6 +170,7 @@ NEW_MILESTONE_INIT_FIELDS = frozenset(
         "autonomy",
         "init_root_policy",
         "research_mode",
+        "cognitive_profile",
         "research_enabled",
         "current_milestone",
         "current_milestone_name",
@@ -184,6 +186,7 @@ NEW_MILESTONE_INIT_FIELDS = frozenset(
 )
 EXECUTE_PHASE_INIT_FIELDS = frozenset(
     {
+        "cognitive_profile",
         "executor_model",
         "verifier_model",
         "commit_docs",
@@ -223,6 +226,7 @@ EXECUTE_PHASE_INIT_FIELDS = frozenset(
 )
 PLAN_PHASE_BASE_INIT_FIELDS = frozenset(
     {
+        "cognitive_profile",
         "researcher_model",
         "planner_model",
         "checker_model",
@@ -525,6 +529,7 @@ WRITE_PAPER_INIT_FIELDS = frozenset(
         "project_exists",
         "autonomy",
         "research_mode",
+        "cognitive_profile",
         "write_paper_argument_input",
         *PROJECT_CONTRACT_GATE_FIELDS,
         *WRITE_PAPER_PUBLICATION_BOOTSTRAP_FIELDS,

@@ -8,7 +8,7 @@ This reference is loaded by GPD agents when research involves a specific physics
 1. **For the planner (gpd-planner):** Which methods and tools are standard for the subfield, what validation checks to include in plans
 2. **For the executor (gpd-executor):** Correct conventions, standard software, typical numerical parameters
 3. **For the verifier (gpd-verifier):** Subfield-specific validation strategies, known exact results, standard benchmarks
-4. **For the researcher (gpd-phase-researcher):** What tools and libraries to investigate, what communities and databases to consult
+4. **For the researcher (gpd-researcher):** What tools and libraries to investigate, what communities and databases to consult
 </purpose>
 
 ---

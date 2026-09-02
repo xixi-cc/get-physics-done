@@ -121,6 +121,7 @@
       ],
       "required_init_fields": [
         "roadmapper_model",
+        "cognitive_profile",
         "current_milestone",
         "current_milestone_name",
         "project_contract",
@@ -134,10 +135,15 @@
         "research_map_reference_files"
       ],
       "loaded_authorities": [
-        "workflows/new-milestone/roadmap-authoring.md",
-        "references/orchestration/runtime-delegation-note.md"
+        "workflows/new-milestone/roadmap-authoring.md"
       ],
       "conditional_authorities": [
+        {
+          "when": "roadmapper_spawn_needed",
+          "authorities": [
+            "references/orchestration/runtime-delegation-note.md"
+          ]
+        },
         {
           "when": "roadmap_artifact_template_write",
           "authorities": [
@@ -149,6 +155,7 @@
       "must_not_eager_load": [
         "workflows/new-milestone.md",
         "workflows/new-milestone/survey-objectives.md",
+        "references/orchestration/runtime-delegation-note.md",
         "references/research/questioning.md"
       ],
       "must_not_eager_load_groups": [

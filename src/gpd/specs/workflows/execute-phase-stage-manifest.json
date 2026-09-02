@@ -24,6 +24,9 @@
       "phase_slug",
       "plans"
     ],
+    "cognitive_routing": [
+      "cognitive_profile"
+    ],
     "phase_bootstrap_route": [
       "phase_found",
       "phase_dir",
@@ -297,6 +300,12 @@
       ],
       "conditional_authorities": [
         {
+          "when": "downstream_checkpoint_auto",
+          "authorities": [
+            "references/orchestration/risk-triggered-review.md"
+          ]
+        },
+        {
           "when": "classification_policy_debug",
           "authorities": [
             "references/orchestration/meta-orchestration.md",
@@ -305,6 +314,7 @@
         }
       ],
       "must_not_eager_load": [
+        "references/orchestration/risk-triggered-review.md",
         "references/orchestration/meta-orchestration.md",
         "references/orchestration/model-profile-resolution.md",
         "workflows/execute-phase/wave-planning.md",
@@ -371,6 +381,12 @@
       ],
       "conditional_authorities": [
         {
+          "when": "workflow_verifier_auto",
+          "authorities": [
+            "references/orchestration/risk-triggered-review.md"
+          ]
+        },
+        {
           "when": "selected_wave_has_proof_bearing_plan",
           "authorities": [
             "references/verification/core/proof-redteam-workflow-gate.md"
@@ -396,6 +412,7 @@
         }
       ],
       "must_not_eager_load": [
+        "references/orchestration/risk-triggered-review.md",
         "references/orchestration/context-budget.md",
         "references/orchestration/checkpoints.md",
         "references/orchestration/agent-infrastructure.md",
@@ -506,6 +523,7 @@
       ],
       "required_init_field_groups": [
         "execution_phase_base",
+        "cognitive_routing",
         "plan_progress",
         "contract_gate_status",
         "reference_runtime_context",

@@ -8,7 +8,7 @@ The active authority is selected by `map-research-stage-manifest.json`. Do not l
 - `map_bootstrap` -> `workflows/map-research/map-bootstrap.md`
   Project-root discovery, optional focus handling, existing-map routing, selected-document update routing, and project-rooted `GPD/research-map/` directory setup.
 - `mapper_authoring` -> `workflows/map-research/mapper-authoring.md`
-  Runtime delegation, contract/reference context, four parallel `gpd-research-mapper` handoffs, artifact verification, secret scanning, commit, and completion summary.
+  Runtime delegation, contract/reference context, four parallel `gpd-researcher` handoffs, artifact verification, secret scanning, commit, and completion summary.
 </stage_authority_index>
 
 <stage_loading_rule>

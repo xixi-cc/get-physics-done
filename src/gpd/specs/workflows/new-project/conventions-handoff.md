@@ -5,10 +5,11 @@ Establish notation conventions after the roadmap has been committed.
 @{GPD_INSTALL_DIR}/references/orchestration/runtime-delegation-note.md
 
 <stage_boundary>
-This stage starts only after the staged roadmap commit is recorded. It owns the
-notation-coordinator handoff, supervised no-write checkpoint boundary, auto
-direct-write path, deterministic fallback, convention lock, commit, and
-checkpoint. It must not revise requirements or roadmap structure.
+This stage starts only after the staged roadmap commit is recorded. It owns a
+registry-first main-context route or compatible notation-coordinator handoff,
+the supervised no-write checkpoint boundary, auto direct-write path,
+deterministic fallback, convention lock, commit, and checkpoint. It must not
+revise requirements or roadmap structure.
 </stage_boundary>
 
 <bootstrap>
@@ -24,6 +25,14 @@ fi
 ```
 
 Follow `CONVENTIONS_INIT.staged_loading.field_access_instruction`; `<INIT>` there means `CONVENTIONS_INIT`. Do not revise requirements or roadmap structure here.
+
+Read `cognitive_profile` from the payload. Under `base-model-first`, use the
+current main context and deterministic convention registry for ordinary setup;
+do not spawn a notation persona merely to copy defaults. Use a fresh
+`gpd-notation-coordinator` only for an explicit isolation request, unresolved
+physical-meaning ambiguity, or cross-source/cross-subfield conflict. Under
+`classic`, retain the handoff below. Every route keeps the same no-write
+supervised checkpoint, scoped-write auto path, lock, and artifact gate.
 
 Do not require a `notation_model` init field. Resolve the concrete local model
 override inside this stage immediately before spawning:
@@ -60,17 +69,22 @@ Set `CONVENTION_MODE` before spawning:
 - `interactive` only when `autonomy=supervised`
 - `auto` for `autonomy=balanced` and `autonomy=yolo`
 
-Display:
+Display (replace the second line with `>>> Using registry-first main context...`
+on the ordinary `base-model-first` route):
 
 ```text
 GPD >>> ESTABLISHING CONVENTIONS
 >>> Spawning notation coordinator...
 ```
 
-Apply the canonical runtime delegation convention already loaded above.
+Apply the canonical runtime delegation convention already loaded above only
+when a fresh coordinator is selected.
 
-Spawn `gpd-notation-coordinator`. Use the same prompt for both model paths; only
-the spawn call arguments differ:
+Use `NOTATION_PROMPT` as the common task packet. On the ordinary
+`base-model-first` route, execute it in the current main context without
+reading the coordinator persona and return the same typed envelope; do not
+invent a child id. On a classic/fresh route, spawn `gpd-notation-coordinator`.
+For the fresh route, only the model argument differs:
 
 ```text
 If NOTATION_MODEL has a concrete value:
@@ -139,7 +153,7 @@ shared_state_policy: none
 </spawn_contract_interactive>
 ```
 
-**Notation-coordinator child gate:**
+**Convention artifact gate** (a child id exists only on the fresh route):
 
 ```yaml
 child_gate:

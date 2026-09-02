@@ -33,13 +33,13 @@ It covers:
 <!-- repo-graph-scope:start -->
 
 - `src/gpd/commands/*.md`: `71`
-- `src/gpd/agents/*.md`: `24`
+- `src/gpd/agents/*.md`: `20`
 - `src/gpd/specs/workflows/*.md`: `72`
 - `src/gpd/specs/templates/**/*.md`: `81`
-- `src/gpd/specs/references/**/*.md`: `241`
+- `src/gpd/specs/references/**/*.md`: `243`
 - `src/gpd/adapters/*.py`: `15`
 - `src/gpd/hooks/*.py`: `11`
-- `src/gpd/mcp/*.py`: `5`
+- `src/gpd/mcp/*.py`: `6`
 - `src/gpd/mcp/integrations/*.py`: `2`
 - `src/gpd/mcp/servers/*.py`: `15`
 - `infra/gpd-*.json`: `8`
@@ -271,7 +271,7 @@ flowchart TD
   `authority`
   Fallback version source when installed metadata is unavailable.
 
-- `pyproject.toml -> external Python packages {typer, rich, pydantic, PyYAML, mcp, pybtex, Pillow, jinja2, pytest, pytest-asyncio, pytest-xdist, ruff, hatchling, arxiv-mcp-server, arxiv, httpx, cairosvg, pypdf}`
+- `pyproject.toml -> external Python packages {typer, rich, pydantic, PyYAML, mcp, pybtex, Pillow, jinja2, pytest, pytest-asyncio, pytest-xdist, ruff, hatchling, arxiv, httpx, pymupdf4llm, cairosvg, pypdf}`
   `external-package`
 
 - `src/gpd/mcp/builtin_servers.py -> infra/gpd-*.json`

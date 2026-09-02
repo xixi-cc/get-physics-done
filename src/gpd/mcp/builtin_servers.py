@@ -15,8 +15,8 @@ import subprocess
 import sys
 from copy import deepcopy
 
+from gpd.mcp.arxiv_contract import ADVERTISED_TOOL_NAMES, DOWNLOAD_SOURCE_TOOL_NAME, UPSTREAM_CORE_TOOL_NAMES
 from gpd.mcp.descriptor_text import SKILLS_SERVER_DESCRIPTION
-from gpd.mcp.servers.arxiv_bridge import ADVERTISED_TOOL_NAMES, DOWNLOAD_SOURCE_TOOL_NAME, UPSTREAM_CORE_TOOL_NAMES
 from gpd.mcp.verification_contract_policy import verification_server_description
 
 logger = logging.getLogger(__name__)
@@ -73,7 +73,7 @@ _BUILTIN_SERVERS: dict[str, _ServerDef] = {
         "args": ["-m", "gpd.mcp.servers.arxiv_bridge"],
         "env": {},
         "optional": True,
-        "module_check": "arxiv_mcp_server",
+        "module_check": "arxiv",
     },
 }
 
@@ -236,12 +236,12 @@ _PUBLIC_DESCRIPTOR_METADATA: dict[str, dict[str, object]] = {
     },
     "gpd-arxiv": {
         "description": (
-            "Optional arXiv bridge for arxiv-mcp-server. Advertises the baseline upstream tools "
-            f"{', '.join(_ARXIV_UPSTREAM_CAPABILITIES)}, forwards only tools exposed "
-            f"by the live upstream server, and adds GPD {DOWNLOAD_SOURCE_TOOL_NAME} for raw source archives."
+            "Optional MCP-2-native arXiv bridge. Advertises the fixed research tools "
+            f"{', '.join(_ARXIV_UPSTREAM_CAPABILITIES)} and adds GPD "
+            f"{DOWNLOAD_SOURCE_TOOL_NAME} for raw source archives."
         ),
-        "capability_surface": "baseline_dynamic_upstream",
-        "dynamic_upstream_capabilities": True,
+        "capability_surface": "fixed_native",
+        "dynamic_upstream_capabilities": False,
         "baseline_upstream_capabilities": _ARXIV_UPSTREAM_CAPABILITIES,
         "local_capabilities": _ARXIV_LOCAL_CAPABILITIES,
         "capabilities": _ARXIV_CAPABILITIES,

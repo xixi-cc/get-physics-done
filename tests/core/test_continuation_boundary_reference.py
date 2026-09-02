@@ -13,10 +13,10 @@ OWNED_SURFACES = [
     REPO_ROOT / "src/gpd/specs/references/execution/execute-plan-checkpoints.md",
     REPO_ROOT / "src/gpd/agents/gpd-roadmapper.md",
     REPO_ROOT / "src/gpd/agents/gpd-notation-coordinator.md",
-    REPO_ROOT / "src/gpd/agents/gpd-literature-reviewer.md",
+    REPO_ROOT / "src/gpd/agents/gpd-researcher.md",
     REPO_ROOT / "src/gpd/agents/gpd-paper-writer.md",
     REPO_ROOT / "src/gpd/agents/gpd-debugger.md",
-    REPO_ROOT / "src/gpd/agents/gpd-project-researcher.md",
+    REPO_ROOT / "src/gpd/agents/gpd-researcher.md",
     REPO_ROOT / "src/gpd/agents/gpd-plan-checker.md",
     REPO_ROOT / "src/gpd/agents/gpd-consistency-checker.md",
 ]

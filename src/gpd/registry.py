@@ -1655,14 +1655,12 @@ _SKILL_CATEGORY_MAP: dict[str, str] = {
     "gpd-explainer": "help",
     "gpd-list-phase-assumptions": "planning",
     "gpd-notation-coordinator": "verification",
-    "gpd-phase-researcher": "research",
-    "gpd-project-researcher": "research",
+    "gpd-researcher": "research",
     "gpd-referee": "paper",
     "gpd-revise-phase": "management",
     "gpd-roadmapper": "planning",
     "gpd-route": "planning",
     "gpd-slides": "output",
-    "gpd-research-mapper": "exploration",
     "gpd-verifier": "verification",
 }
 VALID_SKILL_CATEGORIES: tuple[str, ...] = tuple(sorted({*set(_SKILL_CATEGORY_MAP.values()), "other"}))

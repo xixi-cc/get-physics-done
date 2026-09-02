@@ -49,7 +49,7 @@ def test_plan_phase_planner_and_checker_handoffs_carry_inline_spawn_contracts() 
 
     gates = _child_gates_by_id(workflow)
     researcher = gates["phase_researcher_context_refresh"]
-    assert researcher.role == "gpd-phase-researcher"
+    assert researcher.role == "gpd-researcher"
     assert [artifact.path for artifact in researcher.expected_artifacts] == ["${PHASE_DIR}/${PHASE_NUMBER}-RESEARCH.md"]
     assert researcher.allowed_roots == ("${PHASE_DIR}",)
     assert researcher.freshness is not None

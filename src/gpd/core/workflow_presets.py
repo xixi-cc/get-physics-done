@@ -227,19 +227,27 @@ WORKFLOW_PRESETS: tuple[WorkflowPreset, ...] = (
     WorkflowPreset(
         id="theory",
         label="Theory",
-        description="Prioritizes rigorous derivations and exact reasoning within the base runtime-readiness contract.",
-        summary="Derivation-heavy workflow using the base runtime-readiness contract.",
+        description=(
+            "Keeps tier-1 deep-theory reasoning while reducing routine orchestration overhead; "
+            "independent research and review agents activate only for explicit risk signals."
+        ),
+        summary="Continuous deep derivation with risk-triggered, deduplicated review.",
         recommended_config={
-            "autonomy": "supervised",
+            "autonomy": "balanced",
             "research_mode": "adaptive",
             "model_profile": "deep-theory",
             "model_cost_posture": "max-quality",
-            "execution.review_cadence": "dense",
-            "parallelization": True,
+            "execution.review_cadence": "sparse",
+            "execution.max_unattended_minutes_per_plan": 120,
+            "execution.max_unattended_minutes_per_wave": 240,
+            "execution.checkpoint_after_n_tasks": 8,
+            "execution.checkpoint_after_first_load_bearing_result": True,
+            "execution.checkpoint_before_downstream_dependent_tasks": "auto",
+            "parallelization": False,
             "planning.commit_docs": True,
-            "workflow.research": True,
-            "workflow.plan_checker": True,
-            "workflow.verifier": True,
+            "workflow.research": "auto",
+            "workflow.plan_checker": "auto",
+            "workflow.verifier": "auto",
         },
     ),
     WorkflowPreset(

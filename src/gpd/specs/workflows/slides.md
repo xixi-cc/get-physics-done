@@ -147,7 +147,7 @@ If the format supports compilation or rendering and the needed tool is already i
 - Markdown slides: any already-installed renderer (for example Marp, Quarto, Pandoc, or reveal tooling)
 
 If the tool is missing, do not install it silently; report the limitation instead.
-After Beamer compilation, keep only durable deck outputs: prefer a disposable build dir or runtime-native deletion for exact known aux files under `slides/` (`main.nav`, `main.snm`, `main.toc`, `main.out`, `main.aux`, `main.log`, `main.fls`, `main.fdb_latexmk`). Re-list `slides/` and include only durable artifacts in `files_written`.
+After Beamer compilation, keep only durable deck outputs: prefer a disposable build dir or runtime-native deletion for exact known aux files under `slides/` (`main.nav`, `main.snm`, `main.toc`, `main.out`, `main.aux`, `main.log`, `main.fls`, `main.fdb_latexmk`). Re-list `slides/`; report only durable artifacts.
 </step>
 
 <step name="report">

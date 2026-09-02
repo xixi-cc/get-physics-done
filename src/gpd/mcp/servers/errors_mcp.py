@@ -2,7 +2,7 @@
 
 Loads the error catalog files and traceability matrix from
 specs/references/verification/errors/, parses markdown tables, and serves them
-via FastMCP tools.
+via MCPServer tools.
 
 Entry point: python -m gpd.mcp.servers.errors_mcp
 Console script: gpd-mcp-errors
@@ -13,7 +13,7 @@ import threading
 from pathlib import Path
 from typing import Annotated
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 from pydantic import Field, WithJsonSchema
 
 from gpd.core.observability import gpd_span
@@ -364,7 +364,7 @@ def _get_store() -> ErrorStore:
         return _store
 
 
-mcp = FastMCP("gpd-errors")
+mcp = MCPServer("gpd-errors")
 
 ComputationDescriptionInput = Annotated[
     str,

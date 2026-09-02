@@ -48,6 +48,7 @@ class VerificationCheckDef(BaseModel):
     evidence_kind: Literal["computational", "structural", "hybrid"]
     machine_supported: bool = True
     oracle_hint: str
+    oracle_runners: list[Literal["python", "pytest", "numeric-tolerance"]] = Field(default_factory=list)
     check_class: Literal[
         "universal",
         "contract_limit_recovery",
@@ -88,6 +89,7 @@ VERIFICATION_CHECK_DEFS: tuple[VerificationCheckDef, ...] = (
         catches="Wrong powers of c, hbar, k_B; natural unit leaks into SI",
         evidence_kind="computational",
         oracle_hint="Track dimensions term-by-term or compare annotated dimensional forms.",
+        oracle_runners=["python", "pytest"],
     ),
     VerificationCheckDef(
         check_id="5.2",
@@ -98,6 +100,7 @@ VERIFICATION_CHECK_DEFS: tuple[VerificationCheckDef, ...] = (
         catches="Hallucinated identities, wrong coefficients",
         evidence_kind="computational",
         oracle_hint="Evaluate at independently known parameter points and compare within tolerance.",
+        oracle_runners=["python", "pytest", "numeric-tolerance"],
     ),
     VerificationCheckDef(
         check_id="5.3",
@@ -108,6 +111,7 @@ VERIFICATION_CHECK_DEFS: tuple[VerificationCheckDef, ...] = (
         catches="General result that does not reduce to known limits",
         evidence_kind="hybrid",
         oracle_hint="Apply symbolic or numerical limits and compare to benchmark forms.",
+        oracle_runners=["python", "pytest", "numeric-tolerance"],
     ),
     VerificationCheckDef(
         check_id="5.4",
@@ -118,6 +122,7 @@ VERIFICATION_CHECK_DEFS: tuple[VerificationCheckDef, ...] = (
         catches="Conservation law violations in dynamics or numerics",
         evidence_kind="computational",
         oracle_hint="Evaluate conserved quantities across time steps, configurations, or channels.",
+        oracle_runners=["python", "pytest", "numeric-tolerance"],
     ),
     VerificationCheckDef(
         check_id="5.5",
@@ -128,6 +133,7 @@ VERIFICATION_CHECK_DEFS: tuple[VerificationCheckDef, ...] = (
         catches="Unconverged results reported as final",
         evidence_kind="computational",
         oracle_hint="Run multiple resolutions and estimate convergence order or stability.",
+        oracle_runners=["python", "pytest", "numeric-tolerance"],
     ),
     VerificationCheckDef(
         check_id="5.6",
@@ -241,6 +247,7 @@ VERIFICATION_CHECK_DEFS: tuple[VerificationCheckDef, ...] = (
         catches="Benchmark drift, normalization mismatch, hidden convention mismatch",
         evidence_kind="computational",
         oracle_hint="Compare against the benchmark anchor with explicit metric, tolerance, and normalization notes.",
+        oracle_runners=["python", "pytest", "numeric-tolerance"],
         check_class="contract_benchmark_reproduction",
         contract_aware=True,
         binding_targets=["claim", "deliverable", "acceptance_test", "reference"],

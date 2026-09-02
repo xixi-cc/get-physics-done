@@ -27,6 +27,13 @@ fi
 
 **Skip if:** `--gaps` flag, `--skip-research` flag, or `research_enabled` is false (from init) without `--research` override.
 
+If `research_enabled` is `auto`, load
+`references/orchestration/risk-triggered-review.md` and apply its Researcher
+Auto Route before treating a missing `RESEARCH.md` as a reason to spawn. A
+missing optional research artifact alone is not a trigger. Record the decision
+as `auto_route: run|skip`; a clean skip continues directly to planning without
+asking the user. An explicit `--research` flag still forces the route.
+
 ### Research Mode Decision
 
 <event name="research_route_decision">
@@ -49,7 +56,9 @@ bundle bodies, planner templates, or checker controls in this event.
   plausibly stale for this phase.
 </event>
 
-**If RESEARCH.md missing OR `--research` flag OR explore mode with existing research:**
+**If the Researcher Auto Route selected `run`, RESEARCH.md is missing while
+`research_enabled` is true, `--research` is present, or explore mode with an
+enabled researcher requires a refresh:**
 
 Display banner:
 
@@ -77,7 +86,7 @@ fi
 ```
 </event>
 
-### Spawn gpd-phase-researcher
+### Spawn gpd-researcher
 
 Apply the shared runtime delegation note at task-construction time:
 @{GPD_INSTALL_DIR}/references/orchestration/runtime-delegation-note.md
@@ -144,8 +153,8 @@ shared_state_policy: return_only
 RESEARCH_HANDOFF_STARTED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 RESEARCH_RETURN=$(
 task(
-  prompt="First, read {GPD_AGENTS_DIR}/gpd-phase-researcher.md for your role and instructions.\n\n" + research_prompt,
-  subagent_type="gpd-phase-researcher",
+  prompt="First, read {GPD_AGENTS_DIR}/gpd-researcher.md for your role and instructions. Use mode `phase-research`.\n\n" + research_prompt,
+  subagent_type="gpd-researcher",
   model="{researcher_model}",
   readonly=false,
   description="Research Phase {phase_number}"
@@ -162,7 +171,7 @@ Run this `child_gate`; shared gate and continuation rules live in `references/or
 ```yaml
 child_gate:
   id: "phase_researcher_context_refresh"
-  role: "gpd-phase-researcher"
+  role: "gpd-researcher"
   return_profile: "researcher"
   required_status: "completed"
   expected_artifacts:
@@ -231,8 +240,8 @@ shared_state_policy: return_only
 ```bash
 RESEARCH_RETURN=$(
 task(
-  prompt="First, read {GPD_AGENTS_DIR}/gpd-phase-researcher.md for your role and instructions.\n\n" + continuation_prompt,
-  subagent_type="gpd-phase-researcher",
+  prompt="First, read {GPD_AGENTS_DIR}/gpd-researcher.md for your role and instructions. Use mode `phase-research`.\n\n" + continuation_prompt,
+  subagent_type="gpd-researcher",
   model="{researcher_model}",
   readonly=false,
   description="Continue research Phase {phase_number}"

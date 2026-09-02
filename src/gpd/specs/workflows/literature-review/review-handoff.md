@@ -59,6 +59,23 @@ shared_state_policy: return_only
 
 **If the bibliographer reports completed:** apply the citation-audit artifact
 gate for `GPD/literature/{slug}-CITATION-AUDIT.md` before continuing.
+
+After the corrected sidecar passes, emit locator-only evidence; merge scoped
+claim evidence only when the reviewer produced it:
+
+```bash
+CLAIM_EVIDENCE_ARGS=()
+if [ -f "GPD/literature/{slug}-CLAIM-EVIDENCE.json" ]; then
+  CLAIM_EVIDENCE_ARGS=(--claim-evidence "GPD/literature/{slug}-CLAIM-EVIDENCE.json")
+fi
+gpd --raw evidence literature \
+  "GPD/literature/{slug}-CITATION-SOURCES.json" \
+  "${CLAIM_EVIDENCE_ARGS[@]}" \
+  --output "GPD/literature/{slug}-EVIDENCE.json"
+```
+
+Malformed sources or orphan links make the handoff incomplete; never inline
+paper bodies in the bundle.
   </step>
 
 </process>

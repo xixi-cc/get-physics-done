@@ -1,0 +1,5 @@
+{
+  "resolutions": [16, 32, 64, 128],
+  "estimates": [0.62, 0.55, 0.515, 0.503],
+  "reported_limit": 0.503
+}

@@ -1,0 +1,1 @@
+{"public_sources":["../canary-v1/public.jsonl","extension-public.jsonl"],"private_sources":["../canary-v1/private-oracles.jsonl","extension-private-oracles.jsonl"],"expected_counts":{"state_authority_recovery":8,"deep_theory_proof":12,"theory_construction":10,"numerical_computation":6,"planning_execution_repair":6,"source_writing_review":6}}

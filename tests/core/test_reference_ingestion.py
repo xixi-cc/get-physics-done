@@ -553,15 +553,13 @@ def test_ingest_reference_artifacts_rejects_duplicate_citation_reference_id(tmp_
 def test_literature_review_surfaces_publish_closed_citation_source_contract() -> None:
     repo_root = Path(__file__).resolve().parents[2]
     command_doc = (repo_root / "src/gpd/commands/literature-review.md").read_text(encoding="utf-8")
-    agent_doc = (repo_root / "src/gpd/agents/gpd-literature-reviewer.md").read_text(encoding="utf-8")
+    agent_doc = (repo_root / "src/gpd/agents/gpd-researcher.md").read_text(encoding="utf-8")
     workflow_doc = workflow_authority_text(repo_root / "src/gpd/specs/workflows", "literature-review")
 
     assert "Run the literature-review workflow as a thin wrapper" in command_doc
     assert "matching `GPD/literature/{slug}-CITATION-SOURCES.json` sidecar" in command_doc
-    assert "closed contract is:" in agent_doc
-    assert "Extra keys are rejected by the downstream parser." in agent_doc
-    assert '"year": "2026"' in agent_doc
-    assert "`verification_status`, `canonical_identifiers`, and `verification_sources`" in agent_doc
+    assert "`literature-review`" in agent_doc
+    assert "citation-source sidecar" in agent_doc
     assert "strict `CitationSource` objects" in workflow_doc
     assert "Extra keys are rejected" in workflow_doc
     assert '"year": "2026"' in workflow_doc

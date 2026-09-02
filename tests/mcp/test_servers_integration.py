@@ -464,7 +464,7 @@ class TestSkillsServerIntegration:
         assert "gpd-discover" in names
         assert "gpd-peer-review" in names
         assert "gpd-research-phase" in names
-        assert "gpd-phase-researcher" in names
+        assert "gpd-researcher" in names
 
         # Each skill has expected shape
         for skill in result["skills"]:
@@ -491,10 +491,10 @@ class TestSkillsServerIntegration:
         names = {skill["name"] for skill in result["skills"]}
         assert {
             "gpd-research-phase",
-            "gpd-phase-researcher",
-            "gpd-project-researcher",
+            "gpd-researcher",
+            "gpd-researcher",
             "gpd-literature-review",
-            "gpd-literature-reviewer",
+            "gpd-researcher",
         }.issubset(names)
         assert all(skill["category"] == "research" for skill in result["skills"])
 
@@ -681,7 +681,7 @@ class TestSkillsServerIntegration:
         from gpd.mcp.servers.skills_server import get_skill
 
         command = get_skill("gpd-literature-review")
-        reviewer = get_skill("gpd-literature-reviewer")
+        reviewer = get_skill("gpd-researcher")
 
         assert "error" not in command
         assert "error" not in reviewer
@@ -689,7 +689,7 @@ class TestSkillsServerIntegration:
         assert command["category"] == "research"
         assert command["allowed_tools_surface"] == "command.allowed-tools"
         assert command["context_mode"] == "project-aware"
-        assert reviewer["name"] == "gpd-literature-reviewer"
+        assert reviewer["name"] == "gpd-researcher"
         assert reviewer["category"] == "research"
         assert reviewer["allowed_tools_surface"] == "agent.tools"
         assert "Why subagent" in command["content"]
@@ -700,11 +700,11 @@ class TestSkillsServerIntegration:
         from gpd.core.agent_role_kits import role_kit_authority_paths
         from gpd.mcp.servers.skills_server import get_skill
 
-        result = get_skill("gpd-project-researcher")
-        agent = registry.get_agent("gpd-project-researcher")
+        result = get_skill("gpd-researcher")
+        agent = registry.get_agent("gpd-researcher")
 
         assert "error" not in result
-        assert result["name"] == "gpd-project-researcher"
+        assert result["name"] == "gpd-researcher"
         assert result["category"] == "research"
         assert result["allowed_tools_surface"] == "agent.tools"
         assert result["content_authority"] == "canonical"
@@ -713,12 +713,10 @@ class TestSkillsServerIntegration:
         assert result["structured_metadata_authority"]["agent_policy"] == "mirrored"
         assert result["agent_policy"]["role_kits"] == list(agent.role_kits)
         assert result["agent_policy"]["role_kit_authorities"] == list(role_kit_authority_paths(agent.role_kits))
-        assert "Checkpoint after the initial survey with scope confirmation." in result["content"]
-        assert "gpd_return:" in result["content"]
-        assert "status: completed" in result["content"]
-        assert "files_written:" in result["content"]
-        assert "issues: []" in result["content"]
-        assert "next_actions:" in result["content"]
+        assert "`project-survey`" in result["content"]
+        assert "typed checkpoint" in result["content"]
+        assert "standard `gpd_return` envelope" in result["content"]
+        assert "files_written" in result["content"]
         assert "wait for confirmation" not in result["content"]
         assert "pause here for approval" not in result["content"]
         assert "ask the user then continue" not in result["content"]
@@ -757,12 +755,12 @@ class TestSkillsServerIntegration:
             "shared_state_policy": "return_only",
         }
 
-        synthesizer = get_skill("gpd-research-synthesizer")
+        synthesizer = get_skill("gpd-researcher")
         new_project = get_skill("gpd-new-project")
         new_milestone = get_skill("gpd-new-milestone")
 
         assert "error" not in synthesizer
-        assert synthesizer["name"] == "gpd-research-synthesizer"
+        assert synthesizer["name"] == "gpd-researcher"
         assert synthesizer["allowed_tools_surface"] == "agent.tools"
         assert synthesizer["content_authority"] == "canonical"
         assert synthesizer["structured_metadata_authority"] == {
@@ -770,16 +768,9 @@ class TestSkillsServerIntegration:
             "allowed_tools": "mirrored",
             "agent_policy": "mirrored",
         }
-        assert "`files-written-freshness`" in synthesizer["content"]
-        assert (
-            "Use the synthesizer profile (`gpd return skeleton --role synthesizer --status <status>`)"
-            in synthesizer["content"]
-        )
-        assert (
-            "record `GPD/literature/SUMMARY.md` as the sole written artifact when this run creates or updates it"
-            in synthesizer["content"]
-        )
-        assert "gpd_return:" in synthesizer["content"]
+        assert "`synthesis`" in synthesizer["content"]
+        assert "allowed output paths" in synthesizer["content"]
+        assert "files_written" in synthesizer["content"]
 
         expected_project_spawn_contracts = [
             dict(contract) for contract in registry.get_command("gpd:new-project").spawn_contracts

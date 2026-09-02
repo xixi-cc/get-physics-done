@@ -65,8 +65,8 @@ AUTHORITY_DOC_BUDGETS = (
     ),
     AuthorityDocBudget(
         rel_path="specs/references/orchestration/model-profiles.md",
-        baseline_lines=285,
-        baseline_chars=32_850,
+        baseline_lines=248,
+        baseline_chars=26_911,
         max_raw_includes=0,
         semantic_anchors=("deep-theory", "numerical", "exploratory", "review", "paper-writing"),
     ),
@@ -111,8 +111,8 @@ AUTHORITY_DOC_BUDGETS = (
     ),
 )
 
-AGGREGATE_BASELINE_LINES = 2_650
-AGGREGATE_BASELINE_CHARS = 165_000
+AGGREGATE_BASELINE_LINES = 2_606
+AGGREGATE_BASELINE_CHARS = 154_316
 
 
 def _assert_prompt_baseline_is_current(

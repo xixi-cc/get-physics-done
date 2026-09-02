@@ -72,7 +72,7 @@ Focus: Rigorous analytical derivations, formal proofs, exact results
 
 Best for: Deriving new results, proving identities, establishing exact relations, formal perturbation theory, renormalization group calculations.
 
-Behavioral highlights: Verification checkpoints after every derivation step. Planner inserts derivation checkpoint every 2 steps. Run the full relevant universal verifier registry plus any required contract-aware checks. The full plan-checker dimension matrix is checked. Paper-writer includes proofs in main text (not appendices). Full investigation debugging with formal proof of root cause. Pair with `execution.review_cadence=dense` when you want more bounded review stops, but `set-profile` does not change cadence automatically.
+Behavioral highlights: Tier-1 planner and executor preserve maximum derivational depth, explicit assumptions, exact reasoning, controlled approximations, and local dimensional/sign/index/limit/convention checks. These checks stay inside the coherent derivation instead of forcing user-facing checkpoints after each algebraic step. Independent agents and bounded stops remain controlled separately by `workflow.*` policy and `execution.review_cadence`. Use `workflow.*="auto"` with sparse cadence for daily theory construction; request dense cadence and always-on agents for a formal audit. Paper-writer includes proofs in main text, and debugging retains formal root-cause depth.
 
 **numerical**
 Focus: Computational implementation, optimization, convergence, performance
@@ -116,7 +116,7 @@ Change cadence with `gpd:settings` or by editing `GPD/config.json` (`execution.r
 
 If you also want to pin concrete runtime model strings for `tier-1`, `tier-2`, or `tier-3`, use `gpd:set-tier-models` for the direct path or `gpd:settings` for the broader unattended/configuration flow. `set-profile` changes the abstract tier assignments, not the runtime-native model IDs.
 
-For full agent tier assignments across all 24 agents, see `references/orchestration/model-profiles.md`.
+For full agent tier assignments across all 20 agents, see `references/orchestration/model-profiles.md`.
 For detailed behavioral effect descriptions per agent per profile, see the "Behavioral Effects" section in `references/orchestration/model-profiles.md`.
 
 Next spawned agents will use the new profile.

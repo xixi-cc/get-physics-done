@@ -48,6 +48,9 @@
     "roadmap_model": [
       "roadmapper_model"
     ],
+    "cognitive_route": [
+      "cognitive_profile"
+    ],
     "platform_context": [
       "platform"
     ]
@@ -393,6 +396,7 @@
       ],
       "required_init_field_groups": [
         "roadmap_model",
+        "cognitive_route",
         "runtime_mode",
         "contract_gate_status"
       ],
@@ -434,6 +438,7 @@
         "workflows/new-project/conventions-handoff.md"
       ],
       "required_init_field_groups": [
+        "cognitive_route",
         "runtime_mode",
         "contract_gate_status"
       ],

@@ -3227,6 +3227,118 @@ def result_update(
 verify_app = typer.Typer(help="Verification checks on plans, summaries, and artifacts")
 app.add_typer(verify_app, name="verify")
 
+evidence_app = typer.Typer(help="Build compact evidence bundles for claim-bearing research workflows")
+app.add_typer(evidence_app, name="evidence")
+
+
+@evidence_app.command("literature")
+def evidence_literature(
+    citation_sources: str = typer.Argument(..., help="Literature-review CitationSource JSON sidecar"),
+    output: str = typer.Option(..., "--output", help="Output path for the canonical evidence bundle"),
+    claim_evidence: str | None = typer.Option(
+        None,
+        "--claim-evidence",
+        help="Optional EvidenceBundle with claim-scoped page, equation, figure, or data locators",
+    ),
+) -> None:
+    """Convert a reviewed citation sidecar into reusable research evidence."""
+    from gpd.core.research_evidence import EvidenceBundle, literature_evidence_bundle, write_evidence_bundle
+    from gpd.mcp.paper.bibliography import parse_citation_source_sidecar_payload
+
+    cwd = _get_cwd()
+    source_path = _resolve_existing_input_path(citation_sources, candidates=(), label="citation sources")
+    source_payload = _load_json_document(str(source_path))
+    try:
+        sources = parse_citation_source_sidecar_payload(
+            source_payload,
+            source_path=_format_display_path_from_cwd(source_path, cwd=cwd),
+        )
+        claim_bundle = None
+        if claim_evidence is not None:
+            claim_path = _resolve_existing_input_path(claim_evidence, candidates=(), label="claim evidence bundle")
+            claim_bundle = EvidenceBundle.model_validate(_load_json_document(str(claim_path)))
+        bundle = literature_evidence_bundle(
+            sources,
+            claim_evidence=claim_bundle,
+            source_artifact=_format_display_path_from_cwd(source_path, cwd=cwd),
+        )
+    except (ValueError, PydanticValidationError) as exc:
+        _error(f"Invalid literature evidence input: {exc}")
+
+    output_path = Path(output)
+    if not output_path.is_absolute():
+        output_path = cwd / output_path
+    write_evidence_bundle(output_path, bundle)
+    _output(
+        {
+            "bundle_path": _format_display_path_from_cwd(output_path, cwd=cwd),
+            "evidence_count": len(bundle.evidence),
+            "link_count": len(bundle.links),
+            "bundle": bundle.model_dump(mode="json"),
+        }
+    )
+
+
+@verify_app.command("oracle")
+def verify_oracle(
+    spec_path: str = typer.Argument(..., help="Typed Python, pytest, or numeric-tolerance oracle JSON"),
+    result_output: str | None = typer.Option(None, "--result-output", help="Optional JSON result artifact"),
+    evidence_bundle: str | None = typer.Option(
+        None,
+        "--evidence-bundle",
+        help="Optional canonical evidence bundle to extend with this result",
+    ),
+    bundle_output: str | None = typer.Option(
+        None,
+        "--bundle-output",
+        help="Output path for the extended bundle; requires --result-output and --evidence-bundle",
+    ),
+) -> None:
+    """Run one executable oracle and optionally attach it to an evidence bundle."""
+    from gpd.core.oracle_runner import oracle_result_to_evidence, run_oracle_file
+    from gpd.core.research_evidence import EvidenceBundle, write_evidence_bundle
+
+    cwd = _get_cwd()
+    oracle_path = _resolve_existing_input_path(spec_path, candidates=(), label="oracle spec")
+    result = run_oracle_file(oracle_path, cwd=cwd)
+    result_path: Path | None = None
+    if result_output is not None:
+        result_path = Path(result_output)
+        if not result_path.is_absolute():
+            result_path = cwd / result_path
+        result_path.parent.mkdir(parents=True, exist_ok=True)
+        result_path.write_text(result.model_dump_json(indent=2) + "\n", encoding="utf-8")
+
+    if bundle_output is not None and (evidence_bundle is None or result_path is None):
+        _error("--bundle-output requires both --evidence-bundle and --result-output")
+    extended_bundle_path: Path | None = None
+    if evidence_bundle is not None:
+        bundle_path = _resolve_existing_input_path(evidence_bundle, candidates=(), label="evidence bundle")
+        try:
+            bundle = EvidenceBundle.model_validate_json(bundle_path.read_text(encoding="utf-8"))
+        except (OSError, PydanticValidationError) as exc:
+            _error(f"Invalid evidence bundle: {exc}")
+        if bundle_output is not None:
+            extended_bundle_path = Path(bundle_output)
+            if not extended_bundle_path.is_absolute():
+                extended_bundle_path = cwd / extended_bundle_path
+            result_evidence, result_link = oracle_result_to_evidence(
+                result,
+                result_path=_format_display_path_from_cwd(result_path, cwd=cwd),
+            )
+            extended = EvidenceBundle(
+                evidence=[*bundle.evidence, result_evidence],
+                links=[*bundle.links, *([result_link] if result_link is not None else [])],
+            )
+            write_evidence_bundle(extended_bundle_path, extended)
+
+    payload = result.model_dump(mode="json")
+    payload["result_path"] = _format_display_path_from_cwd(result_path, cwd=cwd)
+    payload["bundle_output"] = _format_display_path_from_cwd(extended_bundle_path, cwd=cwd)
+    _output(payload)
+    if not result.passed:
+        raise typer.Exit(code=1)
+
 
 @verify_app.command("summary")
 def verify_summary(
@@ -3610,6 +3722,32 @@ def diagnostics_prompt_surface(
         _print_prompt_diagnostic_rendered(prompt_diagnostics.render_prompt_surface_markdown(report, top))
         return
     _print_prompt_diagnostic_rendered(prompt_diagnostics.render_prompt_surface_table(report, top))
+
+
+@diagnostics_app.command("prompt-bom")
+def diagnostics_prompt_bom(
+    workflow: str = typer.Option(..., "--workflow", help="Staged workflow id."),
+    stage: str = typer.Option(..., "--stage", help="Workflow stage id."),
+    conditions: str = typer.Option(
+        "",
+        "--conditions",
+        help="Comma-separated conditional-authority selectors to include as eager.",
+    ),
+) -> None:
+    """Report a read-only, model-invisible staged prompt bill of materials."""
+    from gpd.core.thinning_prompt_bom import build_stage_prompt_bom
+
+    selected_conditions = tuple(part.strip() for part in conditions.split(",") if part.strip())
+    try:
+        payload = build_stage_prompt_bom(
+            workflow,
+            stage,
+            selected_conditions=selected_conditions,
+            specs_root=_prompt_diagnostic_repo_root() / "src" / "gpd" / "specs",
+        )
+    except (KeyError, ValueError) as exc:
+        _error(str(exc))
+    _output(payload)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -10771,6 +10909,7 @@ def _install_single_runtime(
     *,
     is_global: bool,
     target_dir_override: str | None = None,
+    projection_profile: str | None = None,
 ) -> dict[str, object]:
     """Install GPD for a single runtime. Returns install result dict."""
     from contextlib import nullcontext
@@ -10787,12 +10926,17 @@ def _install_single_runtime(
 
     defer_rollback = getattr(adapter, "defer_install_rollback_discard", None)
     rollback_context = defer_rollback() if callable(defer_rollback) else nullcontext()
+    install_kwargs: dict[str, object] = {
+        "is_global": is_global,
+        "explicit_target": target_dir_override is not None,
+    }
+    if projection_profile is not None:
+        install_kwargs.update(adapter.install_projection_kwargs(projection_profile))
     with rollback_context:
         result = adapter.install(
             gpd_root,
             dest,
-            is_global=is_global,
-            explicit_target=target_dir_override is not None,
+            **install_kwargs,
         )
     install_rollback = result.pop(_INSTALL_RESULT_ROLLBACK_KEY, None)
     result[_INSTALL_RESULT_ADAPTER_KEY] = adapter
@@ -11105,6 +11249,11 @@ def install(
     local_install: bool = typer.Option(False, "--local", help="Install into the local runtime config dir"),
     global_install: bool = typer.Option(False, "--global", help="Install into the global runtime config dir"),
     target_dir: str | None = typer.Option(None, "--target-dir", help=_INSTALL_TARGET_DIR_HELP),
+    projection: str | None = typer.Option(
+        None,
+        "--projection",
+        help="Adapter-owned command discovery profile for a single selected runtime.",
+    ),
     force_statusline: bool = typer.Option(False, "--force-statusline", help="Overwrite existing statusline config"),
     skip_readiness_check: bool = typer.Option(
         False, "--skip-readiness-check", help="Skip runtime readiness preflight (for embedded/sidecar use)"
@@ -11139,6 +11288,15 @@ def install(
         selected = _prompt_runtimes()
 
     _validate_target_dir_runtime_selection("install", selected, target_dir)
+    if projection is not None:
+        if len(selected) != 1:
+            _error("--projection requires exactly one selected runtime")
+        try:
+            projection = _get_adapter_or_error(selected[0], action="install projection").normalize_install_projection(
+                projection
+            )
+        except ValueError as exc:
+            _error(str(exc))
 
     # Resolve location
     if target_dir:
@@ -11234,7 +11392,13 @@ def install(
             adapter = _get_adapter_or_error(rt, action="install")
             task = progress.add_task(f"Installing {adapter.display_name}...", total=None)
             try:
-                result = _install_single_runtime(rt, is_global=is_global, target_dir_override=target_dir)
+                install_runtime_kwargs: dict[str, object] = {
+                    "is_global": is_global,
+                    "target_dir_override": target_dir,
+                }
+                if projection is not None:
+                    install_runtime_kwargs["projection_profile"] = projection
+                result = _install_single_runtime(rt, **install_runtime_kwargs)
                 install_adapter = result.pop(_INSTALL_RESULT_ADAPTER_KEY, adapter)
                 install_rollback = result.pop(_INSTALL_RESULT_ROLLBACK_KEY, None)
                 result_target = Path(str(result.get("target") or adapter.resolve_target_dir(is_global, _get_cwd())))

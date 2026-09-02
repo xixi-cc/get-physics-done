@@ -160,6 +160,14 @@ Translate cadence config plus selected-wave risk into execution boundaries befor
 
 Read `review_cadence`, `research_mode`, the unattended-minute limits, checkpoint thresholds, `strict_wait`, `never_interrupt_running_workers`, and `never_auto_close_child_agents` from the current staged payload/config. `strict_wait` disables unattended-minute cutoffs entirely; `never_interrupt_running_workers` is the narrower form of the same guarantee. In either case, set plan and wave unattended-minute limits to zero so workers run to natural completion. `never_auto_close_child_agents` means a spawned child remains open until it returns, checkpoints, or fails; no parent stage may synthesize closure.
 
+When `checkpoint_before_downstream_dependent_tasks` is `auto`, load
+`references/orchestration/risk-triggered-review.md` and apply Downstream
+Checkpoint Deduplication. A fresh first-result, proof-redteam, targeted
+cross-check, or verifier pass covering the unchanged result and claim scope
+clears the pre-dependent gate. Record `deduplicated_against`; do not prompt or
+run a second equivalent gate. If no equivalent check exists, keep the gate for
+the first downstream consumer of the load-bearing result.
+
 `autonomy` decides who gets interrupted; `review_cadence` decides when to stop, inspect, or re-question. Even in `yolo`, first-result and pre-fanout gates still run; a clean pass may auto-continue. These are task-level gates, not line-by-line interruptions.
 
 For each wave, classify downstream fanout as risky when any of these holds:

@@ -23,7 +23,7 @@ def _route_protocol_tool_schema() -> dict[str, object]:
     async def _load() -> dict[str, object]:
         tools = await mcp.list_tools()
         tool = next(tool for tool in tools if tool.name == "route_protocol")
-        return tool.inputSchema
+        return tool.input_schema
 
     return anyio.run(_load)
 

@@ -33,7 +33,7 @@ Use the staged refresh for `contract_intake`, `effective_reference_intake`, `ref
 
 ```
 task(
-  prompt="First, read {GPD_AGENTS_DIR}/gpd-phase-researcher.md for your role and instructions.
+  prompt="First, read {GPD_AGENTS_DIR}/gpd-researcher.md for your role and instructions. Use mode `phase-research`.
 
 <objective>
 Research mathematical methods, physical principles, and computational approaches for Phase {phase}: {name}
@@ -81,7 +81,7 @@ dimensional scales, and pitfalls relevant to this phase.
 <output>
 Write to: {phase_dir}/{phase_number}-RESEARCH.md
 </output>",
-  subagent_type="gpd-phase-researcher",
+  subagent_type="gpd-researcher",
   model="{researcher_model}",
   readonly=false
 )
@@ -101,7 +101,7 @@ shared_state_policy: return_only
 </spawn_contract>
 ```
 
-Child artifact gate: apply `references/orchestration/child-artifact-gate.md`; tuple: role=`gpd-phase-researcher`; expected=`{phase_dir}/{phase_number}-RESEARCH.md`; allowed_root=`{phase_dir}`; validators=readable research artifact; applicator=none; failure=`retry research | skip to plan-phase | abort/discuss`.
+Child artifact gate: apply `references/orchestration/child-artifact-gate.md`; tuple: role=`gpd-researcher`; expected=`{phase_dir}/{phase_number}-RESEARCH.md`; allowed_root=`{phase_dir}`; validators=readable research artifact; applicator=none; failure=`retry research | skip to plan-phase | abort/discuss`.
 
 ## Step 5: Handle Return
 
@@ -159,8 +159,8 @@ shared_state_policy: return_only
 
 ```bash
 task(
-  prompt="First, read {GPD_AGENTS_DIR}/gpd-phase-researcher.md for your role and instructions.\n\n" + continuation_prompt,
-  subagent_type="gpd-phase-researcher",
+  prompt="First, read {GPD_AGENTS_DIR}/gpd-researcher.md for your role and instructions. Use mode `phase-research`.\n\n" + continuation_prompt,
+  subagent_type="gpd-researcher",
   model="{researcher_model}",
   readonly=false,
   description="Continue research Phase {phase}"
@@ -173,7 +173,7 @@ task(
 - [ ] Phase argument validated and phase info loaded
 - [ ] Existing research checked (update/skip offered if present)
 - [ ] Phase context gathered (roadmap section, requirements, prior decisions)
-- [ ] gpd-phase-researcher spawned with physics research directives
+- [ ] gpd-researcher spawned with physics research directives
 - [ ] RESEARCH.md written to phase directory and named in `gpd_return.files_written`
 - [ ] Next action offered (plan phase, dig deeper, review)
 </success_criteria>

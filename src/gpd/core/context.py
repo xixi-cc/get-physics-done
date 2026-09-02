@@ -2964,6 +2964,7 @@ def _config_to_dict(cfg: GPDProjectConfig) -> dict:
         "autonomy": str(cfg.autonomy.value),
         "review_cadence": str(cfg.review_cadence.value),
         "research_mode": str(cfg.research_mode.value),
+        "cognitive_profile": str(cfg.cognitive_profile.value),
         "commit_docs": cfg.commit_docs,
         "branching_strategy": str(cfg.branching_strategy.value),
         "phase_branch_template": cfg.phase_branch_template,
@@ -3242,6 +3243,7 @@ def init_execute_phase(
         "autonomy": config["autonomy"],
         "review_cadence": config["review_cadence"],
         "research_mode": config["research_mode"],
+        "cognitive_profile": config["cognitive_profile"],
         "parallelization": config["parallelization"],
         "max_unattended_minutes_per_plan": config["max_unattended_minutes_per_plan"],
         "max_unattended_minutes_per_wave": config["max_unattended_minutes_per_wave"],
@@ -3622,7 +3624,7 @@ def init_plan_phase(
 
     result: dict[str, object] = {
         # Models
-        "researcher_model": _resolve_model(effective_cwd, "gpd-phase-researcher", config),
+        "researcher_model": _resolve_model(effective_cwd, "gpd-researcher", config),
         "planner_model": _resolve_model(effective_cwd, "gpd-planner", config),
         "checker_model": _resolve_model(effective_cwd, "gpd-plan-checker", config),
         # Workflow flags
@@ -3631,6 +3633,7 @@ def init_plan_phase(
         "commit_docs": config["commit_docs"],
         "autonomy": config["autonomy"],
         "research_mode": config["research_mode"],
+        "cognitive_profile": config["cognitive_profile"],
         # Phase info
         "phase_found": phase_info is not None,
         "phase_dir": phase_info["directory"] if phase_info else None,
@@ -3700,6 +3703,7 @@ def init_new_project(cwd: Path, stage: str | None = None) -> dict:
         "commit_docs": config["commit_docs"],
         "autonomy": config["autonomy"],
         "research_mode": config["research_mode"],
+        "cognitive_profile": config["cognitive_profile"],
         **base_result,
     }
 
@@ -3708,8 +3712,8 @@ def init_new_project(cwd: Path, stage: str | None = None) -> dict:
         result.update(
             {
                 # Models
-                "researcher_model": _resolve_model(project_cwd, "gpd-project-researcher", config),
-                "synthesizer_model": _resolve_model(project_cwd, "gpd-research-synthesizer", config),
+                "researcher_model": _resolve_model(project_cwd, "gpd-researcher", config),
+                "synthesizer_model": _resolve_model(project_cwd, "gpd-researcher", config),
                 "roadmapper_model": _resolve_model(project_cwd, "gpd-roadmapper", config),
             }
         )
@@ -3728,11 +3732,11 @@ def init_new_project(cwd: Path, stage: str | None = None) -> dict:
         providers=(
             _staged_scalar_field_provider(
                 "researcher_model",
-                lambda: _resolve_model(project_cwd, "gpd-project-researcher", config),
+                lambda: _resolve_model(project_cwd, "gpd-researcher", config),
             ),
             _staged_scalar_field_provider(
                 "synthesizer_model",
-                lambda: _resolve_model(project_cwd, "gpd-research-synthesizer", config),
+                lambda: _resolve_model(project_cwd, "gpd-researcher", config),
             ),
             _staged_scalar_field_provider(
                 "roadmapper_model",
@@ -3781,6 +3785,7 @@ def init_new_milestone(cwd: Path, stage: str | None = None) -> dict:
         "commit_docs": config["commit_docs"],
         "autonomy": config["autonomy"],
         "research_mode": config["research_mode"],
+        "cognitive_profile": config["cognitive_profile"],
         "research_enabled": config["research"],
         # Current milestone
         "current_milestone": milestone["version"],
@@ -3798,8 +3803,8 @@ def init_new_milestone(cwd: Path, stage: str | None = None) -> dict:
         result.update(
             {
                 # Models
-                "researcher_model": _resolve_model(effective_cwd, "gpd-project-researcher", config),
-                "synthesizer_model": _resolve_model(effective_cwd, "gpd-research-synthesizer", config),
+                "researcher_model": _resolve_model(effective_cwd, "gpd-researcher", config),
+                "synthesizer_model": _resolve_model(effective_cwd, "gpd-researcher", config),
                 "roadmapper_model": _resolve_model(effective_cwd, "gpd-roadmapper", config),
             }
         )
@@ -3820,11 +3825,11 @@ def init_new_milestone(cwd: Path, stage: str | None = None) -> dict:
         providers=(
             _staged_scalar_field_provider(
                 "researcher_model",
-                lambda: _resolve_model(effective_cwd, "gpd-project-researcher", config),
+                lambda: _resolve_model(effective_cwd, "gpd-researcher", config),
             ),
             _staged_scalar_field_provider(
                 "synthesizer_model",
-                lambda: _resolve_model(effective_cwd, "gpd-research-synthesizer", config),
+                lambda: _resolve_model(effective_cwd, "gpd-researcher", config),
             ),
             _staged_scalar_field_provider(
                 "roadmapper_model",
@@ -4169,6 +4174,7 @@ def init_write_paper(cwd: Path, subject: str | None = None, stage: str | None = 
         "project_exists": _path_exists(effective_cwd, f"{PLANNING_DIR_NAME}/{PROJECT_FILENAME}"),
         "autonomy": config["autonomy"],
         "research_mode": config["research_mode"],
+        "cognitive_profile": config["cognitive_profile"],
         "platform": _detect_platform(effective_cwd),
     }
     base_result["write_paper_argument_input"] = subject.strip() if isinstance(subject, str) else ""

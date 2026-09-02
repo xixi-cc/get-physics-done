@@ -21,7 +21,7 @@ help:
 ---
 
 <objective>
-Map an existing physics research project using parallel gpd-research-mapper agents.
+Map an existing physics research project using parallel gpd-researcher agents.
 
 Orchestrator role: validate the focus area, then hand off to the workflow-owned staged init, mapper fanout, and artifact gating. The workflow init stays bound to the current workspace: if the user is inside a nested verified GPD project, it walks up to that nearest project root; it does not auto-reenter a different recent project.
 </objective>

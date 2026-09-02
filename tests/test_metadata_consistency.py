@@ -428,9 +428,9 @@ def test_arxiv_descriptor_tracks_optional_dependency_surface() -> None:
         "pypdf>=5.0",
     }
     assert set(optional["arxiv"]) == {
-        "arxiv-mcp-server[pdf]>=0.4.11",
         "arxiv>=2.4.1",
         "httpx>=0.27",
+        "pymupdf4llm>=0.0.17",
         "cairosvg>=2.7.0",
         "pypdf>=5.0",
     }
@@ -443,8 +443,8 @@ def test_arxiv_descriptor_tracks_optional_dependency_surface() -> None:
     ]
     assert descriptor["prerequisites"] == expected_prerequisites
     assert infra_descriptor["prerequisites"] == expected_prerequisites
-    assert descriptor["capability_surface"] == "baseline_dynamic_upstream"
-    assert descriptor["dynamic_upstream_capabilities"] is True
+    assert descriptor["capability_surface"] == "fixed_native"
+    assert descriptor["dynamic_upstream_capabilities"] is False
     assert descriptor["baseline_upstream_capabilities"] == list(UPSTREAM_CORE_TOOL_NAMES)
     assert descriptor["local_capabilities"] == [DOWNLOAD_SOURCE_TOOL_NAME]
     assert descriptor["capabilities"] == list(ADVERTISED_TOOL_NAMES)
