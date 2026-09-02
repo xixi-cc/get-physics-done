@@ -740,6 +740,7 @@ class TestReadCurrentTask:
 
     def test_self_owned_todo_candidate_moves_to_front_when_already_present(self, tmp_path: Path) -> None:
         from gpd.hooks.install_context import HookLookupContext, SelfOwnedInstallContext, ordered_todo_lookup_candidates
+        from gpd.hooks.runtime_detect import TodoCandidate as CurrentTodoCandidate
 
         hook_file = tmp_path / ".codex" / "hooks" / "statusline.py"
         self_install = SelfOwnedInstallContext(
@@ -747,8 +748,12 @@ class TestReadCurrentTask:
             runtime="codex",
             install_scope="local",
         )
-        self_candidate = TodoCandidate(path=tmp_path / ".codex" / "todos", runtime="codex", scope="local")
-        other_candidate = TodoCandidate(path=tmp_path / "other" / "todos", runtime="claude-code", scope="global")
+        # runtime_detect has an intentional reload regression test; resolve the
+        # dataclass here so full-suite collection does not retain its old identity.
+        self_candidate = CurrentTodoCandidate(path=tmp_path / ".codex" / "todos", runtime="codex", scope="local")
+        other_candidate = CurrentTodoCandidate(
+            path=tmp_path / "other" / "todos", runtime="claude-code", scope="global"
+        )
 
         with (
             patch(

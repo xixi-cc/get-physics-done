@@ -2825,12 +2825,18 @@ def test_roadmap_template_and_workflows_surface_phase_contract_coverage() -> Non
         context="roadmapper return and coverage fields",
     )
     _m(
-        new_project_roadmapper,
+        new_project,
         "new-project roadmapper artifact gate",
         "gpd_return.files_written",
         "GPD/REQUIREMENTS.md",
     )
-    _s(new_project_roadmapper, "new-project roadmapper artifact gate", "do not rely on runtime completion text alone")
+    _s(new_project, "new-project roadmapper artifact gate", "do not rely on runtime completion text alone")
+    _m(
+        new_project_roadmapper,
+        "new-project fresh roadmapper task route",
+        "prompt=ROADMAP_TASK_PACKET",
+        'subagent_type="gpd-roadmapper"',
+    )
     _mf(
         new_milestone,
         "expected_artifacts:",
