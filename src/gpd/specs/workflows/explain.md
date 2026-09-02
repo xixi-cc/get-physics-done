@@ -88,11 +88,22 @@ mkdir -p GPD/explanations
 </step>
 
 <step name="spawn_explainer">
-Resolve the explainer model:
+Resolve the cognitive route and compatible explainer model:
 
 ```bash
+COGNITIVE_PROFILE=$(gpd --raw config get cognitive_profile 2>/dev/null | gpd json get .value --default classic 2>/dev/null || echo "classic")
 EXPLAINER_MODEL=$(gpd resolve-model gpd-explainer)
 ```
+
+- Under `base-model-first`, the current main model writes the explanation from
+  the same prompt below so it can retain the active conceptual and notation
+  context.
+- Use a fresh `gpd-explainer` under `classic`, when the user explicitly asks
+  for fresh isolation, or when measured context pressure requires it. Record
+  the concrete trigger; do not spawn merely because an explainer role exists.
+- The route does not change the artifact structure, rigor, literature
+  requirements, or citation-audit gate. The bibliographer remains a fresh
+  independent audit on every route.
 
 @{GPD_INSTALL_DIR}/references/orchestration/runtime-delegation-note.md
 
@@ -149,6 +160,13 @@ Structure:
 - Suggested Follow-up Questions
 </output>
 ```
+
+For the ordinary `base-model-first` route, execute `filled_prompt` in the
+current main context and write `GPD/explanations/{slug}-EXPLAIN.md` directly.
+Then continue to citation verification; do not invent a child id or typed
+child return for this route.
+
+For a fresh-context route:
 
 ```
 task(

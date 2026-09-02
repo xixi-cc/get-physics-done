@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import copy
 import json
+import subprocess
 import sys
 from pathlib import Path
 from types import SimpleNamespace
@@ -310,13 +311,29 @@ def _tool_description_and_schema(tool_name: str) -> tuple[str, dict[str, object]
 
         tools = await mcp.list_tools()
         tool = next(tool for tool in tools if tool.name == tool_name)
-        return tool.description, tool.inputSchema
+        return tool.description, tool.input_schema
 
     return anyio.run(_load)
 
 
 class TestBuiltinServerDescriptors:
     """Tests for public built-in MCP server descriptor metadata."""
+
+    def test_descriptor_registry_does_not_import_optional_arxiv_runtime(self):
+        subprocess.run(
+            [
+                sys.executable,
+                "-c",
+                (
+                    "import sys; import gpd.mcp.builtin_servers as b; "
+                    "bad = 'gpd.mcp.servers.arxiv_bridge' in sys.modules or not "
+                    "b.build_public_descriptors()['gpd-arxiv']['capabilities']; raise SystemExit(1 if bad else 0)"
+                ),
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
 
     def test_public_descriptor_prerequisites_are_runtime_neutral(self):
         from gpd.mcp.builtin_servers import build_public_descriptors
@@ -380,20 +397,20 @@ class TestBuiltinServerDescriptors:
         run_health_check = tools["run_health_check"]
 
         assert advance_plan.annotations is not None
-        assert advance_plan.annotations.readOnlyHint is False
-        assert advance_plan.annotations.idempotentHint is False
+        assert advance_plan.annotations.read_only_hint is False
+        assert advance_plan.annotations.idempotent_hint is False
         assert run_health_check.annotations is not None
-        assert run_health_check.annotations.readOnlyHint is False
-        assert run_health_check.annotations.destructiveHint is True
-        assert run_health_check.annotations.idempotentHint is False
-        assert run_health_check.inputSchema["properties"]["fix"] == {
+        assert run_health_check.annotations.read_only_hint is False
+        assert run_health_check.annotations.destructive_hint is True
+        assert run_health_check.annotations.idempotent_hint is False
+        assert run_health_check.input_schema["properties"]["fix"] == {
             "default": False,
             "description": "If true, attempt auto-fixes and allow the health check to modify project files.",
             "title": "Fix",
             "type": "boolean",
         }
 
-    def test_arxiv_public_descriptor_describes_baseline_and_live_upstream_forwarding(self):
+    def test_arxiv_public_descriptor_describes_fixed_native_surface(self):
         from gpd.mcp.builtin_servers import build_public_descriptors
         from gpd.mcp.servers.arxiv_bridge import (
             ADVERTISED_TOOL_NAMES,
@@ -405,11 +422,11 @@ class TestBuiltinServerDescriptors:
 
         _assert_semantic_surface(
             descriptor["description"],
-            "arxiv descriptor upstream forwarding semantics",
-            required=("baseline upstream tools", "live upstream server", "download_source"),
+            "arxiv descriptor native semantics",
+            required=("MCP-2-native", "fixed research tools", "download_source"),
         )
-        assert descriptor["capability_surface"] == "baseline_dynamic_upstream"
-        assert descriptor["dynamic_upstream_capabilities"] is True
+        assert descriptor["capability_surface"] == "fixed_native"
+        assert descriptor["dynamic_upstream_capabilities"] is False
         assert descriptor["baseline_upstream_capabilities"] == list(UPSTREAM_CORE_TOOL_NAMES)
         assert descriptor["local_capabilities"] == [DOWNLOAD_SOURCE_TOOL_NAME]
         assert descriptor["capabilities"] == list(ADVERTISED_TOOL_NAMES)
@@ -423,6 +440,8 @@ class TestBuiltinServerDescriptors:
 
         async def _call() -> dict[str, object]:
             result = await mcp.call_tool(str(health_check["tool"]), dict(health_check["input"]))
+            if getattr(result, "structured_content", None) is not None:
+                return dict(result.structured_content)
             if isinstance(result, dict):
                 return result
             if isinstance(result, tuple) and len(result) == 2 and isinstance(result[1], dict):
@@ -482,7 +501,7 @@ class TestBuiltinServerDescriptors:
         assert "gpd-arxiv" in servers
         assert observed["command"][0] == target_python
         assert observed["command"][2].startswith("import importlib.util")
-        assert observed["command"][3] == "arxiv_mcp_server"
+        assert observed["command"][3] == "arxiv"
         assert observed["check"] is False
         assert observed["timeout"] == 5
 
@@ -530,22 +549,18 @@ class TestMcpServerRunner:
     def test_run_mcp_server_preserves_explicit_port_zero(self, monkeypatch):
         from gpd.mcp.servers import run_mcp_server
 
-        calls: list[str] = []
+        calls: list[tuple[str, dict[str, object]]] = []
 
         class FakeMCP:
-            def __init__(self) -> None:
-                self.settings = SimpleNamespace(host=None, port=8123)
-
-            def run(self, transport: str) -> None:
-                calls.append(transport)
+            def run(self, transport: str, **kwargs: object) -> None:
+                calls.append((transport, kwargs))
 
         monkeypatch.setattr(sys, "argv", ["gpd-mcp-state", "--transport", "sse", "--port", "0"])
 
         mcp = FakeMCP()
         run_mcp_server(mcp, "fake server")
 
-        assert mcp.settings.port == 0
-        assert calls == ["sse"]
+        assert calls == [("sse", {"port": 0})]
 
 
 # ---------------------------------------------------------------------------

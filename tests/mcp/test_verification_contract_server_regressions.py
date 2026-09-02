@@ -41,8 +41,17 @@ def _call_verification_tool(tool_name: str, arguments: dict[str, object]) -> dic
 
     async def _call() -> dict[str, object]:
         result = await mcp.call_tool(tool_name, arguments)
+        if isinstance(getattr(result, "structured_content", None), dict):
+            return dict(result.structured_content)
         if isinstance(result, dict):
             return result
+        if (
+            hasattr(result, "content")
+            and len(result.content) == 1
+            and hasattr(result.content[0], "text")
+            and isinstance(result.content[0].text, str)
+        ):
+            return json.loads(result.content[0].text)
         if (
             isinstance(result, list)
             and len(result) == 1
@@ -72,7 +81,7 @@ def _run_contract_check_input_schema() -> dict[str, object]:
     async def _load() -> dict[str, object]:
         tools = await mcp.list_tools()
         tool = next(tool for tool in tools if tool.name == "run_contract_check")
-        return tool.inputSchema
+        return tool.input_schema
 
     return anyio.run(_load)
 
@@ -83,7 +92,7 @@ def _suggest_contract_checks_input_schema() -> dict[str, object]:
     async def _load() -> dict[str, object]:
         tools = await mcp.list_tools()
         tool = next(tool for tool in tools if tool.name == "suggest_contract_checks")
-        return tool.inputSchema
+        return tool.input_schema
 
     return anyio.run(_load)
 

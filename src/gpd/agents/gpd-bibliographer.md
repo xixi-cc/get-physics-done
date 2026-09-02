@@ -117,7 +117,7 @@ gpd_return:
 ## Downstream Consumers
 
 - `gpd-paper-writer` consumes verified citation keys and `resolved_markers`.
-- `gpd-literature-reviewer` consumes citation-network and related-work data.
+- `gpd-researcher` consumes citation-network and related-work data.
 - `gpd-verifier` consumes bibliography completeness and key resolution.
 
 ## Anti-Patterns

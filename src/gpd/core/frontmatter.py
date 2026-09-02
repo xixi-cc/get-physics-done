@@ -940,21 +940,51 @@ def _resolve_contract_artifact_path(
     artifact_dir: Path | None,
     path_text: str,
 ) -> tuple[Path | None, str | None]:
+    """Resolve a safe contract artifact path with canonical root precedence.
+
+    Contract ledgers normally store project-root-relative paths, while older
+    artifacts may store paths relative to the SUMMARY or VERIFICATION file.
+    Prefer the project-root interpretation and use the artifact-relative form
+    only when the root candidate is absent.  Resolve every candidate before
+    selection so symlink escapes cannot hide behind the fallback behavior.
+    """
     artifact_path = Path(path_text)
     if _is_absolute_path(path_text):
         return None, "must be a project-relative path"
+
+    normalized_parts = path_text.replace("\\", "/").split("/")
+    if ".." in normalized_parts:
+        return None, "must not traverse parent directories; must resolve inside the project root"
 
     anchor_dir = artifact_dir or project_root
     if anchor_dir is None:
         return artifact_path, None
 
     resolved_root = (project_root or anchor_dir).resolve(strict=False)
-    candidate = (anchor_dir / artifact_path).resolve(strict=False)
-    try:
-        candidate.relative_to(resolved_root)
-    except ValueError:
-        return None, "must resolve inside the project root"
-    return candidate, None
+    anchors: list[Path] = []
+    for anchor in (project_root, artifact_dir):
+        if anchor is None:
+            continue
+        resolved_anchor = anchor.resolve(strict=False)
+        if resolved_anchor not in anchors:
+            anchors.append(resolved_anchor)
+
+    candidates: list[Path] = []
+    for anchor in anchors:
+        candidate = (anchor / artifact_path).resolve(strict=False)
+        try:
+            candidate.relative_to(resolved_root)
+        except ValueError:
+            return None, "must resolve inside the project root"
+        candidates.append(candidate)
+
+    primary = candidates[0]
+    if primary.exists() or primary.is_symlink():
+        return primary, None
+    for fallback in candidates[1:]:
+        if fallback.exists() or fallback.is_symlink():
+            return fallback, None
+    return primary, None
 
 
 class FrontmatterValidation(BaseModel):

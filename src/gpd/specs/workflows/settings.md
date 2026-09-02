@@ -59,7 +59,7 @@ absent:
 - `research_mode` -- `"explore"`, `"balanced"` (default), `"exploit"`, `"adaptive"`
 - `model_overrides` -- optional runtime-scoped concrete model mapping for
   `tier-1`, `tier-2`, `tier-3`
-- `workflow.research`, `workflow.plan_checker`, `workflow.verifier`
+- `workflow.research`, `workflow.plan_checker`, `workflow.verifier` -- `true`, `false`, or `"auto"`
 - `execution.review_cadence` -- `"dense"` (default), `"adaptive"`, `"sparse"`
 - `execution.max_unattended_minutes_per_plan`
 - `execution.max_unattended_minutes_per_wave`
@@ -79,6 +79,12 @@ this does NOT disable mandatory proof red-teaming for `proof_obligation` work.
 `research_mode`: it controls bounded review stop density, not agent tiering or
 verification rigor. Sparse cadence does not waive proof red-teaming for
 proof-bearing work.
+
+For a workflow agent set to `"auto"`, use
+`references/orchestration/risk-triggered-review.md`. Auto keeps routine work on
+the main capable agent, activates an independent agent only for an explicit
+risk signal, and deduplicates equivalent fresh checks. It does not lower the
+model profile or promote unchecked candidate results.
 
 Project conventions do **not** live in `GPD/config.json`. Do not invent or
 preserve a `physics` section here. Project conventions still live in `GPD/state.json` (`convention_lock`) with `GPD/CONVENTIONS.md` as the projection/audit surface, not in `GPD/config.json`.
@@ -119,7 +125,7 @@ Broader local references stay outside this settings-specific list: `gpd doctor`,
 Before detailed questions, offer preset preview choices:
 
 - Core research (Recommended): preview the supervised default bundle over the existing knobs, then apply or customize
-- Theory: preview the derivation-heavy bundle over the existing knobs, then apply or customize
+- Theory: preview balanced autonomy, deep-theory/max-quality reasoning, sequential execution, sparse cadence, and risk-triggered workflow agents, then apply or customize
 - Numerics: preview the computation-heavy bundle over the existing knobs, then apply or customize
 - Publication / manuscript: preview the paper-writing bundle over the existing knobs, then apply or customize
 - Full research: preview core-research plus publication readiness over the existing knobs, then apply or customize
@@ -135,9 +141,9 @@ and preserves these labels/mappings:
 | `Research Profile` | Which research profile for agents? | `Deep Theory` -> `model_profile=deep-theory`; `Numerical` -> `model_profile=numerical`; `Exploratory` -> `model_profile=exploratory`; `Review (Recommended)` -> `model_profile=review`; `Paper Writing` -> `model_profile=paper-writing`. |
 | `Model Cost Posture` | What model-cost posture should GPD optimize for? | `Max Quality`; `Balanced (Recommended)`; `Budget-aware`. Qualitative only: no persisted key, billing promise, or spend enforcement. |
 | `Tier Models` | How should GPD handle concrete tier models for the active runtime? | `Leave current setting unchanged` preserves `model_overrides.<SELECTED_RUNTIME>` exactly; `Use runtime defaults` clears that runtime's tier map; `Configure explicit tier models` asks for runtime-native `tier-1`, `tier-2`, and `tier-3` strings. |
-| `Research` | Spawn Plan Researcher? | `Yes` -> `workflow.research=true`; `No` -> `workflow.research=false`. |
-| `Plan Check` | Spawn Plan Checker? | `Yes` -> `workflow.plan_checker=true`; `No` -> `workflow.plan_checker=false`. |
-| `Verifier` | Spawn Execution Verifier? | `Yes` -> `workflow.verifier=true`; `No` -> `workflow.verifier=false` for only the generic post-execution verifier; this does NOT disable mandatory proof red-teaming for proof-bearing or `proof_obligation` work. |
+| `Research` | When should GPD spawn the Plan Researcher? | `Auto (Recommended)` -> `workflow.research="auto"`; `Always` -> `workflow.research=true`; `Never` -> `workflow.research=false`. Auto follows the risk-triggered research route. |
+| `Plan Check` | When should GPD spawn the Plan Checker? | `Auto (Recommended)` -> `workflow.plan_checker="auto"`; `Always` -> `workflow.plan_checker=true`; `Never` -> `workflow.plan_checker=false`. Auto follows the risk-triggered plan-check route. |
+| `Verifier` | When should GPD spawn the Execution Verifier? | `Auto (Recommended)` -> `workflow.verifier="auto"`; `Always` -> `workflow.verifier=true`; `Never` -> `workflow.verifier=false` for only the generic post-execution verifier. Auto follows the risk-triggered verifier route; neither auto nor false disables mandatory proof red-teaming. |
 | `Cadence` | How aggressively should execution inject review gates? | `Dense (Recommended)` -> `execution.review_cadence=dense`; `Adaptive` -> `execution.review_cadence=adaptive`; `Sparse` -> `execution.review_cadence=sparse`. Sparse cadence does not waive proof red-teaming for proof-bearing work. |
 | `Planning Commit Docs` | Should planning artifacts be committed to git? | `Commit planning docs` -> `planning.commit_docs=true`; `Keep planning docs local-only` -> `planning.commit_docs=false`. |
 | `Parallel` | Execute plans within a wave in parallel? | `Yes (Recommended)` -> `parallelization=true`; `No` -> `parallelization=false`. |
@@ -151,6 +157,10 @@ execution budgets and checkpoint controls using current values as defaults:
 - `execution.checkpoint_after_n_tasks`
 - `execution.checkpoint_after_first_load_bearing_result`
 - `execution.checkpoint_before_downstream_dependent_tasks`
+
+The downstream checkpoint accepts `true`, `false`, or `"auto"`. Recommend
+`"auto"` for theory work so a fresh equivalent first-result, proof-redteam, or
+verifier check is reused instead of shown again.
 
 Then ask one compact inline follow-up for optional advisory USD budget
 guardrails using current values as defaults:

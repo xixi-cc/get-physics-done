@@ -94,7 +94,7 @@ def test_representative_agents_expose_expected_metadata_policy() -> None:
             "artifact_write_authority": "scoped_write",
             "shared_state_authority": "direct",
         },
-        "gpd-phase-researcher": {
+        "gpd-researcher": {
             "surface": "internal",
             "role_family": "analysis",
             "artifact_write_authority": "scoped_write",

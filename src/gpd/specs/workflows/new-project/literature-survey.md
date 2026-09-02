@@ -55,7 +55,7 @@ SCOUT_HANDOFF_STARTED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 @{GPD_INSTALL_DIR}/references/orchestration/runtime-delegation-note.md
 
 ```
-task(prompt="First, read {GPD_AGENTS_DIR}/gpd-project-researcher.md for your role and instructions.
+task(prompt="First, read {GPD_AGENTS_DIR}/gpd-researcher.md for your role and instructions. Use mode `project-survey`.
 
 <research_type>
 Literature Survey - Known Results dimension for [research domain].
@@ -96,9 +96,9 @@ expected_artifacts:
   - GPD/literature/PRIOR-WORK.md
 shared_state_policy: return_only
 </spawn_contract>
-", subagent_type="gpd-project-researcher", model="{researcher_model}", readonly=false, description="Prior work research")
+", subagent_type="gpd-researcher", model="{researcher_model}", readonly=false, description="Prior work research")
 
-task(prompt="First, read {GPD_AGENTS_DIR}/gpd-project-researcher.md for your role and instructions.
+task(prompt="First, read {GPD_AGENTS_DIR}/gpd-researcher.md for your role and instructions. Use mode `project-survey`.
 
 <research_type>
 Literature Survey - Methods dimension for [research domain].
@@ -140,9 +140,9 @@ expected_artifacts:
   - GPD/literature/METHODS.md
 shared_state_policy: return_only
 </spawn_contract>
-", subagent_type="gpd-project-researcher", model="{researcher_model}", readonly=false, description="Methods research")
+", subagent_type="gpd-researcher", model="{researcher_model}", readonly=false, description="Methods research")
 
-task(prompt="First, read {GPD_AGENTS_DIR}/gpd-project-researcher.md for your role and instructions.
+task(prompt="First, read {GPD_AGENTS_DIR}/gpd-researcher.md for your role and instructions. Use mode `project-survey`.
 
 <research_type>
 Literature Survey - Computational Approaches dimension for [research domain].
@@ -184,9 +184,9 @@ expected_artifacts:
   - GPD/literature/COMPUTATIONAL.md
 shared_state_policy: return_only
 </spawn_contract>
-", subagent_type="gpd-project-researcher", model="{researcher_model}", readonly=false, description="Computational approaches research")
+", subagent_type="gpd-researcher", model="{researcher_model}", readonly=false, description="Computational approaches research")
 
-task(prompt="First, read {GPD_AGENTS_DIR}/gpd-project-researcher.md for your role and instructions.
+task(prompt="First, read {GPD_AGENTS_DIR}/gpd-researcher.md for your role and instructions. Use mode `project-survey`.
 
 <research_type>
 Literature Survey - Open Problems and Pitfalls dimension for [research domain].
@@ -227,7 +227,7 @@ expected_artifacts:
   - GPD/literature/PITFALLS.md
 shared_state_policy: return_only
 </spawn_contract>
-", subagent_type="gpd-project-researcher", model="{researcher_model}", readonly=false, description="Pitfalls research")
+", subagent_type="gpd-researcher", model="{researcher_model}", readonly=false, description="Pitfalls research")
 ```
 
 **Scout child gate:**
@@ -235,7 +235,7 @@ shared_state_policy: return_only
 ```yaml
 child_gate:
   id: "literature_scouts"
-  role: "gpd-project-researcher"
+  role: "gpd-researcher"
   return_profile: "researcher"
   required_status: "completed"
   expected_artifacts:
@@ -269,7 +269,7 @@ SYNTHESIZER_HANDOFF_STARTED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 ```
 
 ```
-task(prompt="First, read {GPD_AGENTS_DIR}/gpd-research-synthesizer.md for your role and instructions.
+task(prompt="First, read {GPD_AGENTS_DIR}/gpd-researcher.md for your role and instructions. Use mode `synthesis`.
 
 <task>
 Synthesize literature survey outputs into SUMMARY.md.
@@ -300,7 +300,7 @@ expected_artifacts:
   - GPD/literature/SUMMARY.md
 shared_state_policy: return_only
 </spawn_contract>
-", subagent_type="gpd-research-synthesizer", model="{synthesizer_model}", readonly=false, description="Synthesize research")
+", subagent_type="gpd-researcher", model="{synthesizer_model}", readonly=false, description="Synthesize research")
 ```
 
 **Synthesizer child gate:**
@@ -308,7 +308,7 @@ shared_state_policy: return_only
 ```yaml
 child_gate:
   id: "literature_synthesizer"
-  role: "gpd-research-synthesizer"
+  role: "gpd-researcher"
   return_profile: "synthesizer"
   required_status: "completed"
   expected_artifacts:

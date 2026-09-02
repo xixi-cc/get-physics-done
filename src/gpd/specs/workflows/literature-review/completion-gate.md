@@ -19,7 +19,7 @@ Apply `COMPLETION_GATE_INIT.staged_loading.field_access_instruction` before read
 
 Local completion gate:
 
-- completed: `GPD/literature/{slug}-REVIEW.md` exists; `GPD/literature/{slug}-CITATION-SOURCES.json` exists and remains aligned with the review's Full Reference List; `GPD/literature/{slug}-CITATION-AUDIT.md` is current; all three paths are named in `files_written` and present/readable on disk.
+- completed: review, aligned `CITATION-SOURCES.json`, current `CITATION-AUDIT.md`, and parseable `EVIDENCE.json` v1 are present and named by their producing handoffs. Require `CLAIM-EVIDENCE.json` only for bound authoritative claims.
 - checkpoint: include the decision question, context, options, and partial progress; record the user's answer as `checkpoint_response` before continuation.
 - blocked/failed: list the missing artifact, malformed artifact, stale audit, or unresolved scope issue explicitly.
 
@@ -43,5 +43,6 @@ Include `papers_reviewed`, `field_assessment`, and citation verification details
 - [ ] LITERATURE-REVIEW.md created with all sections
 - [ ] Recommended reading path provided
 - [ ] Citations verified via gpd-bibliographer (no hallucinated references)
+- [ ] Compact `EVIDENCE.json` emitted from the audited citation sidecar
 
 </success_criteria>

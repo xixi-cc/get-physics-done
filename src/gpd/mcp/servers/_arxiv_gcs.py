@@ -159,7 +159,7 @@ def pdf_bytes_to_markdown(
     except ImportError as exc:
         raise ImportError(
             "PDF conversion requires pymupdf4llm. "
-            "Install with: pip install 'arxiv-mcp-server[pdf]'"
+            "Install GPD with the arxiv extra: pip install 'get-physics-done[arxiv]'"
         ) from exc
 
     try:

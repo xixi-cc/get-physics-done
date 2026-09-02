@@ -200,7 +200,7 @@ async def test_bridge_open_uses_bearer_token_and_initializes_session(monkeypatch
 
 @pytest.mark.asyncio
 async def test_bridge_proxies_remote_results_without_rewriting() -> None:
-    from mcp.types import (
+    from mcp_types import (
         CallToolResult,
         GetPromptResult,
         ListPromptsResult,
@@ -220,35 +220,38 @@ async def test_bridge_proxies_remote_results_without_rewriting() -> None:
 
     from gpd.mcp.integrations.wolfram_bridge import WolframBridge, WolframBridgeConfig
 
-    tool = Tool(name="wolf-tool", inputSchema={"type": "object", "properties": {"x": {"type": "number"}}})
+    tool = Tool(name="wolf-tool", input_schema={"type": "object", "properties": {"x": {"type": "number"}}})
     resource = Resource(name="wolf-resource", uri="https://example.invalid/resource")
     prompt = Prompt(name="wolf-prompt", arguments=[PromptArgument(name="x")])
-    template = ResourceTemplate(name="wolf-template", uriTemplate="wolfram://{name}")
+    template = ResourceTemplate(name="wolf-template", uri_template="wolfram://{name}")
     text = TextContent(type="text", text="ok")
     resource_contents = TextResourceContents(uri="https://example.invalid/resource", text="content")
     prompt_message = PromptMessage(role="user", content=text)
 
     class FakeSession:
-        async def list_tools(self, cursor=None):
-            return ListToolsResult(tools=[tool], nextCursor=None)
+        async def list_tools(self, *, params=None):
+            return ListToolsResult(tools=[tool], next_cursor=None)
 
         async def call_tool(self, name, arguments):
-            return CallToolResult(content=[text], structuredContent={"name": name, "arguments": arguments})
+            return CallToolResult(content=[text], structured_content={"name": name, "arguments": arguments})
 
-        async def list_resources(self, cursor=None):
-            return ListResourcesResult(resources=[resource], nextCursor=None)
+        async def list_resources(self, *, params=None):
+            return ListResourcesResult(resources=[resource], next_cursor=None)
 
         async def read_resource(self, uri):
             return ReadResourceResult(contents=[resource_contents])
 
-        async def list_prompts(self, cursor=None):
-            return ListPromptsResult(prompts=[prompt], nextCursor=None)
+        async def list_prompts(self, *, params=None):
+            return ListPromptsResult(prompts=[prompt], next_cursor=None)
 
         async def get_prompt(self, name, arguments=None):
             return GetPromptResult(description=name, messages=[prompt_message])
 
-        async def list_resource_templates(self, cursor=None):
-            return ListResourceTemplatesResult(resourceTemplates=[template], nextCursor=cursor)
+        async def list_resource_templates(self, *, params=None):
+            return ListResourceTemplatesResult(
+                resource_templates=[template],
+                next_cursor=params.cursor if params else None,
+            )
 
     bridge = WolframBridge(WolframBridgeConfig(api_key="bridge-token", endpoint="https://example.invalid/mcp"))
     bridge._session = FakeSession()  # type: ignore[assignment]
@@ -265,29 +268,29 @@ async def test_bridge_proxies_remote_results_without_rewriting() -> None:
         bridge._session = None
 
     assert tools_result.tools == [tool]
-    assert call_result.structuredContent == {"name": "wolf-tool", "arguments": {"x": 3}}
+    assert call_result.structured_content == {"name": "wolf-tool", "arguments": {"x": 3}}
     assert resources_result.resources == [resource]
     assert read_result.contents == [resource_contents]
     assert prompts_result.prompts == [prompt]
     assert prompt_result.description == "wolf-prompt"
     assert prompt_result.messages == [prompt_message]
-    assert templates_result.resourceTemplates == [template]
-    assert templates_result.nextCursor == "cursor-1"
+    assert templates_result.resource_templates == [template]
+    assert templates_result.next_cursor == "cursor-1"
 
 
 @pytest.mark.asyncio
 async def test_bridge_list_resource_templates_preserves_cursor_and_next_cursor() -> None:
-    from mcp.types import ListResourceTemplatesResult, ResourceTemplate
+    from mcp_types import ListResourceTemplatesResult, ResourceTemplate
 
     from gpd.mcp.integrations.wolfram_bridge import WolframBridge, WolframBridgeConfig
 
     observed: dict[str, object] = {}
-    template = ResourceTemplate(name="wolf-template", uriTemplate="wolfram://{name}")
+    template = ResourceTemplate(name="wolf-template", uri_template="wolfram://{name}")
 
     class FakeSession:
-        async def list_resource_templates(self, cursor=None):
-            observed["cursor"] = cursor
-            return ListResourceTemplatesResult(resourceTemplates=[template], nextCursor="cursor-2")
+        async def list_resource_templates(self, *, params=None):
+            observed["cursor"] = params.cursor if params else None
+            return ListResourceTemplatesResult(resource_templates=[template], next_cursor="cursor-2")
 
     bridge = WolframBridge(WolframBridgeConfig(api_key="bridge-token", endpoint="https://example.invalid/mcp"))
     bridge._session = FakeSession()  # type: ignore[assignment]
@@ -298,8 +301,8 @@ async def test_bridge_list_resource_templates_preserves_cursor_and_next_cursor()
         bridge._session = None
 
     assert observed["cursor"] == "cursor-1"
-    assert result.resourceTemplates == [template]
-    assert result.nextCursor == "cursor-2"
+    assert result.resource_templates == [template]
+    assert result.next_cursor == "cursor-2"
 
 
 def test_build_server_registers_expected_server_name() -> None:
@@ -313,36 +316,38 @@ def test_build_server_registers_expected_server_name() -> None:
 
 @pytest.mark.asyncio
 async def test_build_server_resource_handlers_match_lowlevel_server_api(monkeypatch: pytest.MonkeyPatch) -> None:
-    from mcp import types
+    import mcp_types as types
 
     from gpd.mcp.integrations.wolfram_bridge import WolframBridgeConfig, build_server
 
     server, bridge = build_server(WolframBridgeConfig(api_key="bridge-token", endpoint="https://example.invalid/mcp"))
-    template = types.ResourceTemplate(name="wolf-template", uriTemplate="wolfram://{name}")
+    template = types.ResourceTemplate(name="wolf-template", uri_template="wolfram://{name}")
 
     async def fake_read_resource(uri: str):
         return types.ReadResourceResult(
-            contents=[types.TextResourceContents(uri=uri, text="content", mimeType="text/plain")]
+            contents=[types.TextResourceContents(uri=uri, text="content", mime_type="text/plain")]
         )
 
     async def fake_list_resource_templates(cursor: str | None = None):
         assert cursor == "cursor-1"
-        return types.ListResourceTemplatesResult(resourceTemplates=[template], nextCursor="cursor-ignored")
+        return types.ListResourceTemplatesResult(resource_templates=[template], next_cursor="cursor-ignored")
 
     monkeypatch.setattr(bridge, "read_resource", fake_read_resource)
     monkeypatch.setattr(bridge, "list_resource_templates", fake_list_resource_templates)
 
-    read_response = await server.request_handlers[types.ReadResourceRequest](
-        types.ReadResourceRequest(params=types.ReadResourceRequestParams(uri="https://example.invalid/resource"))
+    read_response = await server._request_handlers["resources/read"].handler(
+        None,
+        types.ReadResourceRequestParams(uri="https://example.invalid/resource"),
     )
-    templates_response = await server.request_handlers[types.ListResourceTemplatesRequest](
-        types.ListResourceTemplatesRequest(params=types.PaginatedRequestParams(cursor="cursor-1"))
+    templates_response = await server._request_handlers["resources/templates/list"].handler(
+        None,
+        types.PaginatedRequestParams(cursor="cursor-1"),
     )
 
-    assert read_response.root.contents[0].text == "content"
-    assert read_response.root.contents[0].mimeType == "text/plain"
-    assert templates_response.root.resourceTemplates == [template]
-    assert templates_response.root.nextCursor == "cursor-ignored"
+    assert read_response.contents[0].text == "content"
+    assert read_response.contents[0].mime_type == "text/plain"
+    assert templates_response.resource_templates == [template]
+    assert templates_response.next_cursor == "cursor-ignored"
 
 
 def test_pyproject_exposes_the_wolfram_console_script() -> None:

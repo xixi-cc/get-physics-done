@@ -1,6 +1,6 @@
 # Shared Research Philosophy and Protocols
 
-Shared by `gpd-project-researcher` and `gpd-phase-researcher`. Loaded via `@` reference.
+Legacy extended guidance for `gpd-researcher`. The thin role does not load this file by default; consult it only when a task needs a specific search or confidence-calibration detail not covered by the scientific constitution.
 
 ## Training Data = Hypothesis
 

@@ -48,7 +48,7 @@ When the project profile is known (from PROJECT.md or orchestrator context), app
 
 | Profile       | Planning adjustment                                                                                    |
 | ------------- | ------------------------------------------------------------------------------------------------------ |
-| deep-theory   | Add derivation checkpoint every 2 steps (not 3-4). Require INDEPENDENTLY_CONFIRMED for all key results |
+| deep-theory   | Keep local checks inside a coherent derivation; attach independent checks when a result becomes load-bearing or is promoted beyond candidate status |
 | numerical     | Add convergence testing task for every numerical computation. Require error budget task                |
 | exploratory   | Compress optional detail, keep decisive anchor and acceptance-test coverage explicit, and allow somewhat larger tasks when that speeds first-result learning without hiding risk |
 | review        | Add cross-reference task comparing every result to literature. Require 2+ independent checks           |
@@ -56,7 +56,12 @@ When the project profile is known (from PROJECT.md or orchestrator context), app
 
 **Profile adjustment details:**
 
-**deep-theory:** Theoretical derivations where correctness is paramount. Every 2 derivation steps, insert a verification task that independently re-derives or cross-checks the result. All key results (equations that downstream tasks depend on) must carry an `INDEPENDENTLY_CONFIRMED` tag in their verification, meaning they were verified by a method different from the original derivation (e.g., derive via path integral AND operator formalism, or verify symbolically AND numerically).
+**deep-theory:** Theoretical derivations where correctness is paramount. Keep
+dimensional, sign, index, convention, and limiting-case checks inside the same
+coherent derivation instead of splitting it every two algebraic steps. When an
+equation becomes load-bearing, canonical, or publication-facing, attach a
+fresh independent check unless an equivalent check already covers the same
+result and assumptions. Only then may it carry `INDEPENDENTLY_CONFIRMED`.
 
 **numerical:** Computationally intensive work where numerical accuracy is the primary concern. Every task that produces a numerical result must have a paired convergence testing sub-task (grid refinement, time step halving, or statistical bootstrap). Additionally, include one `error_budget` task per plan that tracks how numerical errors propagate through the calculation chain and verifies the final uncertainty is within acceptable bounds.
 

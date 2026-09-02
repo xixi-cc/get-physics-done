@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from enum import StrEnum
 from functools import lru_cache
 from pathlib import Path
+from typing import Literal, TypeAlias
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
@@ -26,6 +27,7 @@ __all__ = [
     "MODEL_PROFILES",
     "AutonomyMode",
     "BranchingStrategy",
+    "CognitiveProfile",
     "ExecutionPreferences",
     "GPDProjectConfig",
     "ModelProfile",
@@ -70,6 +72,13 @@ class ResearchMode(StrEnum):
     ADAPTIVE = "adaptive"
 
 
+class CognitiveProfile(StrEnum):
+    """Whether ordinary cognition stays in the main context or uses legacy roles."""
+
+    CLASSIC = "classic"
+    BASE_MODEL_FIRST = "base-model-first"
+
+
 class ModelProfile(StrEnum):
     """Research profile controlling model tier assignments."""
 
@@ -109,6 +118,13 @@ class BranchingStrategy(StrEnum):
     PER_MILESTONE = "per-milestone"
 
 
+# ``auto`` keeps ordinary work on the main capable agent and delegates an
+# independent workflow agent only when the workflow's explicit risk classifier
+# fires.  Booleans remain accepted so existing project configs are unchanged.
+WorkflowAgentPolicy: TypeAlias = bool | Literal["auto"]
+DownstreamCheckpointPolicy: TypeAlias = bool | Literal["auto"]
+
+
 # ─── Model Profiles ─────────────────────────────────────────────────────────────
 
 # Maps agent_name -> profile -> tier. Matches model-profiles.md reference exactly.
@@ -134,26 +150,12 @@ MODEL_PROFILES: dict[str, dict[str, ModelTier]] = {
         "review": ModelTier.TIER_2,
         "paper-writing": ModelTier.TIER_1,
     },
-    "gpd-phase-researcher": {
+    "gpd-researcher": {
         "deep-theory": ModelTier.TIER_1,
         "numerical": ModelTier.TIER_1,
         "exploratory": ModelTier.TIER_1,
         "review": ModelTier.TIER_2,
         "paper-writing": ModelTier.TIER_2,
-    },
-    "gpd-project-researcher": {
-        "deep-theory": ModelTier.TIER_1,
-        "numerical": ModelTier.TIER_2,
-        "exploratory": ModelTier.TIER_1,
-        "review": ModelTier.TIER_2,
-        "paper-writing": ModelTier.TIER_3,
-    },
-    "gpd-research-synthesizer": {
-        "deep-theory": ModelTier.TIER_1,
-        "numerical": ModelTier.TIER_2,
-        "exploratory": ModelTier.TIER_2,
-        "review": ModelTier.TIER_2,
-        "paper-writing": ModelTier.TIER_1,
     },
     "gpd-debugger": {
         "deep-theory": ModelTier.TIER_1,
@@ -161,13 +163,6 @@ MODEL_PROFILES: dict[str, dict[str, ModelTier]] = {
         "exploratory": ModelTier.TIER_2,
         "review": ModelTier.TIER_1,
         "paper-writing": ModelTier.TIER_2,
-    },
-    "gpd-research-mapper": {
-        "deep-theory": ModelTier.TIER_2,
-        "numerical": ModelTier.TIER_3,
-        "exploratory": ModelTier.TIER_3,
-        "review": ModelTier.TIER_3,
-        "paper-writing": ModelTier.TIER_3,
     },
     "gpd-verifier": {
         "deep-theory": ModelTier.TIER_1,
@@ -196,13 +191,6 @@ MODEL_PROFILES: dict[str, dict[str, ModelTier]] = {
         "exploratory": ModelTier.TIER_2,
         "review": ModelTier.TIER_2,
         "paper-writing": ModelTier.TIER_1,
-    },
-    "gpd-literature-reviewer": {
-        "deep-theory": ModelTier.TIER_1,
-        "numerical": ModelTier.TIER_2,
-        "exploratory": ModelTier.TIER_1,
-        "review": ModelTier.TIER_2,
-        "paper-writing": ModelTier.TIER_2,
     },
     "gpd-bibliographer": {
         "deep-theory": ModelTier.TIER_2,
@@ -339,18 +327,19 @@ class GPDProjectConfig(BaseModel):
     autonomy: AutonomyMode = AutonomyMode.SUPERVISED
     review_cadence: ReviewCadence = ReviewCadence.DENSE
     research_mode: ResearchMode = ResearchMode.BALANCED
+    cognitive_profile: CognitiveProfile = CognitiveProfile.CLASSIC
 
     # Workflow toggles
     commit_docs: bool = True
-    research: bool = True
-    plan_checker: bool = True
-    verifier: bool = True
+    research: WorkflowAgentPolicy = True
+    plan_checker: WorkflowAgentPolicy = True
+    verifier: WorkflowAgentPolicy = True
     parallelization: bool = True
     max_unattended_minutes_per_plan: int = Field(default=15, ge=1)
     max_unattended_minutes_per_wave: int = Field(default=30, ge=1)
     checkpoint_after_n_tasks: int = Field(default=1, ge=1)
     checkpoint_after_first_load_bearing_result: bool = True
-    checkpoint_before_downstream_dependent_tasks: bool = True
+    checkpoint_before_downstream_dependent_tasks: DownstreamCheckpointPolicy = True
     project_usd_budget: float | None = Field(default=None, gt=0)
     session_usd_budget: float | None = Field(default=None, gt=0)
 
@@ -449,6 +438,7 @@ def _enum_value(value: object) -> object:
 
 _CONFIG_KEY_DESCRIPTORS: tuple[_ConfigKeyDescriptor, ...] = (
     _ConfigKeyDescriptor("model_profile", ("model_profile",)),
+    _ConfigKeyDescriptor("cognitive_profile", ("cognitive_profile",)),
     _ConfigKeyDescriptor("autonomy", ("autonomy",)),
     _ConfigKeyDescriptor(
         "review_cadence",

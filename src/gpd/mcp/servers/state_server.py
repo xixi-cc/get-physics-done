@@ -13,7 +13,7 @@ Usage:
 from pathlib import Path
 from typing import Annotated
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 from pydantic import WithJsonSchema
 
 from gpd.core.command_run_hints import COMMAND_RUN_HINT_EXECUTION, build_command_run_hint
@@ -45,7 +45,7 @@ from gpd.mcp.servers import (
 
 logger = configure_mcp_logging("gpd-state")
 
-mcp = FastMCP("gpd-state")
+mcp = MCPServer("gpd-state")
 
 AbsoluteProjectDirInput = Annotated[str, WithJsonSchema(ABSOLUTE_PROJECT_DIR_SCHEMA)]
 SuggestLimitInput = Annotated[

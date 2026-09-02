@@ -31,6 +31,7 @@ MANUSCRIPT_ENTRYPOINT=$(echo "$INIT" | gpd json get .manuscript_entrypoint --def
 MANUSCRIPT_BASENAME="${MANUSCRIPT_ENTRYPOINT##*/}"
 AUTONOMY=$(echo "$INIT" | gpd json get .autonomy --default balanced)
 RESEARCH_MODE=$(echo "$INIT" | gpd json get .research_mode --default balanced)
+COGNITIVE_PROFILE=$(echo "$INIT" | gpd json get .cognitive_profile --default classic)
 if command -v pdflatex >/dev/null 2>&1; then
   PDFLATEX_AVAILABLE=true
 else
@@ -84,7 +85,21 @@ and name the phase, intake binding, or source artifact that must be repaired.
 </generate_figures>
 
 <draft_sections>
-Resolve the paper-writer model override before spawning section writers.
+Choose the cognitive route before drafting:
+
+- Under `base-model-first`, draft sections sequentially in the current main
+  model by default. This preserves the live narrative, notation, and claim
+  structure across sections.
+- Use fresh `gpd-paper-writer` children under `classic`, when the user
+  explicitly requests fresh isolation, when true parallel wave drafting is
+  selected, or when measured context pressure requires a fresh context. Record
+  the concrete trigger; do not spawn merely because a paper-writer role exists.
+- Both routes receive the same section prompt and evidence packet and keep the
+  same `.tex` artifact, write scope, proof-redteam ceiling, build checks, and
+  stage-recovery gate. Citation, consistency, bibliography, and final referee
+  review remain independent downstream gates.
+
+Resolve the paper-writer model override only when a fresh writer route is used.
 
 Drafting order:
 
@@ -111,7 +126,14 @@ Existing `.tex` files can make a resumed wave current, but they are not fresh
 child handoff success. Treat the emitted `.tex` file as the success artifact gate
 for each section only after the tuple passes.
 
-For each section, load the manifest conditional
+For an ordinary `base-model-first` route, execute `section_prompt` in the
+current main context and write `${PAPER_DIR}/{section_path}.tex` directly. Do
+not invent a child id or typed child return. Accept the section only after the
+file is readable, within `${PAPER_DIR}`, newer than the drafting start marker,
+and its claim/proof scope does not exceed passed proof-redteam artifacts; route
+failure through the same stage-recovery choices.
+
+For a fresh writer route, load the manifest conditional
 `{GPD_INSTALL_DIR}/references/orchestration/runtime-delegation-note.md` when
 `writer_spawn_needed`, then spawn a writer agent:
 
@@ -125,7 +147,7 @@ task(
 )
 ```
 
-Section writer child gate:
+Fresh section-writer child gate:
 
 ```yaml
 child_gate:

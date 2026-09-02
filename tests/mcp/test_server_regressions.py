@@ -298,6 +298,8 @@ def test_lookup_pattern_returns_error_for_backend_failures(side_effect: Exceptio
 def _call_mcp_tool(mcp_server: object, tool_name: str, arguments: dict[str, object]) -> dict[str, object]:
     async def _call() -> dict[str, object]:
         result = await mcp_server.call_tool(tool_name, arguments)
+        if isinstance(getattr(result, "structured_content", None), dict):
+            return dict(result.structured_content)
         if isinstance(result, dict):
             return result
         if (
@@ -306,6 +308,13 @@ def _call_mcp_tool(mcp_server: object, tool_name: str, arguments: dict[str, obje
             and isinstance(result[1], dict)
         ):
             return result[1]
+        if (
+            hasattr(result, "content")
+            and len(result.content) == 1
+            and hasattr(result.content[0], "text")
+            and isinstance(result.content[0].text, str)
+        ):
+            return json.loads(result.content[0].text)
         if (
             isinstance(result, list)
             and len(result) == 1

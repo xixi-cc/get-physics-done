@@ -260,7 +260,7 @@ Different GPD agents have different context profiles:
 | -------------------- | ------------- | --------------------------------------------- |
 | gpd-executor         | 40-70%        | Executes tasks, reads files, runs derivations |
 | gpd-planner          | 30-50%        | Reads research + state, produces plans        |
-| gpd-phase-researcher | 40-60%        | Web searches, literature, synthesis           |
+| gpd-researcher | 40-60%        | Web searches, literature, synthesis           |
 | gpd-plan-checker     | 20-30%        | Reads plans, checks against goals             |
 | gpd-verifier         | 30-50%        | Reads results, runs validation checks         |
 | gpd-debugger         | 50-80%        | Iterative investigation, heavy reads          |

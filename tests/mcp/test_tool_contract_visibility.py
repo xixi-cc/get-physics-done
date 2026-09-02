@@ -34,17 +34,17 @@ def _tool_description(mcp_server: object, tool_name: str) -> str:
 def _tool_input_schema(mcp_server: object, tool_name: str) -> dict[str, object]:
     async def _load() -> dict[str, object]:
         tools = await mcp_server.list_tools()
-        return next(tool.inputSchema for tool in tools if tool.name == tool_name)
+        return next(tool.input_schema for tool in tools if tool.name == tool_name)
 
     return anyio.run(_load)
 
 
 def _assert_read_only_tool_annotations(annotations: object, *, server_name: str, tool_name: str) -> None:
     assert annotations is not None, f"{server_name}.{tool_name} must publish MCP annotations"
-    assert annotations.readOnlyHint is True
-    assert annotations.destructiveHint is False
-    assert annotations.idempotentHint is True
-    assert annotations.openWorldHint is False
+    assert annotations.read_only_hint is True
+    assert annotations.destructive_hint is False
+    assert annotations.idempotent_hint is True
+    assert annotations.open_world_hint is False
 
 
 def _schema_ref(schema_fragment: dict[str, object]) -> str:
@@ -1026,7 +1026,7 @@ def test_non_verification_tools_publish_closed_input_schemas(mcp_module: str, ex
     names = {tool.name for tool in tools}
     assert expected_tools <= names
     for tool in tools:
-        assert tool.inputSchema["additionalProperties"] is False, f"{tool.name} must reject unknown top-level keys"
+        assert tool.input_schema["additionalProperties"] is False, f"{tool.name} must reject unknown top-level keys"
 
 
 def test_required_mcp_string_inputs_publish_non_blank_constraints() -> None:
@@ -1077,14 +1077,14 @@ def test_tighten_registered_tool_contracts_updates_detached_public_tool_descript
     @dataclasses.dataclass
     class _FakeRegisteredTool:
         name: str
-        inputSchema: dict[str, object]
+        input_schema: dict[str, object]
         parameters: dict[str, object]
         fn_metadata: _FakeFnMetadata
 
     @dataclasses.dataclass
     class _FakePublicTool:
         name: str
-        inputSchema: dict[str, object]
+        input_schema: dict[str, object]
 
     @dataclasses.dataclass
     class _FakeToolManager:
@@ -1097,7 +1097,7 @@ def test_tighten_registered_tool_contracts_updates_detached_public_tool_descript
         def __init__(self) -> None:
             self._registered_tool = _FakeRegisteredTool(
                 name="demo",
-                inputSchema={"type": "object", "properties": {}, "additionalProperties": True},
+                input_schema={"type": "object", "properties": {}, "additionalProperties": True},
                 parameters={"type": "object", "properties": {}, "additionalProperties": True},
                 fn_metadata=_FakeFnMetadata(
                     arg_model=DemoArgs,
@@ -1106,11 +1106,14 @@ def test_tighten_registered_tool_contracts_updates_detached_public_tool_descript
             )
             self._tool_manager = _FakeToolManager([self._registered_tool])
 
+        async def call_tool(self, name, arguments, context=None):
+            return {"name": name, "arguments": arguments, "context": context}
+
         async def list_tools(self) -> list[_FakePublicTool]:
             return [
                 _FakePublicTool(
                     name="demo",
-                    inputSchema={"type": "object", "properties": {}, "additionalProperties": True},
+                    input_schema={"type": "object", "properties": {}, "additionalProperties": True},
                 )
             ]
 
@@ -1120,14 +1123,14 @@ def test_tighten_registered_tool_contracts_updates_detached_public_tool_descript
 
     public_tools = anyio.run(fake_mcp.list_tools)
 
-    public_schema = public_tools[0].inputSchema
+    public_schema = public_tools[0].input_schema
     registered_schema = fake_mcp._registered_tool.parameters
     assert public_schema["additionalProperties"] is False
     assert public_schema["required"] == ["project_dir"]
     assert public_schema["properties"]["project_dir"]["type"] == "string"
-    assert fake_mcp._registered_tool.inputSchema["additionalProperties"] is False
+    assert fake_mcp._registered_tool.input_schema["additionalProperties"] is False
     assert registered_schema["additionalProperties"] is False
-    assert fake_mcp._registered_tool.inputSchema == public_schema
+    assert fake_mcp._registered_tool.input_schema == public_schema
     assert registered_schema == public_schema
 
 
@@ -1184,7 +1187,7 @@ def test_state_server_tools_publish_absolute_project_dir_schema() -> None:
 
     async def _load() -> dict[str, object]:
         tools = await mcp.list_tools()
-        return {tool.name: tool.inputSchema for tool in tools}
+        return {tool.name: tool.input_schema for tool in tools}
 
     schemas = anyio.run(_load)
 
@@ -1205,14 +1208,14 @@ def test_state_server_tools_publish_absolute_project_dir_schema() -> None:
 
 async def _builtin_descriptor_live_tool_names(server_name: str, module_name: str | None) -> list[str]:
     if server_name == "gpd-arxiv":
-        from mcp.types import ListToolsResult, Tool
+        from mcp_types import ListToolsResult, Tool
 
         from gpd.mcp.servers.arxiv_bridge import UPSTREAM_CORE_TOOL_NAMES, ArxivBridge, ArxivBridgeConfig
 
         class FakeSession:
-            async def list_tools(self, cursor=None):
+            async def list_tools(self, *, params=None):
                 return ListToolsResult(
-                    tools=[Tool(name=name, inputSchema={"type": "object"}) for name in UPSTREAM_CORE_TOOL_NAMES],
+                    tools=[Tool(name=name, input_schema={"type": "object"}) for name in UPSTREAM_CORE_TOOL_NAMES],
                 )
 
         bridge = ArxivBridge(ArxivBridgeConfig())
@@ -1290,8 +1293,8 @@ def test_conventions_server_tools_publish_same_absolute_project_dir_schema_as_st
         conventions_tools = await conventions_mcp.list_tools()
         state_tools = await state_mcp.list_tools()
         return (
-            {tool.name: tool.inputSchema for tool in conventions_tools},
-            {tool.name: tool.inputSchema for tool in state_tools},
+            {tool.name: tool.input_schema for tool in conventions_tools},
+            {tool.name: tool.input_schema for tool in state_tools},
         )
 
     conventions_schemas, state_schemas = anyio.run(_load)
@@ -1317,25 +1320,25 @@ def test_mutating_convention_and_pattern_tools_publish_annotations() -> None:
 
     convention_set = conventions_annotations["convention_set"]
     assert convention_set is not None
-    assert convention_set.readOnlyHint is False
-    assert convention_set.destructiveHint is True
-    assert convention_set.idempotentHint is False
-    assert convention_set.openWorldHint is False
+    assert convention_set.read_only_hint is False
+    assert convention_set.destructive_hint is True
+    assert convention_set.idempotent_hint is False
+    assert convention_set.open_world_hint is False
 
     for tool_name in ("add_pattern", "promote_pattern"):
         annotations = patterns_annotations[tool_name]
         assert annotations is not None
-        assert annotations.readOnlyHint is False
-        assert annotations.destructiveHint is False
-        assert annotations.idempotentHint is False
-        assert annotations.openWorldHint is False
+        assert annotations.read_only_hint is False
+        assert annotations.destructive_hint is False
+        assert annotations.idempotent_hint is False
+        assert annotations.open_world_hint is False
 
     seed_patterns = patterns_annotations["seed_patterns"]
     assert seed_patterns is not None
-    assert seed_patterns.readOnlyHint is False
-    assert seed_patterns.destructiveHint is False
-    assert seed_patterns.idempotentHint is True
-    assert seed_patterns.openWorldHint is False
+    assert seed_patterns.read_only_hint is False
+    assert seed_patterns.destructive_hint is False
+    assert seed_patterns.idempotent_hint is True
+    assert seed_patterns.open_world_hint is False
 
 
 def test_read_only_builtin_mcp_tools_publish_annotations() -> None:

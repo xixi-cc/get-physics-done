@@ -285,13 +285,13 @@ def test_agent_delegation_reference_defines_canonical_task_contract() -> None:
 def test_representative_workflows_keep_runtime_note_and_agent_prompt_bootstrap() -> None:
     coverage = {
         "quick.md": ["gpd-planner", "gpd-executor"],
-        "map-research.md": ["gpd-research-mapper"],
+        "map-research.md": ["gpd-researcher"],
         "write-paper.md": ["gpd-paper-writer", "gpd-bibliographer"],
         "respond-to-referees.md": ["gpd-paper-writer"],
         "validate-conventions.md": ["gpd-consistency-checker"],
         "new-project.md": [
-            "gpd-project-researcher",
-            "gpd-research-synthesizer",
+            "gpd-researcher",
+            "gpd-researcher",
             "gpd-roadmapper",
             "gpd-notation-coordinator",
         ],
@@ -359,11 +359,15 @@ def test_new_project_roadmapper_spawn_contract_uses_direct_shared_state_and_arti
         "new-project roadmapper task parameters and state contract",
         'subagent_type="gpd-roadmapper"',
         'model="{roadmapper_model}"',
+    )
+    _assert_machine(
+        content,
+        "new-project roadmapper packet state contract",
         "gpd_return.files_written",
         "GPD/REQUIREMENTS.md",
     )
     _assert_semantic(
-        task.text,
+        content,
         "new-project roadmapper direct write and completion gate",
         "Write files immediately (ROADMAP.md, STATE.md, update REQUIREMENTS.md traceability)",
         "do not rely on runtime completion text alone.",
@@ -584,7 +588,7 @@ def test_research_phase_verifies_research_artifact_before_accepting_handoff() ->
         content,
         "research-phase child artifact gate fields",
         "Child artifact gate: apply `references/orchestration/child-artifact-gate.md`",
-        "role=`gpd-phase-researcher`",
+        "role=`gpd-researcher`",
         "expected=`{phase_dir}/{phase_number}-RESEARCH.md`",
         "allowed_root=`{phase_dir}`",
         "<spawn_contract>",
@@ -601,7 +605,8 @@ def test_research_phase_verifies_research_artifact_before_accepting_handoff() ->
 
 def test_new_project_parallel_researchers_write_to_disjoint_artifacts() -> None:
     path = WORKFLOWS_DIR / "new-project.md"
-    tasks = _task_blocks_by_agent(path, "gpd-project-researcher")
+    tasks = _task_blocks_by_agent(path, "gpd-researcher")
+    survey_tasks = [task for task in tasks if "Use mode `project-survey`" in task.text]
     outputs = {output for task in tasks for output in _extract_output_paths(task)}
 
     expected = {
@@ -613,15 +618,15 @@ def test_new_project_parallel_researchers_write_to_disjoint_artifacts() -> None:
 
     assert expected <= outputs
     assert len(outputs) == len(set(outputs))
-    assert len(tasks) == 4
+    assert len(survey_tasks) == 4
 
-    for task in tasks:
+    for task in survey_tasks:
         task_outputs = tuple(_extract_output_paths(task))
         assert len(task_outputs) == 1
         _assert_spawn_contract(task, task_outputs)
 
     content = _read(path)
-    synth = _find_single_task(path, "gpd-research-synthesizer")
+    synth = next(task for task in tasks if "Use mode `synthesis`" in task.text)
     _assert_spawn_contract(synth, ("GPD/literature/SUMMARY.md",))
     _assert_machine(
         synth.text,
@@ -647,7 +652,7 @@ def test_new_project_parallel_researchers_write_to_disjoint_artifacts() -> None:
 def test_map_research_parallel_mappers_use_spawn_contracts_and_return_only_artifacts() -> None:
     path = WORKFLOWS_DIR / "map-research.md"
     content = _read(path)
-    tasks = _task_blocks_by_agent(path, "gpd-research-mapper")
+    tasks = _task_blocks_by_agent(path, "gpd-researcher")
     outputs = {output for task in tasks for output in _extract_output_paths(task)}
 
     expected = {
@@ -694,14 +699,22 @@ def test_new_project_roadmapper_uses_spawn_contract_and_artifact_gate() -> None:
     roadmapper = _find_single_task(path, "gpd-roadmapper")
     gate = _child_gate(content, "project_roadmapper")
 
-    _assert_spawn_contract(roadmapper, ("GPD/ROADMAP.md", "GPD/STATE.md"), shared_state_policy="direct")
+    _assert_spawn_contract(content, ("GPD/ROADMAP.md", "GPD/STATE.md"), shared_state_policy="direct")
     _assert_machine(
-        roadmapper.text,
+        content,
         "new-project roadmapper state and reference paths",
         "GPD/REQUIREMENTS.md",
         "gpd_return.files_written",
         "GPD/literature/SUMMARY.md",
         "allowed_paths:",
+    )
+    _assert_machine(
+        roadmapper.text,
+        "new-project roadmapper fresh task parameters",
+        "prompt=ROADMAP_TASK_PACKET",
+        'subagent_type="gpd-roadmapper"',
+        'model="{roadmapper_model}"',
+        "readonly=false",
     )
     assert _artifact_paths(gate) == ("GPD/ROADMAP.md", "GPD/STATE.md", "GPD/REQUIREMENTS.md")
     _assert_semantic(
@@ -716,7 +729,7 @@ def test_new_project_notation_coordinator_uses_explicit_model_and_spawn_contract
     path = WORKFLOWS_DIR / "new-project.md"
     content = _read(path)
     start = content.index("## 8.5. Establish Conventions")
-    end = content.index("**Notation-coordinator child gate:**", start)
+    end = content.index("**Convention artifact gate**", start)
     notation_section = content[start:end]
 
     assert _find_single_task(path, "gpd-notation-coordinator")
@@ -765,7 +778,8 @@ def test_validate_conventions_uses_one_shot_delegation_and_artifact_gating_for_r
         "next_actions",
         "gpd-notation-coordinator",
         "same scope",
-        "coordinator owns the repair policy",
+        "coordinator owns",
+        "ambiguous repair policy",
         "gpd_return.status: completed",
         "gpd_return.files_written",
     )
@@ -796,14 +810,14 @@ def test_new_milestone_research_and_roadmapper_gate_success_path_artifacts() -> 
     _assert_machine(
         content,
         "new-milestone subagent and artifact paths",
-        'subagent_type="gpd-project-researcher"',
+        'subagent_type="gpd-researcher"',
         "GPD/literature/{FILE}",
         "expected_artifacts:",
         "PRIOR-WORK.md",
         "METHODS.md",
         "COMPUTATIONAL.md",
         "PITFALLS.md",
-        'subagent_type="gpd-research-synthesizer"',
+        'subagent_type="gpd-researcher"',
         "GPD/literature/SUMMARY.md",
         'subagent_type="gpd-roadmapper"',
         "GPD/ROADMAP.md",

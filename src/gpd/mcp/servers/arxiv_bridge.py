@@ -1,4 +1,4 @@
-"""GPD-owned bridge for the optional arxiv_mcp_server integration."""
+"""GPD-owned MCP-2-native arXiv research server."""
 
 from __future__ import annotations
 
@@ -7,18 +7,15 @@ import asyncio
 import json
 import logging
 import os
-import sys
 import tempfile
 from collections import deque
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
 
-import mcp.types as types
-from mcp import ClientSession
-from mcp.client.stdio import StdioServerParameters, stdio_client
-from mcp.server.lowlevel import NotificationOptions, Server
-from mcp.server.models import InitializationOptions
+import mcp_types as types
+from mcp.server.context import ServerRequestContext
+from mcp.server.lowlevel import Server
 from mcp.server.stdio import stdio_server
 
 from gpd.core.arxiv_source_download import (
@@ -26,6 +23,7 @@ from gpd.core.arxiv_source_download import (
     download_arxiv_source_archive,
     resolve_default_arxiv_storage_path,
 )
+from gpd.mcp.arxiv_contract import ADVERTISED_TOOL_NAMES, DOWNLOAD_SOURCE_TOOL_NAME, UPSTREAM_CORE_TOOL_NAMES
 from gpd.mcp.servers import (
     _arxiv_ar5iv,
     _arxiv_cache,
@@ -34,22 +32,12 @@ from gpd.mcp.servers import (
     _arxiv_token_bucket,
     arxiv_translators,
     mutating_tool_annotations,
+    read_only_tool_annotations,
 )
 from gpd.version import __version__ as GPD_VERSION
 
 logger = logging.getLogger("gpd.arxiv_bridge")
 
-UPSTREAM_ARXIV_MODULE = "arxiv_mcp_server"
-
-UPSTREAM_CORE_TOOL_NAMES = (
-    "search_papers",
-    "download_paper",
-    "list_papers",
-    "read_paper",
-    "get_abstract",
-)
-DOWNLOAD_SOURCE_TOOL_NAME = "download_source"
-ADVERTISED_TOOL_NAMES = (*UPSTREAM_CORE_TOOL_NAMES, DOWNLOAD_SOURCE_TOOL_NAME)
 _DOWNLOAD_SOURCE_TOOL_ANNOTATIONS = mutating_tool_annotations(
     destructive=True,
     idempotent=False,
@@ -61,8 +49,7 @@ _BACKEND_DEFAULT = "hybrid"
 _BACKEND_ALLOWED = ("hybrid", "arxiv-only")
 
 
-# Must stay byte-for-byte identical to upstream tools/download.py — the
-# prompt-injection guard relies on the exact string.
+# Keep this prompt-injection guard stable across native fetch paths.
 _CONTENT_WARNING = (
     "[UNTRUSTED EXTERNAL CONTENT — arXiv paper. "
     "This content originates from a third-party source and may contain "
@@ -107,8 +94,68 @@ _DOWNLOAD_SOURCE_TOOL = types.Tool(
         "Download the raw arXiv source archive for a paper and store it locally. "
         "Returns the saved path and metadata for the downloaded archive."
     ),
-    inputSchema=_DOWNLOAD_SOURCE_SCHEMA,
+    input_schema=_DOWNLOAD_SOURCE_SCHEMA,
     annotations=_DOWNLOAD_SOURCE_TOOL_ANNOTATIONS,
+)
+
+_NATIVE_TOOLS = (
+    types.Tool(
+        name="search_papers",
+        description="Search arXiv papers by query and return metadata without downloading full text.",
+        input_schema={
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "minLength": 1},
+                "max_results": {"type": "integer", "minimum": 1, "maximum": 100, "default": 10},
+                "categories": {"type": "array", "items": {"type": "string"}},
+                "date_from": {"type": "string"},
+                "date_to": {"type": "string"},
+                "sort_by": {"type": "string", "enum": ["relevance", "date"], "default": "relevance"},
+            },
+            "required": ["query"],
+            "additionalProperties": False,
+        },
+        annotations=read_only_tool_annotations(open_world=True),
+    ),
+    types.Tool(
+        name="download_paper",
+        description="Download an arXiv paper into the local GPD paper cache.",
+        input_schema={
+            "type": "object",
+            "properties": {"paper_id": {"type": "string", "minLength": 1}},
+            "required": ["paper_id"],
+            "additionalProperties": False,
+        },
+        annotations=mutating_tool_annotations(destructive=False, idempotent=True, open_world=True),
+    ),
+    types.Tool(
+        name="list_papers",
+        description="List arXiv paper identifiers currently present in the local GPD paper cache.",
+        input_schema={"type": "object", "properties": {}, "additionalProperties": False},
+        annotations=read_only_tool_annotations(),
+    ),
+    types.Tool(
+        name="read_paper",
+        description="Read a previously downloaded arXiv paper from the local GPD paper cache.",
+        input_schema={
+            "type": "object",
+            "properties": {"paper_id": {"type": "string", "minLength": 1}},
+            "required": ["paper_id"],
+            "additionalProperties": False,
+        },
+        annotations=read_only_tool_annotations(),
+    ),
+    types.Tool(
+        name="get_abstract",
+        description="Fetch arXiv paper metadata and abstract without downloading full text.",
+        input_schema={
+            "type": "object",
+            "properties": {"paper_id": {"type": "string", "minLength": 1}},
+            "required": ["paper_id"],
+            "additionalProperties": False,
+        },
+        annotations=read_only_tool_annotations(open_world=True),
+    ),
 )
 
 
@@ -137,7 +184,7 @@ def load_settings(
     workspace: str | Path | None = None,
     backend: str | None = None,
 ) -> ArxivBridgeConfig:
-    """Load bridge settings for the upstream server and local source archive storage.
+    """Load bridge settings for the native server and local source archive storage.
 
     When *storage_path* is not supplied, the storage root is resolved from
     :func:`gpd.core.arxiv_source_download.resolve_default_arxiv_storage_path`,
@@ -148,7 +195,7 @@ def load_settings(
     project remain backward-compatible.
 
     *backend* selects between the full intercept stack (``hybrid``, default)
-    and a straight pass-through to upstream (``arxiv-only``) — the
+    and a straight native translator path (``arxiv-only``) — the
     emergency-rollback knob that does not require shipping a new desktop
     release. Falls back to the ``GPD_ARXIV_BACKEND`` env var when ``None``.
     """
@@ -170,51 +217,104 @@ class _BridgeState:
     failure_log: deque[float] = field(default_factory=_arxiv_retry.make_failure_log)
 
 
-class ArxivBridge:
-    """Proxy around the upstream arxiv_mcp_server plus local intercepts."""
+def _paginated_params(cursor: str | None) -> types.PaginatedRequestParams | None:
+    return types.PaginatedRequestParams(cursor=cursor) if cursor else None
+
+
+class _NativeArxivSession:
+    """MCP-2-native replacement for the unmaintained MCP-1 upstream server."""
 
     def __init__(self, config: ArxivBridgeConfig) -> None:
         self.config = config
-        self._session: ClientSession | None = None
+
+    async def list_tools(self, *, params: types.PaginatedRequestParams | None = None) -> types.ListToolsResult:
+        return types.ListToolsResult(tools=list(_NATIVE_TOOLS))
+
+    async def list_prompts(
+        self, *, params: types.PaginatedRequestParams | None = None
+    ) -> types.ListPromptsResult:
+        return types.ListPromptsResult(prompts=[])
+
+    async def get_prompt(
+        self, name: str, arguments: dict[str, str] | None = None
+    ) -> types.GetPromptResult:
+        return types.GetPromptResult(description=f"No built-in arXiv prompt named {name!r}", messages=[])
+
+    async def call_tool(
+        self, name: str, arguments: dict[str, object] | None = None
+    ) -> types.CallToolResult:
+        args = dict(arguments or {})
+        if name == "search_papers":
+            unsupported = {key for key in ("categories", "date_from", "date_to") if args.get(key)}
+            sort_by = args.get("sort_by")
+            if isinstance(sort_by, str) and sort_by.strip().lower() not in {"", "relevance"}:
+                unsupported.add("sort_by")
+            if unsupported:
+                return _tool_error(
+                    "Native OpenAlex search cannot preserve filters: " + ", ".join(sorted(unsupported))
+                )
+            body = await asyncio.to_thread(arxiv_translators.openalex_search, args)
+        elif name == "get_abstract":
+            body = await asyncio.to_thread(arxiv_translators.openalex_abstract, args)
+        elif name == "list_papers":
+            body = {
+                "status": "success",
+                "papers": sorted(path.stem for path in self.config.storage_path.glob("*.md")),
+            }
+        elif name in {"download_paper", "read_paper"}:
+            return _tool_error(
+                f"{name} could not be satisfied by the native GPD arXiv cache/fetch pipeline"
+            )
+        else:
+            return _tool_error(f"Unknown native arXiv tool {name!r}")
+        if not isinstance(body, dict):
+            return _tool_error(f"{name} returned an invalid response")
+        is_error = body.get("status") == "error"
+        return types.CallToolResult(
+            content=[types.TextContent(type="text", text=json.dumps(body))],
+            structured_content=body,
+            is_error=is_error,
+        )
+
+
+class ArxivBridge:
+    """MCP-2-native arXiv service with cache-first local intercepts."""
+
+    def __init__(self, config: ArxivBridgeConfig) -> None:
+        self.config = config
+        self._session: _NativeArxivSession | None = None
         self._state = _BridgeState()
         self._upstream_tool_names: set[str] | None = None
         self._upstream_tool_names_complete = False
 
     @property
-    def session(self) -> ClientSession:
+    def session(self) -> _NativeArxivSession:
         if self._session is None:
             raise RuntimeError("arXiv bridge session is not open")
         return self._session
 
     @asynccontextmanager
     async def open(self):
-        server = StdioServerParameters(
-            command=sys.executable,
-            args=["-m", UPSTREAM_ARXIV_MODULE, "--storage-path", str(self.config.storage_path)],
-        )
-        async with stdio_client(server) as streams:
-            async with ClientSession(*streams) as session:
-                await session.initialize()
-                self._session = session
-                try:
-                    yield self
-                finally:
-                    self._session = None
+        self._session = _NativeArxivSession(self.config)
+        try:
+            yield self
+        finally:
+            self._session = None
 
     async def list_tools(self, cursor: str | None = None) -> types.ListToolsResult:
-        upstream = await self.session.list_tools(cursor)
+        upstream = await self.session.list_tools(params=_paginated_params(cursor))
         self._remember_upstream_tools(
             upstream.tools,
             reset=cursor in (None, ""),
-            complete=upstream.nextCursor is None,
+            complete=upstream.next_cursor is None,
         )
         filtered = [tool for tool in upstream.tools if tool.name in UPSTREAM_CORE_TOOL_NAMES]
         if cursor in (None, ""):
             filtered.append(_DOWNLOAD_SOURCE_TOOL)
-        return types.ListToolsResult(tools=filtered, nextCursor=upstream.nextCursor)
+        return types.ListToolsResult(tools=filtered, next_cursor=upstream.next_cursor)
 
     async def list_prompts(self, cursor: str | None = None) -> types.ListPromptsResult:
-        return await self.session.list_prompts(cursor)
+        return await self.session.list_prompts(params=_paginated_params(cursor))
 
     async def get_prompt(self, name: str, arguments: dict[str, str] | None) -> types.GetPromptResult:
         return await self.session.get_prompt(name, arguments)
@@ -223,11 +323,11 @@ class ArxivBridge:
         """Dispatch an advertised tool call through the bridge.
 
         Rejects un-advertised tools, serves the GPD-owned ``download_source``
-        tool, and (in the default ``hybrid`` backend) intercepts
+        tool, and (in the default ``hybrid`` backend) handles
         ``download_paper`` / ``read_paper`` for cache-first, size-aware
         serving and routes ``search_papers`` / ``get_abstract`` through the
-        OpenAlex translator + cache. Everything else is forwarded to the
-        upstream arXiv MCP via the token-bucket-gated throttled path.
+        OpenAlex translator + cache. Remaining calls use the native fallback
+        through the token-bucket-gated path.
         """
         if name not in ADVERTISED_TOOL_NAMES:
             return _tool_error(f"Tool {name!r} is not advertised by the GPD arXiv bridge")
@@ -250,8 +350,8 @@ class ArxivBridge:
             # so large papers come back as a path + preview rather than a full
             # inline dump (the search → download → read_paper workflow would
             # otherwise reintroduce the RES-1205 grind via this tool). On a
-            # cache miss, fall through to upstream so its "download first"
-            # error (with the available-papers list) still reaches the model.
+            # cache miss, fall through to the native session for a stable
+            # "download first" error.
             intercepted = await self._intercept_read_paper(args)
             if intercepted is not None:
                 return intercepted
@@ -304,7 +404,7 @@ class ArxivBridge:
     async def _call_throttled(
         self, name: str, args: dict[str, object]
     ) -> types.CallToolResult:
-        # Token-bucket-gated upstream call with fail-fast rate-limit handling.
+        # Token-bucket-gated native fallback with fail-fast rate-limit handling.
         # The earlier in-bridge 60-second sleep+retry raced the MCP client's
         # 60s default request timeout and surfaced as -32001 "Request timed
         # out" on the caller, hiding the underlying 429. The retry also did
@@ -325,7 +425,7 @@ class ArxivBridge:
         self, args: dict[str, object]
     ) -> types.CallToolResult | None:
         # Deflect `search_papers` to OpenAlex when possible so `export.arxiv.org`
-        # only sees the long tail. Returns ``None`` (fall-through to upstream)
+        # only sees the long tail. Returns ``None`` (fall-through to native)
         # on any failure — missing query, OpenAlex error, empty result set,
         # or unexpected exception.
         #
@@ -334,8 +434,8 @@ class ArxivBridge:
         # `categories`, `date_from`, `date_to`, or a non-default `sort_by`,
         # silently routing through OpenAlex would drop the filter and serve
         # arbitrary-date / wrong-category results that still match the bare
-        # query. Fall through to upstream instead — `arxiv-mcp-server` does
-        # honor those filters via the arxiv.org Atom API.
+        # query. Fall through to the native fallback rather than silently
+        # dropping filters.
         non_translatable = {"categories", "date_from", "date_to"}
         if any(args.get(k) for k in non_translatable):
             return None
@@ -345,7 +445,7 @@ class ArxivBridge:
         try:
             body = await asyncio.to_thread(arxiv_translators.openalex_search, args)
         except Exception:
-            logger.exception("OpenAlex search translator failed; falling through to upstream")
+            logger.exception("OpenAlex search translator failed; falling through to native fallback")
             return None
         if not isinstance(body, dict):
             return None
@@ -375,7 +475,7 @@ class ArxivBridge:
         try:
             body = await asyncio.to_thread(arxiv_translators.openalex_abstract, args)
         except Exception:
-            logger.exception("OpenAlex abstract translator failed; falling through to upstream")
+            logger.exception("OpenAlex abstract translator failed; falling through to native fallback")
             return None
         if not isinstance(body, dict) or body.get("status") != "success":
             return None
@@ -397,7 +497,7 @@ class ArxivBridge:
         result each time. Returns the paper via :func:`_content_envelope`
         (passing ``cache_path`` so large papers come back as a path), or
         ``None`` on a malformed ``paper_id`` or total miss so ``call_tool``
-        falls through to the upstream ``download_paper``.
+        falls through to the native error path.
         """
         paper_id_raw = args.get("paper_id")
         if not isinstance(paper_id_raw, str):
@@ -447,19 +547,18 @@ class ArxivBridge:
                     _arxiv_gcs.pdf_bytes_to_markdown, pdf_bytes, paper_id, storage
                 )
             except ImportError as exc:
-                # ``pymupdf4llm`` missing — fall through to upstream rather
-                # than failing the call. The user's request can still succeed
-                # via the upstream MCP's own PDF→markdown path.
+                # ``pymupdf4llm`` missing — fall through to the native
+                # fallback so the caller receives one stable error envelope.
                 logger.warning(
-                    "PDF conversion unavailable for %s: %s; falling back upstream",
+                    "PDF conversion unavailable for %s: %s; using native fallback",
                     paper_id,
                     exc,
                 )
                 return None
             except Exception:
-                # Conversion errored on this PDF — keep the fallback chain
-                # intact so upstream can still serve the paper.
-                logger.exception("PDF→markdown failed for %s; falling back upstream", paper_id)
+                # Conversion errored on this PDF — keep the native fallback
+                # chain intact so the caller receives a stable error.
+                logger.exception("PDF→markdown failed for %s; using native fallback", paper_id)
                 return None
             self._safe_write(cache_path, markdown)
             return _content_envelope(
@@ -480,8 +579,8 @@ class ArxivBridge:
         Returns the cached ``.md`` via :func:`_content_envelope` (inline for
         small papers, path + preview for large ones) when the paper has been
         downloaded. Returns ``None`` on a malformed ``paper_id`` or a cache
-        miss so ``call_tool`` falls through to the upstream ``read_paper``,
-        whose "download first" error also lists the available papers.
+        miss so ``call_tool`` falls through to the native ``read_paper``
+        error path.
         """
         paper_id_raw = args.get("paper_id")
         if not isinstance(paper_id_raw, str):
@@ -499,8 +598,8 @@ class ArxivBridge:
         safe_id = paper_id.replace("/", "_")
         cache_path = storage / f"{safe_id}.md"
         if not cache_path.exists():
-            # Not downloaded yet — let upstream return its "download first"
-            # error (which also lists the available papers).
+            # Not downloaded yet — let the native fallback return its stable
+            # "download first" error.
             return None
         try:
             content = cache_path.read_text(encoding="utf-8")
@@ -572,13 +671,13 @@ class ArxivBridge:
         cursor: str | None = None
         seen_cursors: set[str] = set()
         while True:
-            upstream = await self.session.list_tools(cursor)
+            upstream = await self.session.list_tools(params=_paginated_params(cursor))
             names.update(tool.name for tool in upstream.tools if tool.name != DOWNLOAD_SOURCE_TOOL_NAME)
-            next_cursor = upstream.nextCursor
+            next_cursor = upstream.next_cursor
             if next_cursor is None:
                 break
             if next_cursor in seen_cursors:
-                raise RuntimeError("upstream arXiv list_tools returned a repeated pagination cursor")
+                raise RuntimeError("native arXiv list_tools returned a repeated pagination cursor")
             seen_cursors.add(next_cursor)
             cursor = next_cursor
 
@@ -615,7 +714,7 @@ class ArxivBridge:
         )
         return types.CallToolResult(
             content=[types.TextContent(type="text", text=summary)],
-            structuredContent={
+            structured_content={
                 "schema_version": 1,
                 "tool": DOWNLOAD_SOURCE_TOOL_NAME,
                 "result": result.as_dict(),
@@ -744,7 +843,7 @@ def _prepend_header_to_result(
     unchanged so cache reads/writes stay raw — the header is only ever applied
     at return time."""
 
-    if result.isError or not result.content:
+    if result.is_error or not result.content:
         return result
     # JSON-status failures (`{"status": "error", "message": "...",`
     # `"paper_id": "..."}` with isError=False) carry a paper_id in the
@@ -793,16 +892,16 @@ def _prepend_header_to_result(
         return result
     return types.CallToolResult(
         content=new_content,
-        isError=result.isError,
-        structuredContent=result.structuredContent,
+        is_error=result.is_error,
+        structured_content=result.structured_content,
     )
 
 
 def _tool_error(message: str) -> types.CallToolResult:
     return types.CallToolResult(
-        isError=True,
+        is_error=True,
         content=[types.TextContent(type="text", text=f"Error: {message}")],
-        structuredContent={"schema_version": 1, "error": message},
+        structured_content={"schema_version": 1, "error": message},
     )
 
 
@@ -815,7 +914,7 @@ def _first_text_payload(result: types.CallToolResult) -> str | None:
 
 
 def _is_success(result: types.CallToolResult) -> bool:
-    if result.isError:
+    if result.is_error:
         return False
     text = _first_text_payload(result)
     if text is None:
@@ -843,7 +942,7 @@ _TRANSIENT_FAILURE_PATTERNS = (
 
 
 def _is_rate_limit_or_timeout(result: types.CallToolResult) -> bool:
-    if result.isError:
+    if result.is_error:
         text = _first_text_payload(result) or ""
         lower = text.lower()
         return any(p in lower for p in _TRANSIENT_FAILURE_PATTERNS)
@@ -867,11 +966,11 @@ def _is_rate_limit_or_timeout(result: types.CallToolResult) -> bool:
 
 
 def _coerce_rate_limit_to_error(result: types.CallToolResult) -> types.CallToolResult:
-    if result.isError:
+    if result.is_error:
         return result
     text = _first_text_payload(result) or ""
     return types.CallToolResult(
-        isError=True,
+        is_error=True,
         content=[types.TextContent(type="text", text=text)],
     )
 
@@ -886,34 +985,39 @@ def build_server(config: ArxivBridgeConfig) -> tuple[Server, ArxivBridge]:
         async with bridge.open():
             yield bridge
 
-    server = Server("gpd-arxiv", version=GPD_VERSION, lifespan=lifespan)
+    async def _list_tools(
+        _context: ServerRequestContext,
+        params: types.PaginatedRequestParams | None,
+    ) -> types.ListToolsResult:
+        return await bridge.list_tools(params.cursor if params else None)
 
-    @server.list_tools()
-    async def _list_tools(request: types.ListToolsRequest | None = None) -> types.ListToolsResult:
-        # mcp SDK invokes the handler with request=None on cache-miss refresh.
-        cursor: str | None = None
-        if request is not None:
-            params = getattr(request, "params", None)
-            if params is not None:
-                cursor = getattr(params, "cursor", None)
-        return await bridge.list_tools(cursor)
+    async def _call_tool(
+        _context: ServerRequestContext,
+        params: types.CallToolRequestParams,
+    ) -> types.CallToolResult:
+        return await bridge.call_tool(params.name, params.arguments)
 
-    @server.call_tool()
-    async def _call_tool(name: str, arguments: dict | None) -> types.CallToolResult:
-        return await bridge.call_tool(name, arguments)
+    async def _list_prompts(
+        _context: ServerRequestContext,
+        params: types.PaginatedRequestParams | None,
+    ) -> types.ListPromptsResult:
+        return await bridge.list_prompts(params.cursor if params else None)
 
-    @server.list_prompts()
-    async def _list_prompts(request: types.ListPromptsRequest | None = None) -> types.ListPromptsResult:
-        cursor: str | None = None
-        if request is not None:
-            params = getattr(request, "params", None)
-            if params is not None:
-                cursor = getattr(params, "cursor", None)
-        return await bridge.list_prompts(cursor)
+    async def _get_prompt(
+        _context: ServerRequestContext,
+        params: types.GetPromptRequestParams,
+    ) -> types.GetPromptResult:
+        return await bridge.get_prompt(params.name, params.arguments)
 
-    @server.get_prompt()
-    async def _get_prompt(name: str, arguments: dict[str, str] | None = None) -> types.GetPromptResult:
-        return await bridge.get_prompt(name, arguments)
+    server = Server(
+        "gpd-arxiv",
+        version=GPD_VERSION,
+        lifespan=lifespan,
+        on_list_tools=_list_tools,
+        on_call_tool=_call_tool,
+        on_list_prompts=_list_prompts,
+        on_get_prompt=_get_prompt,
+    )
 
     return server, bridge
 
@@ -958,11 +1062,7 @@ async def _run() -> None:
         await server.run(
             read_stream,
             write_stream,
-            InitializationOptions(
-                server_name="gpd-arxiv",
-                server_version=GPD_VERSION,
-                capabilities=server.get_capabilities(NotificationOptions(), {}),
-            ),
+            server.create_initialization_options(),
         )
 
 

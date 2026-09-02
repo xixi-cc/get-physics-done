@@ -166,6 +166,7 @@ _ALLOWED_RUNTIME_FILES = {
     "pyproject.toml",
     "src/gpd/bootstrap/installer_metadata.json",
     "src/gpd/hooks/runtime_detect.py",
+    "scripts/thinning/codex_session_trace.py",
 }
 _ALLOWED_SHARED_PYTHON_RUNTIME_FILES = {
     "src/gpd/hooks/runtime_detect.py",

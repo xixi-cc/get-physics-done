@@ -70,6 +70,21 @@ After your first successful start or later, use `$gpd-settings` to review autono
 
 The first time you run Codex, it should prompt you to sign in with your ChatGPT account or an API key.
 
+### Optional: reduce automatic skill discovery
+
+The default `full` projection keeps every GPD command available for automatic
+discovery. If the full command surface is too noisy, install the `lean`
+projection instead:
+
+```bash
+gpd install codex --local --projection lean
+```
+
+Lean keeps a small core discoverable automatically and marks every other GPD
+command as explicit-only. No command is removed: `$gpd-...` invocations still
+work, and `$gpd-router` can route an explicit request to the right command.
+Return to the default at any time with `--projection full`.
+
 ## What success looks like
 
 You are in the right place when:

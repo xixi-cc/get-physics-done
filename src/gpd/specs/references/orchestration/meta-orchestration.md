@@ -46,14 +46,14 @@ Phase Type → Agent Selection (in order of invocation)
 ─────────────────────────────────────────────────────
 
 literature:
-  ALWAYS:  phase-researcher, bibliographer
-  IF explore: + project-researcher (broader context)
+  ALWAYS:  gpd-researcher(mode=phase-research), bibliographer
+  IF explore: + gpd-researcher(mode=project-survey) (broader context)
   IF exploit: bibliographer only when current contract, anchors, and prior research already cover the method family
   POST:    consistency-checker (convention import from literature)
 
 formulation:
-  ALWAYS:  phase-researcher → planner → plan-checker → executor
-  IF explore: + research-mapper (map alternative formulations)
+  ALWAYS:  gpd-researcher(mode=phase-research) → planner → plan-checker → executor
+  IF explore: + gpd-researcher(mode=project-map) (map alternative formulations)
   POST:    verifier (dimensional + limiting cases), consistency-checker
 
 derivation:
@@ -69,7 +69,7 @@ numerical:
 
 validation:
   ALWAYS:  verifier (full contract-aware checklist), consistency-checker
-  IF explore: + phase-researcher (find additional cross-checks)
+  IF explore: + gpd-researcher(mode=phase-research) (find additional cross-checks)
   IF exploit: verifier only after the decisive comparison path is already well established
 
 writing:
@@ -82,8 +82,8 @@ writing:
 
 | Setting | Effect on Agent Selection |
 |---|---|
-| `research_mode: explore` | Add phase-researcher and research-mapper to formulation phases. Bibliographer uses broad search (20+ refs). Planner creates parallel plans. Verification can stage breadth over multiple passes, but contract-critical checks stay mandatory. |
-| `research_mode: exploit` | Skip phase-researcher only when the current contract, anchors, and prior outputs already make the method family obvious. Bibliographer uses narrow search (5-10 refs). Planner creates single focused plan. Verification stays full-strength on contract-critical checks and decisive comparisons. |
+| `research_mode: explore` | Add gpd-researcher(mode=phase-research) and gpd-researcher(mode=project-map) to formulation phases. Bibliographer uses broad search (20+ refs). Planner creates parallel plans. Verification can stage breadth over multiple passes, but contract-critical checks stay mandatory. |
+| `research_mode: exploit` | Skip gpd-researcher(mode=phase-research) only when the current contract, anchors, and prior outputs already make the method family obvious. Bibliographer uses narrow search (5-10 refs). Planner creates single focused plan. Verification stays full-strength on contract-critical checks and decisive comparisons. |
 | `research_mode: adaptive` | Start broad, then narrow only after prior decisive evidence or an explicit approach lock shows the method family is stable. Do not switch purely because the phase number increased, a wave completed, or a proxy comparison passed. |
 | `autonomy: supervised` | All agents produce detailed explanations. Orchestrator pauses for user review at every major phase transition, every required bounded gate, and each key decision, but not after every algebraic micro-step. |
 | `autonomy: balanced` | Standard depth. Orchestrator auto-runs routine work and pauses at major decision points, ambiguities, blocker states, or whenever decisive evidence is still missing and the next work would assume it. |
@@ -113,7 +113,7 @@ When verification fails, the failure type determines which agent to re-invoke an
 | **Conservation law violation** (5.6) | verifier | executor | "Conservation of [quantity] is violated. Current value: [X], expected: [Y]. Check the equations of motion and verify that the symmetry generating this conservation law is preserved." |
 | **Math error** (5.8) | verifier | executor | "Step N contains a mathematical error: [details]. Re-derive from step N-1 with CAS verification of each algebraic step." |
 | **Convergence failure** (5.9) | verifier | debugger | "Numerical result did not converge. Current behavior: [description]. Diagnose: (a) grid resolution, (b) iteration count, (c) algorithm stability, (d) parameter regime." |
-| **Literature disagreement** (5.10) | verifier | phase-researcher + executor | "Our result disagrees with [reference]: we get [X], they report [Y]. Investigate: (a) convention difference, (b) different approximation, (c) their error, (d) our error." |
+| **Literature disagreement** (5.10) | verifier | gpd-researcher(mode=phase-research) + executor | "Our result disagrees with [reference]: we get [X], they report [Y]. Investigate: (a) convention difference, (b) different approximation, (c) their error, (d) our error." |
 | **Convention drift** | consistency-checker | notation-coordinator | "Convention drift detected between phase M and phase N: [details]. Trace the convention through all intermediate steps and identify where the change occurred." |
 | **Cross-phase inconsistency** | consistency-checker | executor | "Phase N result is inconsistent with Phase M output: [details]. The Phase M output was: [value]. Re-derive Phase N result using the Phase M output explicitly." |
 | **Statistical inadequacy** (5.12) | verifier | executor | "Statistical error analysis is inadequate: [details]. Re-run with: (a) longer equilibration, (b) more samples, (c) proper autocorrelation analysis, (d) block averaging." |
@@ -139,7 +139,7 @@ On verification failure:
 
 | Condition | Action |
 |---|---|
-| Same check fails twice | Escalate: invoke phase-researcher to investigate alternative approaches |
+| Same check fails twice | Escalate: invoke gpd-researcher(mode=phase-research) to investigate alternative approaches |
 | Three different checks fail | Escalate: re-run full verification. The result may have a fundamental error |
 | Convention drift recurs after fix | Escalate: invoke notation-coordinator for global convention audit |
 | Numerical convergence fails after debugging | Escalate: reconsider the numerical method (invoke planner for alternative approach) |
@@ -204,7 +204,7 @@ Triggered by:
 ```
 On reverse transition:
   1. Log: "Adaptive mode: reverting to explore at phase N due to [reason]"
-  2. Invoke phase-researcher to survey alternative approaches
+  2. Invoke gpd-researcher(mode=phase-research) to survey alternative approaches
   3. Invoke planner to create comparison plans
   4. Resume explore-mode operation
 ```
@@ -223,7 +223,7 @@ Guidance for the orchestrator on how to handle agent-specific patterns.
 | Verifier returns incomplete contract-aware coverage | Re-invoke with remaining checks. Budget a fresh context. |
 | Researcher returns "insufficient literature" | Try: (a) broader search terms, (b) adjacent subfield, (c) web_search with different query. |
 | Planner produces > 8 tasks in one plan | Split: plans with > 8 tasks risk executor context overflow. Split into 2 plans at a natural boundary. |
-| Debugger returns "unknown failure mode" | Escalate to phase-researcher for alternative method. The current approach may be fundamentally unsuitable. |
+| Debugger returns "unknown failure mode" | Escalate to gpd-researcher(mode=phase-research) for alternative method. The current approach may be fundamentally unsuitable. |
 | Bibliographer returns < 3 references | For explore mode: re-invoke with broader search. For exploit: acceptable if the references are the canonical ones. |
 | Paper-writer output fails referee review | Re-invoke paper-writer with specific referee feedback. Do not re-invoke referee — that creates circular loops. |
 

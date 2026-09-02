@@ -1,9 +1,9 @@
 <purpose>
-Construct and fan out executor child tasks for the selected wave.
+Execute the selected wave in the main context or construct fresh executor tasks when isolation has a concrete benefit.
 </purpose>
 
 <stage_boundary>
-This stage owns only `gpd-executor` task construction and fanout. It does not create the wave checkpoint, spawn proof critics, validate child returns, apply return updates, surface completed artifacts, or close child agents from parent inference.
+This stage owns the normal execution route and its bounded return: main-context execution for ordinary `base-model-first` work, or `gpd-executor` task construction and fanout. It does not create the wave checkpoint, spawn proof critics, accept completion, apply return updates, or close child agents from parent inference.
 </stage_boundary>
 
 <process>
@@ -43,12 +43,22 @@ Read `review_cadence`, `research_mode`, `strict_wait`, `never_interrupt_running_
 <step name="dispatch_executor_tasks">
 Pass paths only. Executors read files themselves with fresh context; parent setup does not preload child workflow authority.
 
+Choose the route from `cognitive_profile` and concrete execution facts:
+
+- `classic`: use the fresh `gpd-executor` handoff below.
+- `base-model-first`: execute in the current main context by default so the active scientific problem representation is preserved.
+- Even under `base-model-first`, use a fresh executor when the user explicitly requests isolation, true parallel fanout is selected, an isolated worktree is required, the task is a long unattended batch, or measured context pressure requires a fresh context. Record the concrete trigger; do not spawn only because an executor role exists.
+
+Both routes require the same pre-computation checkpoint, convention lock, scoped plan paths, selected task overlays, proof-redteam boundary, SUMMARY, validators, and state applicator. Main-context execution does not gain shared-state or science-promotion authority.
+
 Canonical runtime delegation convention for every `task()` block in this workflow:
 @{GPD_INSTALL_DIR}/references/orchestration/runtime-delegation-note.md
 The shared note owns runtime-neutral task construction and handoff conventions. This stage only fills the executor-specific payload and enforces handoff gates.
 
 ```
 EXECUTOR_HANDOFF_STARTED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+# classic, or a recorded fresh-executor trigger:
 task(
   subagent_type="gpd-executor",
   model="{executor_model}",
@@ -117,13 +127,21 @@ task(
   ",
   description="Execute phase {phase_number} plan {plan_id}"
 )
+
+# base-model-first ordinary route:
+# Read the same plan, execute-plan workflow, selected overlays, and validation
+# authorities in the current context. Execute only the bounded selected tasks,
+# write the normal SUMMARY, and build MAIN_CONTEXT_EXECUTOR_RETURN with
+# `gpd return skeleton --role executor --status completed --file <each fresh
+# artifact>`. Pass that orchestrator-owned envelope to wave_return_checkpoint.
+# Do not invent a child id or represent this route as independent verification.
 ```
 
 For risky fanout, launch each selected plan only to its first-result gate or bounded segment first. Collect the child checkpoint/return through the downstream return stage before unlocking later fanout. Do not spawn downstream work when the first result is proxy-only, convention-thin, proof-open, or skeptical re-questioning remains unresolved.
 </step>
 
 <step name="route_after_fanout">
-After executor tasks are launched, do not accept completion in this stage.
+After the selected route returns or launches, do not accept completion in this stage.
 
 Route by observed child state:
 - `wave_return_checkpoint` for `completed`, `checkpoint`, malformed, stale, or incomplete executor returns that need child-return handling.

@@ -13,7 +13,7 @@ Also preserve any explicit user requests about observables, deliverables, prior 
 
 **Downstream consumers:**
 
-- `gpd-phase-researcher` — Reads decisions to focus literature review (e.g., "dimensional regularization" -> research dim-reg techniques for this class of integrals)
+- `gpd-researcher` — Reads decisions to focus literature review (e.g., "dimensional regularization" -> research dim-reg techniques for this class of integrals)
 - `gpd-planner` — Reads decisions to create specific tasks (e.g., "Wolff cluster algorithm" -> task includes cluster update implementation)
 
 ---
@@ -325,7 +325,7 @@ The output should answer: "What does the researcher-agent need to investigate in
 **After creation:**
 
 - File lives in phase directory: `GPD/phases/XX-name/{phase}-CONTEXT.md`
-- `gpd-phase-researcher` uses decisions to focus literature investigation
+- `gpd-researcher` uses decisions to focus literature investigation
 - `gpd-planner` uses decisions + research to create executable tasks
 - Downstream agents should NOT need to ask the researcher again about captured decisions
   </guidelines>

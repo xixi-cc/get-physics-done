@@ -34,6 +34,7 @@ Read mode settings:
 
 ```bash
 AUTONOMY=$(gpd --raw config get autonomy 2>/dev/null | gpd json get .value --default supervised 2>/dev/null || echo "supervised")
+COGNITIVE_PROFILE=$(gpd --raw config get cognitive_profile 2>/dev/null | gpd json get .value --default classic 2>/dev/null || echo "classic")
 ```
 
 Run centralized context preflight before continuing:
@@ -173,7 +174,20 @@ Other status literals for this route map: `gpd_return.status: checkpoint`, `gpd_
 
 Do not route on checker-local text markers or headings. Those are presentation only; use the typed return route above.
 
-If the checker's `next_actions` call for notation repair, spawn `gpd-notation-coordinator` with the checker report and the same scope. Keep that handoff thin: the coordinator owns the repair policy, not this workflow.
+If the checker's `next_actions` call for notation repair, classify the repair
+from the report before routing it:
+
+- Under `base-model-first`, apply a direct registry-first repair in the current
+  main context only when the requested change is an exact, unambiguous diff to
+  the canonical convention ledger and does not alter physical meaning. Use
+  `gpd convention set`, update `GPD/CONVENTIONS.md`, and preserve the same
+  autonomy/write boundary.
+- Spawn `gpd-notation-coordinator` under `classic`, for an explicit fresh
+  isolation request, unresolved physical-meaning ambiguity, or cross-source or
+  cross-subfield conflict. Keep that handoff thin and use the same scope: the
+  coordinator owns the ambiguous repair policy, not this workflow.
+- Never infer a convention value from prose merely to keep the main-context
+  route. An uncertain repair remains a checkpoint or fresh independent handoff.
 
 Verify that `GPD/CONVENTIONS.md` exists and that `gpd convention list` reflects the resolved fields before accepting the update. Convention artifact and lock re-verified after notation resolution before success is accepted.
 </step>
@@ -203,7 +217,7 @@ If the checker completed and the artifact gate passed, return the updated report
 - [ ] Expected `CONSISTENCY-CHECK.md` artifact is verified before success is accepted
 - [ ] Routing uses the typed return route
 - [ ] Routing ignores checker prose, headings, and local markers
-- [ ] Notation repair remains delegated to `gpd-notation-coordinator` when requested by the checker
+- [ ] Unambiguous registry repair is direct; ambiguous notation repair remains delegated
 - [ ] Report presented with the selected scope and artifact gate result
 
 </success_criteria>

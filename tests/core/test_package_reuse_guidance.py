@@ -11,7 +11,7 @@ TOOLING_REF = REPO_ROOT / "src" / "gpd" / "specs" / "references" / "tooling" / "
 RESEARCHER_SHARED = (
     REPO_ROOT / "src" / "gpd" / "specs" / "references" / "research" / "researcher-shared.md"
 )
-PHASE_RESEARCHER = REPO_ROOT / "src" / "gpd" / "agents" / "gpd-phase-researcher.md"
+PHASE_RESEARCHER = REPO_ROOT / "src" / "gpd" / "agents" / "gpd-researcher.md"
 PLANNER = REPO_ROOT / "src" / "gpd" / "agents" / "gpd-planner.md"
 EXECUTOR = REPO_ROOT / "src" / "gpd" / "agents" / "gpd-executor.md"
 
@@ -40,14 +40,7 @@ def test_research_prompts_require_reuse_decision_or_bespoke_justification() -> N
 
     assert "search for established packages/frameworks before recommending bespoke code" in researcher_shared
     assert "### Package / Framework Reuse Decision" in phase_researcher
-    assert_prompt_contracts(
-        phase_researcher,
-        *semantic_concept(
-            "phase researcher requires bespoke-code justification",
-            required=("If bespoke code is still recommended",),
-        ),
-    )
-    assert "Package/framework reuse decision documented, or bespoke-code justification recorded" in phase_researcher
+    assert "specific bespoke-code justification" in phase_researcher
 
 
 def test_planner_and_executor_consume_research_package_guidance_without_new_schema() -> None:

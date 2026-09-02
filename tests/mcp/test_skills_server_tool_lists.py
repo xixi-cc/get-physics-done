@@ -33,7 +33,7 @@ def test_get_skill_tool_schema_publishes_transitive_reference_body_opt_in() -> N
     async def _get_schema() -> dict[str, object]:
         tools = await mcp.list_tools()
         tool = next(tool for tool in tools if tool.name == "get_skill")
-        return tool.inputSchema
+        return tool.input_schema
 
     schema = anyio.run(_get_schema)
     opt_in = schema["properties"]["include_transitive_reference_bodies"]

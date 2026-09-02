@@ -8,7 +8,7 @@ This reference is loaded by GPD agents when generating code or recommending comp
 1. **For the planner (gpd-planner):** Which tools are appropriate for the computational task at hand
 2. **For the executor (gpd-executor):** Correct library APIs, idiomatic patterns, and best practices
 3. **For the verifier (gpd-verifier):** How to set up independent numerical checks using alternative tools
-4. **For the researcher (gpd-phase-researcher):** What software ecosystem to investigate for a given problem
+4. **For the researcher (gpd-researcher):** What software ecosystem to investigate for a given problem
    </purpose>
 
 ---

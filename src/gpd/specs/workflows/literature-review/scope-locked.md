@@ -204,7 +204,7 @@ Map the state-of-the-art:
 The reviewer now owns the synthesis pass in fresh context. Use the stage-local scope, anchors, and reference context to write the review and sidecar, rather than synthesizing it inline in the orchestrator.
 
 ```bash
-REVIEWER_MODEL=$(gpd resolve-model gpd-literature-reviewer)
+REVIEWER_MODEL=$(gpd resolve-model gpd-researcher)
 ```
 
 Build the reviewer prompt from the scoped evidence:
@@ -233,6 +233,9 @@ Scoped reference artifact file handles: {reference_artifact_files}
 
 <output>
 Write `GPD/literature/{slug}-REVIEW.md` and `GPD/literature/{slug}-CITATION-SOURCES.json`.
+For authoritative in-scope claims, also write `{slug}-CLAIM-EVIDENCE.json`
+(`EvidenceBundle` v1) with decisive page/equation/figure/data locators and
+scoped links; omit it for standalone reviews.
 </output>
 
 <citation_sidecar_contract>
@@ -245,6 +248,7 @@ write_scope:
   allowed_paths:
     - GPD/literature/{slug}-REVIEW.md
     - GPD/literature/{slug}-CITATION-SOURCES.json
+    - GPD/literature/{slug}-CLAIM-EVIDENCE.json
 expected_artifacts:
   - GPD/literature/{slug}-REVIEW.md
   - GPD/literature/{slug}-CITATION-SOURCES.json
@@ -255,10 +259,10 @@ shared_state_policy: return_only
 ```
 REVIEW_RETURN=$(
 task(
-  subagent_type="gpd-literature-reviewer",
+  subagent_type="gpd-researcher",
   model="{reviewer_model}",
   readonly=false,
-  prompt="First, read {GPD_AGENTS_DIR}/gpd-literature-reviewer.md for your role and instructions.\\n\\n" + review_prompt
+  prompt="First, read {GPD_AGENTS_DIR}/gpd-researcher.md for your role and instructions. Use mode `literature-review`.\\n\\n" + review_prompt
 )
 )
 ```

@@ -2,7 +2,7 @@
 
 Load this reference when contradiction resolution, cross-validation, iterative
 refinement, or detailed SUMMARY.md closeout needs more detail than the base
-research-synthesizer prompt carries.
+`gpd-researcher` synthesis mode carries.
 
 ## Notation Reconciliation
 

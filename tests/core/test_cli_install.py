@@ -48,6 +48,16 @@ _INSTALL_TEST_DESCRIPTORS = iter_runtime_descriptors()
 _PRIMARY_INSTALL_DESCRIPTOR = _INSTALL_TEST_DESCRIPTORS[0]
 _SECONDARY_INSTALL_DESCRIPTOR = _INSTALL_TEST_DESCRIPTORS[1]
 _TERTIARY_INSTALL_DESCRIPTOR = _INSTALL_TEST_DESCRIPTORS[2]
+_PROJECTION_INSTALL_DESCRIPTOR = next(
+    descriptor
+    for descriptor in _INSTALL_TEST_DESCRIPTORS
+    if get_adapter(descriptor.runtime_name).install_projection_profiles
+)
+_NON_PROJECTION_INSTALL_DESCRIPTOR = next(
+    descriptor
+    for descriptor in _INSTALL_TEST_DESCRIPTORS
+    if not get_adapter(descriptor.runtime_name).install_projection_profiles
+)
 _ENV_OVERRIDE_INSTALL_DESCRIPTOR = next(
     descriptor
     for descriptor in _INSTALL_TEST_DESCRIPTORS
@@ -384,6 +394,82 @@ def test_install_all_success_exits_0(tmp_path: Path):
         result = runner.invoke(app, ["install", _PRIMARY_INSTALL_DESCRIPTOR.runtime_name, "--local"])
 
     assert result.exit_code == 0
+
+
+def test_install_projection_forwards_validated_profile(tmp_path: Path) -> None:
+    captured_calls: list[dict[str, object]] = []
+    mock_adapter = _mock_install_adapter(_PROJECTION_INSTALL_DESCRIPTOR)
+    mock_adapter.normalize_install_projection.return_value = "lean"
+
+    def mock_install_single(runtime_name, **kwargs):
+        captured_calls.append({"runtime": runtime_name, **kwargs})
+        return {"runtime": runtime_name, "commands": 5, "agents": 3, "target": str(tmp_path)}
+
+    with (
+        patch("gpd.cli._install_single_runtime", side_effect=mock_install_single),
+        patch("gpd.adapters.get_adapter", return_value=mock_adapter),
+    ):
+        result = runner.invoke(
+            app,
+            [
+                "install",
+                _PROJECTION_INSTALL_DESCRIPTOR.runtime_name,
+                "--local",
+                "--skip-readiness-check",
+                "--projection",
+                "LEAN",
+            ],
+        )
+
+    assert result.exit_code == 0
+    assert captured_calls == [
+        {
+            "runtime": _PROJECTION_INSTALL_DESCRIPTOR.runtime_name,
+            "is_global": False,
+            "target_dir_override": None,
+            "projection_profile": "lean",
+        }
+    ]
+
+
+def test_install_projection_rejects_unknown_profile() -> None:
+    result = runner.invoke(
+        app,
+        [
+            "install",
+            _PROJECTION_INSTALL_DESCRIPTOR.runtime_name,
+            "--local",
+            "--skip-readiness-check",
+            "--projection",
+            "compact",
+        ],
+    )
+
+    assert_cli_human_contract(
+        result,
+        expect_exit=1,
+        required_all=[f"Unknown {_PROJECTION_INSTALL_DESCRIPTOR.display_name} projection profile 'compact'"],
+    )
+
+
+def test_install_projection_rejects_unsupported_runtime() -> None:
+    result = runner.invoke(
+        app,
+        [
+            "install",
+            _NON_PROJECTION_INSTALL_DESCRIPTOR.runtime_name,
+            "--local",
+            "--skip-readiness-check",
+            "--projection",
+            "lean",
+        ],
+    )
+
+    assert_cli_human_contract(
+        result,
+        expect_exit=1,
+        required_all=[f"{_NON_PROJECTION_INSTALL_DESCRIPTOR.display_name} does not support install projections"],
+    )
 
 
 def test_install_banner_uses_display_names(tmp_path: Path):
@@ -1368,6 +1454,55 @@ def test_install_single_runtime_forwards_is_global(tmp_path: Path):
     assert len(captured_calls) == 1
     assert captured_calls[0]["is_global"] is False
     assert captured_calls[0]["explicit_target"] is False
+
+
+def test_install_single_runtime_forwards_adapter_owned_projection(tmp_path: Path) -> None:
+    """The selected adapter owns projection validation and install keywords."""
+    from gpd.cli import _install_single_runtime
+
+    captured_calls: list[dict[str, object]] = []
+    descriptor = _PROJECTION_INSTALL_DESCRIPTOR
+
+    class SpyAdapter:
+        runtime_name = descriptor.runtime_name
+        display_name = descriptor.display_name
+        config_dir_name = descriptor.config_dir_name
+        help_command = _install_adapter(descriptor).help_command
+
+        def resolve_target_dir(self, is_global, cwd=None):
+            return _install_target(tmp_path, descriptor)
+
+        def install_projection_kwargs(self, value):
+            return {"projection_profile": value}
+
+        def install(
+            self,
+            gpd_root,
+            target_dir,
+            *,
+            is_global=False,
+            explicit_target=False,
+            projection_profile="full",
+        ):
+            captured_calls.append(
+                {
+                    "is_global": is_global,
+                    "explicit_target": explicit_target,
+                    "projection_profile": projection_profile,
+                }
+            )
+            return {"runtime": descriptor.runtime_name, "commands": 0, "agents": 0}
+
+        def finalize_install(self, install_result, *, force_statusline=False):
+            return None
+
+    with (
+        patch("gpd.adapters.get_adapter", return_value=SpyAdapter()),
+        patch("gpd.cli._get_cwd", return_value=tmp_path),
+    ):
+        _install_single_runtime(descriptor.runtime_name, is_global=False, projection_profile="lean")
+
+    assert captured_calls == [{"is_global": False, "explicit_target": False, "projection_profile": "lean"}]
 
 
 def test_install_single_runtime_prefers_checkout_source_tree(tmp_path: Path):

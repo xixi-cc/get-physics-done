@@ -81,8 +81,9 @@ class TestEnums:
 
 
 class TestModelProfiles:
-    def test_all_24_agents_present(self):
-        assert len(MODEL_PROFILES) == 24
+    def test_consolidated_agent_profiles_present(self):
+        assert len(MODEL_PROFILES) == 20
+        assert "gpd-researcher" in MODEL_PROFILES
 
     def test_all_agents_have_5_profiles(self):
         profiles = {profile.value for profile in ModelProfile}
@@ -94,10 +95,10 @@ class TestModelProfiles:
         for profile, tier in MODEL_PROFILES["gpd-planner"].items():
             assert tier == ModelTier.TIER_1, f"planner {profile} should be tier-1"
 
-    def test_research_mapper_mostly_tier_3(self):
-        tiers = MODEL_PROFILES["gpd-research-mapper"]
-        assert tiers["deep-theory"] == ModelTier.TIER_2
-        assert tiers["numerical"] == ModelTier.TIER_3
+    def test_researcher_keeps_capable_tiers_for_load_bearing_research(self):
+        tiers = MODEL_PROFILES["gpd-researcher"]
+        assert tiers["deep-theory"] == ModelTier.TIER_1
+        assert tiers["numerical"] == ModelTier.TIER_1
 
     def test_agent_default_tiers_match_agents(self):
         assert set(AGENT_DEFAULT_TIERS.keys()) == set(MODEL_PROFILES.keys())
@@ -128,12 +129,30 @@ class TestGPDProjectConfigDefaults:
         assert cfg.branching_strategy == BranchingStrategy.NONE
         assert cfg.model_overrides is None
 
+    def test_workflow_auto_policy_is_accepted_without_changing_boolean_defaults(self):
+        cfg = GPDProjectConfig(
+            research="auto",
+            plan_checker="auto",
+            verifier="auto",
+            checkpoint_before_downstream_dependent_tasks="auto",
+        )
+
+        assert cfg.research == "auto"
+        assert cfg.plan_checker == "auto"
+        assert cfg.verifier == "auto"
+        assert cfg.checkpoint_before_downstream_dependent_tasks == "auto"
+
+    @pytest.mark.parametrize("field", ["research", "plan_checker", "verifier"])
+    def test_workflow_auto_policy_rejects_unknown_strings(self, field: str):
+        with pytest.raises(ValueError):
+            GPDProjectConfig(**{field: "sometimes"})
+
 
 class TestConfigKeyContracts:
     def test_supported_config_keys_are_writable_aliases_only(self) -> None:
         keys = supported_config_keys()
 
-        assert len(keys) == 41
+        assert len(keys) == 42
         assert all(section not in keys for section in ("execution", "workflow", "git"))
         assert {
             "execution.review_cadence": "review_cadence",
@@ -198,6 +217,18 @@ class TestConfigKeyContracts:
         updated, canonical = apply_config_update({"workflow": {"research": False}}, "workflow.research", True)
         assert canonical == "research"
         assert updated == {"research": True}
+
+        updated, canonical = apply_config_update({"workflow": {"research": True}}, "workflow.research", "auto")
+        assert canonical == "research"
+        assert updated == {"research": "auto"}
+
+        updated, canonical = apply_config_update(
+            {"execution": {"checkpoint_before_downstream_dependent_tasks": True}},
+            "execution.checkpoint_before_downstream_dependent_tasks",
+            "auto",
+        )
+        assert canonical == "checkpoint_before_downstream_dependent_tasks"
+        assert updated == {"execution": {"checkpoint_before_downstream_dependent_tasks": "auto"}}
 
         updated, canonical = apply_config_update(
             {
@@ -816,17 +847,17 @@ class TestResolveTier:
     def test_project_resolve_tier_uses_profile(self, tmp_path: Path):
         (tmp_path / "GPD").mkdir()
         (tmp_path / "GPD" / "config.json").write_text(json.dumps({"model_profile": "paper-writing"}), encoding="utf-8")
-        tier = resolve_tier(tmp_path, "gpd-project-researcher")
-        assert tier == ModelTier.TIER_3
+        tier = resolve_tier(tmp_path, "gpd-researcher")
+        assert tier == ModelTier.TIER_2
 
     def test_phase_researcher_resolve_tier_defaults_to_tier_2(self, tmp_path: Path) -> None:
         (tmp_path / "GPD").mkdir()
         (tmp_path / "GPD" / "config.json").write_text("{}", encoding="utf-8")
 
-        tier = resolve_tier(tmp_path, "gpd-phase-researcher")
+        tier = resolve_tier(tmp_path, "gpd-researcher")
 
         assert tier == ModelTier.TIER_2
 
     def test_project_researcher_agent_tier_tracks_profile_specific_overrides(self) -> None:
-        assert resolve_agent_tier("gpd-project-researcher", ModelProfile.REVIEW) == ModelTier.TIER_2
-        assert resolve_agent_tier("gpd-project-researcher", ModelProfile.PAPER_WRITING) == ModelTier.TIER_3
+        assert resolve_agent_tier("gpd-researcher", ModelProfile.REVIEW) == ModelTier.TIER_2
+        assert resolve_agent_tier("gpd-researcher", ModelProfile.PAPER_WRITING) == ModelTier.TIER_2

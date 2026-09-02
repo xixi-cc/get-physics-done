@@ -61,7 +61,7 @@ def test_research_phase_stage_manifest_tracks_visible_runtime_delegation_authori
 
 def test_research_phase_prompt_budget_keeps_the_vertical_reasonably_tight() -> None:
     agent_metrics = measure_prompt_surface(
-        AGENTS_DIR / "gpd-phase-researcher.md",
+        AGENTS_DIR / "gpd-researcher.md",
         src_root=SOURCE_ROOT,
         path_prefix=PATH_PREFIX,
     )
