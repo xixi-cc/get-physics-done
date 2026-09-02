@@ -15,8 +15,8 @@ import subprocess
 import sys
 from copy import deepcopy
 
+from gpd.mcp.arxiv_contract import ADVERTISED_TOOL_NAMES, DOWNLOAD_SOURCE_TOOL_NAME, UPSTREAM_CORE_TOOL_NAMES
 from gpd.mcp.descriptor_text import SKILLS_SERVER_DESCRIPTION
-from gpd.mcp.servers.arxiv_bridge import ADVERTISED_TOOL_NAMES, DOWNLOAD_SOURCE_TOOL_NAME, UPSTREAM_CORE_TOOL_NAMES
 from gpd.mcp.verification_contract_policy import verification_server_description
 
 logger = logging.getLogger(__name__)

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import copy
 import json
+import subprocess
 import sys
 from pathlib import Path
 from types import SimpleNamespace
@@ -317,6 +318,23 @@ def _tool_description_and_schema(tool_name: str) -> tuple[str, dict[str, object]
 
 class TestBuiltinServerDescriptors:
     """Tests for public built-in MCP server descriptor metadata."""
+
+    def test_descriptor_registry_does_not_import_optional_arxiv_runtime(self):
+        probe = subprocess.run(
+            [
+                sys.executable,
+                "-c",
+                (
+                    "import sys; import gpd.mcp.builtin_servers as b; "
+                    "assert 'gpd.mcp.servers.arxiv_bridge' not in sys.modules; "
+                    "assert b.build_public_descriptors()['gpd-arxiv']['capabilities']"
+                ),
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        assert probe.returncode == 0, probe.stderr
 
     def test_public_descriptor_prerequisites_are_runtime_neutral(self):
         from gpd.mcp.builtin_servers import build_public_descriptors
