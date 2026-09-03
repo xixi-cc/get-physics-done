@@ -3,7 +3,7 @@
 ### Built by physicists, for physicists
 
 <p align="center">
-  <a href="https://github.com/psi-oss/get-physics-done/actions/workflows/test.yml"><img alt="CI" src="https://github.com/psi-oss/get-physics-done/actions/workflows/test.yml/badge.svg"></a>
+  <a href="https://github.com/xixi-cc/get-physics-done/actions/workflows/test.yml"><img alt="CI" src="https://github.com/xixi-cc/get-physics-done/actions/workflows/test.yml/badge.svg?branch=main"></a>
   <a href="https://github.com/psi-oss/get-physics-done/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/badge/License-Apache_2.0-d4d4d8?style=flat&labelColor=3f3f46"></a>
   <a href="https://www.python.org/downloads/"><img alt="Python 3.11+" src="https://img.shields.io/badge/Python-3.11%2B-ffd43b?style=flat&labelColor=3776ab&logo=python&logoColor=white"></a>
   <a href="https://pypi.org/project/get-physics-done/"><img alt="PyPI" src="https://img.shields.io/pypi/v/get-physics-done?style=flat&logo=pypi&logoColor=white&labelColor=3775a9&color=ffd43b"></a>
@@ -18,6 +18,8 @@
 </p>
 
 Get Physics Done is an open-source agentic AI system for physics research from [Physical Superintelligence PBC (PSI)](https://www.psi.inc), released as a community contribution. GPD helps turn a research question into a structured workflow: scope the problem, plan the work, derive results, verify them, and package the output.
+
+This research fork is maintained by [xncao (xixi-cc)](https://github.com/xixi-cc) and carries tested extensions for research evidence, executable verification, leaner agent prompts, and evidence-aware task model routing.
 
 https://github.com/user-attachments/assets/e79f8153-c0bd-484f-b69e-da8f142649e0
 
