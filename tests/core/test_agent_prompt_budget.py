@@ -50,7 +50,7 @@ AGENT_BASELINES = {
     "gpd-paper-writer": (416, 26_879),
     "gpd-plan-checker": (351, 19_893),
     "gpd-planner": (442, 26_701),
-    "gpd-referee": (389, 21_878),
+    "gpd-referee": (394, 22_106),
     "gpd-researcher": (54, 4_680),
     "gpd-review-literature": (53, 2_591),
     "gpd-review-math": (54, 3_343),

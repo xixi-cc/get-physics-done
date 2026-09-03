@@ -210,7 +210,8 @@ Use domain-specific expectations from the playbook when the paper requires speci
 <execution_flow>
 First classify initial versus revision review from the invoking workflow's
 subject-aware state. It binds selected roots, candidate round, and concrete
-report/response paths; never scan global `GPD/` filenames to infer state. Enter
+report/response paths. Do not infer revision state by scanning global `GPD/`
+filenames. Enter
 Revision Review Mode only when a matching paired response package exists for the
 same round: a same-suffix report plus both matching responses.
 If one response artifact is missing, suffixes disagree, or the latest round is
@@ -259,8 +260,10 @@ Stage 6 writable allowlist (write only the subset applicable to the current run)
 - `${selected_review_root}/REFEREE-DECISION{round_suffix}.json`
 - `${selected_publication_root}/CONSISTENCY-REPORT.md` only as a diagnostic sidecar when needed
 
-Anything else is out of scope. Never rewrite selected-root `CLAIMS`, `STAGE-*`,
-or `PROOF-REDTEAM` inputs; inconsistency returns `blocked`, not a repair.
+Anything else is out of scope. In particular, never rewrite `${selected_review_root}/CLAIMS{round_suffix}.json`,
+any `${selected_review_root}/STAGE-*.json`, or
+`${selected_review_root}/PROOF-REDTEAM{round_suffix}.md`; inconsistency returns
+`blocked`, not a repair: return `blocked` instead of repairing.
 
 Align recommendation, confidence, issue IDs/counts, blockers, and unresolved
 items across artifacts. Markdown owns YAML `actionable_items`; every major
@@ -300,7 +303,8 @@ responses produce R3. Maximum 3 rounds.
 Read all three same-round artifacts and fail closed on divergent IDs,
 classifications, statuses, or suffixes. Classify each issue as `resolved`,
 `partially-resolved`, `unresolved`, or `new-issue`; a claimed fix remains
-unresolved until located and independently checked. Recheck changed content for
+unresolved until the fixed content is on disk, located, and independently
+checked. Recheck changed content for
 dimensions, limits, numerics, conventions, and regressions; do not redo
 unaffected satisfactory dimensions.
 
@@ -370,9 +374,10 @@ gpd_return:
 The return file list may name only paths produced in this Stage 6 run and allowed by `<report_format>`. Upstream `CLAIMS`, `STAGE-*`, and `PROOF-REDTEAM` inputs are read-only evidence and must never appear. For upstream-artifact `blocked` returns, keep the list empty unless this run wrote a `CONSISTENCY-REPORT.md` diagnostic sidecar.
 </structured_returns>
 <review_boundary_reminders>
-- Do not modify or repair upstream staged inputs. Stage 6 owns only the
+- Do NOT modify upstream staged-review inputs or repair them. Stage 6 owns only the
   allowlisted review artifacts; keep the return file list to changed Stage 6
-  outputs. Inconsistencies return `blocked` with the earliest failing stage.
+  outputs. Inconsistencies return `gpd_return.status: blocked` with the earliest
+  failing stage.
 - Do not rewrite derivations, run expensive computations, or commit. Give fair,
   specific fixes and distinguish major from minor issues.
 </review_boundary_reminders>
