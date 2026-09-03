@@ -1,9 +1,9 @@
 <purpose>
-Execute the selected wave in the main context or construct fresh executor tasks when isolation has a concrete benefit.
+Execute the wave locally or create fresh executor tasks when isolation helps.
 </purpose>
 
 <stage_boundary>
-This stage owns the normal execution route and its bounded return: main-context execution for ordinary `base-model-first` work, or `gpd-executor` task construction and fanout. It does not create the wave checkpoint, spawn proof critics, accept completion, apply return updates, or close child agents from parent inference.
+This stage routes bounded work to the main context or fresh executors. It does not create checkpoints, spawn proof critics, accept completion, apply returns, or infer child closure.
 </stage_boundary>
 
 <process>
@@ -11,7 +11,7 @@ This stage owns the normal execution route and its bounded return: main-context 
 <stage_policy>
 `workflows/execute-plan.md` is a child-readable workflow path inside executor prompts, not parent eager authority for this stage. The parent carries route metadata, not the full plan-local execution workflow.
 
-Executor children must receive enough context to execute rigorously, write their SUMMARY, and return structured state updates. They must not write `GPD/STATE.md` directly; durable return application belongs to the return/checkpoint stage.
+Children receive the scoped execution context, write SUMMARY, and return structured updates. Only the return/checkpoint stage writes `GPD/STATE.md`.
 </stage_policy>
 
 <step name="refresh_executor_dispatch_context">
@@ -33,23 +33,36 @@ Require the `wave_dispatch` route record and a wave checkpoint tag before any ex
 
 Within a wave: parallel if `PARALLELIZATION=true` AND `FORCE_SEQUENTIAL=false`, sequential otherwise. Honor serialization decisions from wave planning and convention preflight.
 
-Read `review_cadence`, `research_mode`, `strict_wait`, `never_interrupt_running_workers`, and `never_auto_close_child_agents` from the staged payload/config:
-- `strict_wait=true` disables unattended-minute cutoffs entirely.
-- `never_interrupt_running_workers=true` means parent checkpoint/review timing waits for natural child completion unless the child itself checkpoints or fails.
-- `never_auto_close_child_agents=true` forbids synthesizing child completion from files, commits, partial output, or parent confidence.
-- `review_cadence=dense` and `autonomy=supervised` require the first-result/pre-fanout gates selected by wave planning; they still checkpoint at task/gate boundaries, not algebraic micro-steps.
+Read `review_cadence`, `research_mode`, `platform`, `strict_wait`, `never_interrupt_running_workers`, and `never_auto_close_child_agents`; bind `platform` as `PLATFORM`.
+- `strict_wait` removes unattended cutoffs; `never_interrupt_running_workers` waits for a child result.
+- `never_auto_close_child_agents` forbids inferred completion.
+- `review_cadence=dense` and `autonomy=supervised` keep selected gates at task boundaries, not algebraic micro-steps.
 </step>
 
 <step name="dispatch_executor_tasks">
 Pass paths only. Executors read files themselves with fresh context; parent setup does not preload child workflow authority.
 
+For each segment, derive `TaskExecutionFacts` only from its plan, contract,
+tests, and selected overlays, then run:
+
+```bash
+TASK_MODEL_POLICY=$(gpd --raw resolve-task-policy \
+  --runtime "${PLATFORM}" \
+  --facts-json "${TASK_EXECUTION_FACTS_JSON}")
+```
+
+Set `facts_complete` only when all requested facts are established. Honor the
+returned route and persist the policy. Only a new contract/oracle failure may
+use its single upward escalation; children cannot reclassify themselves. Omit
+empty/unsupported `reasoning_effort`; never encode it in a model string.
+
 Choose the route from `cognitive_profile` and concrete execution facts:
 
 - `classic`: use the fresh `gpd-executor` handoff below.
 - `base-model-first`: execute in the current main context by default so the active scientific problem representation is preserved.
-- Even under `base-model-first`, use a fresh executor when the user explicitly requests isolation, true parallel fanout is selected, an isolated worktree is required, the task is a long unattended batch, or measured context pressure requires a fresh context. Record the concrete trigger; do not spawn only because an executor role exists.
+- Even under `base-model-first`, use a fresh executor when enforced routing selects tier-2 or tier-3, the user explicitly requests isolation, true parallel fanout is selected, an isolated worktree is required, the task is a long unattended batch, or measured context pressure requires a fresh context. Record the concrete trigger; do not spawn only because an executor role exists.
 
-Both routes require the same pre-computation checkpoint, convention lock, scoped plan paths, selected task overlays, proof-redteam boundary, SUMMARY, validators, and state applicator. Main-context execution does not gain shared-state or science-promotion authority.
+Both routes retain the checkpoint, conventions, scoped plan/overlays, proof-redteam boundary, SUMMARY, validators, and state applicator. Main-context execution does not gain shared-state or science-promotion authority.
 
 Canonical runtime delegation convention for every `task()` block in this workflow:
 @{GPD_INSTALL_DIR}/references/orchestration/runtime-delegation-note.md
@@ -61,7 +74,8 @@ EXECUTOR_HANDOFF_STARTED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 # classic, or a recorded fresh-executor trigger:
 task(
   subagent_type="gpd-executor",
-  model="{executor_model}",
+  model="{TASK_MODEL_POLICY.dispatch_model}",
+  reasoning_effort="{TASK_MODEL_POLICY.dispatch_reasoning_effort}",
   readonly=false,
   prompt="First, read {GPD_AGENTS_DIR}/gpd-executor.md for your role and instructions.
 

@@ -2965,6 +2965,7 @@ def _config_to_dict(cfg: GPDProjectConfig) -> dict:
         "review_cadence": str(cfg.review_cadence.value),
         "research_mode": str(cfg.research_mode.value),
         "cognitive_profile": str(cfg.cognitive_profile.value),
+        "model_routing_mode": cfg.model_routing_mode,
         "commit_docs": cfg.commit_docs,
         "branching_strategy": str(cfg.branching_strategy.value),
         "phase_branch_template": cfg.phase_branch_template,

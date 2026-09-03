@@ -506,11 +506,43 @@ Valid runtime keys are `claude-code`, `codex`, `gemini`, `copilot-cli`, and `ope
 
 </details>
 
+### Task-aware routing
+
+Execution can resolve a model separately for each bounded task segment. The
+router uses explicit plan and verification facts rather than asking another
+model to classify the task. It keeps proof-bearing, load-bearing, open-ended,
+scientifically interpretive, ambiguous, project-wide, and incomplete work at
+`tier-1`; bounded work with a real verification path can use `tier-2`; local
+deterministic work with full schema, Python, pytest, or numeric-tolerance
+verification can use `tier-3` or a tool-only route.
+
+The default is `shadow`: GPD reports the recommendation but keeps dispatch on
+`tier-1`, so a project can collect representative evidence before saving cost.
+Enable routing per project only after reviewing those decisions:
+
+```json
+{
+  "execution": {
+    "model_routing_mode": "enforce"
+  }
+}
+```
+
+For Codex, the built-in task-routing defaults are `gpt-5.6-sol` with medium
+reasoning for tier 1, `gpt-5.6-terra` with medium reasoning for tier 2, and
+`gpt-5.6-luna` with low reasoning for tier 3. Explicit project tier overrides
+still win. One contract or oracle failure may promote a task by one tier;
+another failure checkpoints instead of repeatedly escalating or oscillating.
+
 ## Advanced CLI Utilities
 
 The `gpd` CLI also includes machine-readable validation, observability, and tracing commands for automation, review-grade checks, and debugging.
 
 Typed command metadata is not review-only. `gpd validate command-context` exposes the shared command applicability surface for public commands, while `gpd validate review-contract` and `gpd validate review-preflight` are the current specialized typed surfaces for commands that expose review/publication contracts.
+
+`gpd resolve-task-policy --facts-file <task-facts.json> --mode shadow` exposes
+the exact route, model, effort, policy version, fingerprint, reason codes, and
+verification path without making a model call.
 
 <details>
 <summary><strong>Validation commands</strong></summary>

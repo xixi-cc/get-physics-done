@@ -10863,7 +10863,7 @@ def slug(
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-# resolve-tier / resolve-model — Agent tier + runtime model resolution
+# resolve-tier / resolve-model / resolve-task-policy — Model resolution
 # ═══════════════════════════════════════════════════════════════════════════
 
 
@@ -10967,6 +10967,61 @@ def resolve_model_cmd(
         _output(resolved_model)
     except ConfigError as exc:
         _error(str(exc))
+
+
+@app.command("resolve-task-policy")
+def resolve_task_policy_cmd(
+    facts_json: str | None = typer.Option(
+        None,
+        "--facts-json",
+        help="TaskExecutionFacts JSON object. Use --facts-file for larger payloads.",
+    ),
+    facts_file: Path | None = typer.Option(
+        None,
+        "--facts-file",
+        exists=True,
+        file_okay=True,
+        dir_okay=False,
+        readable=True,
+        help="Path to a TaskExecutionFacts JSON file.",
+    ),
+    runtime: str | None = typer.Option(None, "--runtime", help=_runtime_override_help()),
+    mode: str | None = typer.Option(
+        None,
+        "--mode",
+        help="Routing mode override: shadow or enforce. Defaults to project config.",
+    ),
+) -> None:
+    """Resolve an auditable task-segment model policy.
+
+    The command performs no model call. Unknown or incomplete facts resolve to
+    tier-1; shadow mode reports cheaper recommendations while dispatching the
+    tier-1 baseline.
+    """
+    from gpd.core.config import load_config
+    from gpd.core.context import _detect_platform as detect_context_runtime
+    from gpd.core.model_routing import (
+        RoutingMode,
+        TaskExecutionFacts,
+        resolve_project_task_execution_policy,
+    )
+
+    if (facts_json is None) == (facts_file is None):
+        _error("Provide exactly one of --facts-json or --facts-file.")
+    try:
+        raw_facts = facts_json if facts_json is not None else facts_file.read_text(encoding="utf-8")
+        facts = TaskExecutionFacts.model_validate_json(raw_facts)
+        routing_mode = RoutingMode(mode or load_config(_get_cwd()).model_routing_mode)
+        effective_runtime = runtime or detect_context_runtime(_get_cwd())
+        decision = resolve_project_task_execution_policy(
+            _get_cwd(),
+            facts,
+            runtime=effective_runtime,
+            mode=routing_mode,
+        )
+    except (OSError, PydanticValidationError, ValueError, ConfigError) as exc:
+        _error(str(exc))
+    _output(decision.model_dump(mode="json"))
 
 
 # ═══════════════════════════════════════════════════════════════════════════

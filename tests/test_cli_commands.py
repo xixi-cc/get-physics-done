@@ -7851,6 +7851,107 @@ def test_resolve_model_keeps_blank_stdout_by_default_when_no_override(
     assert result.output == ""
 
 
+def test_resolve_task_policy_exposes_codex_model_and_effort(gpd_project: Path) -> None:
+    facts = {
+        "role": "gpd-executor",
+        "segment_id": "02-implementation",
+        "task_shape": "bounded-implementation",
+        "facts_complete": True,
+        "verification_kind": "pytest",
+        "verification_coverage": "full",
+    }
+
+    result = runner.invoke(
+        app,
+        [
+            "--raw",
+            "--cwd",
+            str(gpd_project),
+            "resolve-task-policy",
+            "--runtime",
+            "codex",
+            "--mode",
+            "enforce",
+            "--facts-json",
+            json.dumps(facts),
+        ],
+        catch_exceptions=False,
+    )
+
+    payload = json_output_from_result(result)
+    assert payload["recommended_tier"] == "tier-2"
+    assert payload["dispatch_model"] == "gpt-5.6-terra"
+    assert payload["dispatch_reasoning_effort"] == "medium"
+    assert payload["policy_version"] == "research-floor-v1"
+
+
+def test_resolve_task_policy_shadow_keeps_sol_baseline(gpd_project: Path) -> None:
+    facts = {
+        "role": "gpd-executor",
+        "segment_id": "metadata",
+        "task_shape": "deterministic",
+        "facts_complete": True,
+        "deterministic_transform": True,
+        "verification_kind": "schema",
+        "verification_coverage": "full",
+    }
+
+    result = runner.invoke(
+        app,
+        [
+            "--raw",
+            "--cwd",
+            str(gpd_project),
+            "resolve-task-policy",
+            "--runtime",
+            "codex",
+            "--facts-json",
+            json.dumps(facts),
+        ],
+        catch_exceptions=False,
+    )
+
+    payload = json_output_from_result(result)
+    assert payload["recommended_model"] == "gpt-5.6-luna"
+    assert payload["recommended_reasoning_effort"] == "low"
+    assert payload["dispatch_model"] == "gpt-5.6-sol"
+    assert payload["dispatch_reasoning_effort"] == "medium"
+
+
+def test_resolve_task_policy_uses_project_routing_mode(gpd_project: Path) -> None:
+    config_path = gpd_project / "GPD" / "config.json"
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+    config["execution"] = {"model_routing_mode": "enforce"}
+    config_path.write_text(json.dumps(config), encoding="utf-8")
+    facts = {
+        "role": "gpd-executor",
+        "segment_id": "bounded-change",
+        "task_shape": "bounded-implementation",
+        "facts_complete": True,
+        "verification_kind": "pytest",
+        "verification_coverage": "full",
+    }
+
+    result = runner.invoke(
+        app,
+        [
+            "--raw",
+            "--cwd",
+            str(gpd_project),
+            "resolve-task-policy",
+            "--runtime",
+            "codex",
+            "--facts-json",
+            json.dumps(facts),
+        ],
+        catch_exceptions=False,
+    )
+
+    payload = json_output_from_result(result)
+    assert payload["mode"] == "enforce"
+    assert payload["dispatch_model"] == "gpt-5.6-terra"
+
+
 @pytest.mark.parametrize(
     "command_name",
     ["new-project", "verify-work", "plan-phase", "quick", "execute-phase"],

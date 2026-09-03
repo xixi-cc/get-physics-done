@@ -40,6 +40,7 @@ __all__ = [
     "resolve_agent_tier",
     "resolve_tier",
     "resolve_model",
+    "resolve_tier_model",
     "supported_config_keys",
     "validate_agent_name",
 ]
@@ -328,6 +329,7 @@ class GPDProjectConfig(BaseModel):
     review_cadence: ReviewCadence = ReviewCadence.DENSE
     research_mode: ResearchMode = ResearchMode.BALANCED
     cognitive_profile: CognitiveProfile = CognitiveProfile.CLASSIC
+    model_routing_mode: Literal["shadow", "enforce"] = "shadow"
 
     # Workflow toggles
     commit_docs: bool = True
@@ -439,6 +441,12 @@ def _enum_value(value: object) -> object:
 _CONFIG_KEY_DESCRIPTORS: tuple[_ConfigKeyDescriptor, ...] = (
     _ConfigKeyDescriptor("model_profile", ("model_profile",)),
     _ConfigKeyDescriptor("cognitive_profile", ("cognitive_profile",)),
+    _ConfigKeyDescriptor(
+        "model_routing_mode",
+        ("model_routing_mode",),
+        section="execution",
+        storage_path=("execution", "model_routing_mode"),
+    ),
     _ConfigKeyDescriptor("autonomy", ("autonomy",)),
     _ConfigKeyDescriptor(
         "review_cadence",
@@ -937,3 +945,30 @@ def resolve_model(project_dir: Path, agent_name: str, runtime: str | None = None
     if not runtime_overrides:
         return None
     return runtime_overrides.get(tier)
+
+
+@instrument_gpd_function("config.resolve_tier_model")
+def resolve_tier_model(project_dir: Path, tier: ModelTier | str, runtime: str | None = None) -> str | None:
+    """Resolve one explicit runtime model override by tier.
+
+    Task-aware routing uses this path after it has computed a capability floor;
+    legacy role/profile resolution remains available through :func:`resolve_model`.
+    """
+
+    if not runtime:
+        return None
+    try:
+        normalized_tier = tier if isinstance(tier, ModelTier) else ModelTier(tier)
+    except ValueError as exc:
+        supported = ", ".join(sorted(_VALID_MODEL_TIER_VALUES))
+        raise ConfigError(f"Unknown model tier {tier!r}. Supported: {supported}") from exc
+
+    normalized_runtime = normalize_runtime_name(runtime)
+    if normalized_runtime is None or normalized_runtime not in _valid_runtime_names():
+        supported = ", ".join(sorted(_valid_runtime_names()))
+        raise ConfigError(f"Unknown runtime {runtime!r}. Supported runtimes: {supported}")
+    config = load_config(project_dir)
+    runtime_overrides = (config.model_overrides or {}).get(normalized_runtime)
+    if not runtime_overrides:
+        return None
+    return runtime_overrides.get(normalized_tier.value)

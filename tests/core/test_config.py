@@ -26,6 +26,7 @@ from gpd.core.config import (
     resolve_agent_tier,
     resolve_model,
     resolve_tier,
+    resolve_tier_model,
     supported_config_keys,
 )
 from gpd.core.errors import ConfigError
@@ -117,6 +118,7 @@ class TestGPDProjectConfigDefaults:
         assert cfg.autonomy == AutonomyMode.SUPERVISED
         assert cfg.review_cadence == ReviewCadence.DENSE
         assert cfg.research_mode == ResearchMode.BALANCED
+        assert cfg.model_routing_mode == "shadow"
         assert cfg.commit_docs is True
         assert cfg.parallelization is True
         assert cfg.max_unattended_minutes_per_plan == 15
@@ -152,7 +154,7 @@ class TestConfigKeyContracts:
     def test_supported_config_keys_are_writable_aliases_only(self) -> None:
         keys = supported_config_keys()
 
-        assert len(keys) == 42
+        assert len(keys) == 44
         assert all(section not in keys for section in ("execution", "workflow", "git"))
         assert {
             "execution.review_cadence": "review_cadence",
@@ -179,6 +181,7 @@ class TestConfigKeyContracts:
             True,
             {
                 "review_cadence": "dense",
+                "model_routing_mode": "shadow",
                 "max_unattended_minutes_per_plan": 15,
                 "max_unattended_minutes_per_wave": 30,
                 "checkpoint_after_n_tasks": 1,
@@ -724,6 +727,16 @@ class TestResolveAgentTier:
     def test_executor_numerical(self):
         tier = resolve_agent_tier("gpd-executor", "numerical")
         assert tier == ModelTier.TIER_2
+
+    def test_resolve_tier_model_uses_explicit_runtime_override(self, tmp_path: Path):
+        runtime_name = _RUNTIME_DESCRIPTORS[0].runtime_name
+        (tmp_path / "GPD").mkdir()
+        (tmp_path / "GPD" / "config.json").write_text(
+            json.dumps({"model_overrides": {runtime_name: {"tier-3": "fast-model"}}}),
+            encoding="utf-8",
+        )
+
+        assert resolve_tier_model(tmp_path, ModelTier.TIER_3, runtime=runtime_name) == "fast-model"
 
     def test_unknown_agent_raises(self):
         with pytest.raises(ConfigError, match="Unknown agent 'gpd-unknown'"):
