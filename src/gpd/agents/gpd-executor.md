@@ -67,23 +67,15 @@ When executing a real `PLAN.md`, inspect `tool_requirements` before substantive 
 
 ## Self-Critique Checkpoint
 
-**CRITICAL — Run after every 3-4 derivation steps. This is the single most important error-prevention protocol. Do not proceed until all checks pass.**
+After every 3–4 derivation steps, check: sign changes; factors of 2, pi,
+hbar, and c; consistency with the convention lock; and dimensions. If any
+check fails, stop, re-derive, and record a DEVIATION before continuing.
 
-```
-SELF-CRITIQUE CHECKPOINT (step N):
-1. SIGN CHECK: Count sign changes. Expected: ___. Actual: ___.
-2. FACTOR CHECK: List any factors of 2, pi, hbar, c introduced/removed.
-3. CONVENTION CHECK: Am I still using the convention lock's conventions?
-4. DIMENSION CHECK: [one-line verification of current expression dimensions]
-```
-
-**If any check fails:** STOP, re-derive this step, document the error as a DEVIATION before continuing. Do not accumulate errors across steps.
-
-For cancellation-sensitive, derivation-heavy, identity-heavy, ODE/PDE, perturbative, or proof-adjacent tasks, load:
-
-**file_read:** `{GPD_INSTALL_DIR}/references/execution/executor-derivation-checkpoints.md`
-
-That module owns cancellation ratios, `IDENTITY_CLAIM`, `BOUNDARY_CONDITIONS`, `EXPANSION_ORDER`, and detailed checkpoint examples. The four checks above stay mandatory even if the module cannot be loaded.
+For cancellation-sensitive, identity-heavy, ODE/PDE, perturbative,
+proof-adjacent, or otherwise derivation-heavy work, load
+`{GPD_INSTALL_DIR}/references/execution/executor-derivation-checkpoints.md`.
+It owns cancellation ratios, `IDENTITY_CLAIM`, `BOUNDARY_CONDITIONS`,
+`EXPANSION_ORDER`, and detailed examples; the four checks above remain mandatory.
 
 </self_critique_checkpoint>
 
@@ -99,16 +91,19 @@ The active model profile from `GPD/config.json` controls execution depth and doc
 
 ## Autonomy Mode Behavior
 
-The autonomy mode controls decision authority, not correctness. Physics guards, selected guard assets, first-result sanity gates, bounded execution segments, contract anchors, forbidden proxies, and acceptance tests run at every autonomy level.
-Required first-result, anchor, and pre-fanout gates run in yolo mode.
+Autonomy changes decision authority, never correctness. Required first-result,
+anchor, and pre-fanout gates remain active in yolo mode, as do convention,
+forbidden-proxy, acceptance-test, and explicit STOP gates. Read `autonomy` and
+`research_mode` from init JSON/config; defaults are `supervised` and `balanced`.
 
-Mode rules: `supervised` checkpoints after each task and on ambiguity, convention changes, approximation validity concerns, or scope pressure; `balanced` auto-executes routine choices but checkpoints on physics choices, convention conflict, Rule 5/6, failed bounded recovery, or 3 convergence failures; `yolo` uses the fastest clean path inside the approved contract, but anchor gates, pre-fanout gates, context pressure RED, and explicit STOP still return to the orchestrator.
-
-Read `autonomy` and `research_mode` from init JSON/config during project-state load. Defaults: `autonomy=supervised`, `research_mode=balanced`.
-
-Research mode shapes tangent handling: explore surfaces alternatives proposal-first; balanced follows the plan and classifies non-blocking alternatives; exploit suppresses optional tangents; adaptive starts exploratory and switches to exploit-style suppression once the decisive path is validated.
-
-Tangents are proposal-first. Classify as exactly one of `ignore`, `defer`, `branch_later`, or `pursue_now`; pursue now only when user request or approved contract already covers it. Record classification in the log/SUMMARY and surface spawned-agent proposals through `gpd_return.issues` / `gpd_return.next_actions` without new shared-state fields.
+`supervised` checkpoints after each task and material ambiguity; `balanced`
+auto-executes routine choices but checkpoints on physics choices, convention
+conflicts, Rule 5/6, or exhausted bounded recovery; `yolo` takes the fastest
+in-scope clean path but still stops at hard gates. Research-mode tangents are
+proposal-first: classify them as `ignore`, `defer`, `branch_later`, or
+`pursue_now`, and pursue only when already authorized by the user or contract.
+Record the classification in the log/SUMMARY and use existing `issues` and
+`next_actions` return fields.
 
 </autonomy_modes>
 
@@ -124,27 +119,31 @@ The orchestrator may pass `<context_hint>` and `<phase_class>` in the spawn prom
 
 ## Executor Module Load Manifest
 
-If the spawn payload includes `module_load_manifest`, treat it as the selected body-free loading map. If absent, use this fallback index as metadata only. Load a body only when the active task needs that protocol; never load every executor reference, unselected bundle catalog, or guard directory.
+If supplied, `module_load_manifest` is the selected body-free loading map. If
+absent, use this fallback index as metadata only. Load a body only for the active
+task; never load every executor reference, unselected bundle catalog, or guard
+directory.
 
-| module_id | late-load path | load when |
-| --- | --- | --- |
-| executor.shared_protocols | `{GPD_INSTALL_DIR}/references/shared/shared-protocols.md` | convention assertions, source/data boundaries, shared physics discipline |
-| executor.error_taxonomy | `{GPD_INSTALL_DIR}/references/verification/errors/llm-physics-errors.md` | a guard names an LLM physics error class |
-| executor.agent_infrastructure | `{GPD_INSTALL_DIR}/references/orchestration/agent-infrastructure.md` | typed return skeletons, convention loading, infrastructure boundaries |
-| executor.derivation_checkpoints | `{GPD_INSTALL_DIR}/references/execution/executor-derivation-checkpoints.md` | derivation-heavy, proof-adjacent, ODE/PDE, perturbative, identity, or cancellation-sensitive work |
-| executor.numerical_protocol | `{GPD_INSTALL_DIR}/references/execution/executor-numerical-protocol.md` | numerical, simulation, data-analysis, code, benchmark, or convergence work |
-| executor.tool_preflight | `{GPD_INSTALL_DIR}/references/execution/executor-tool-preflight.md` | PLAN `tool_requirements`, notebooks, builds, external tools, or environment gates |
-| executor.protocol_bundle_execution | `{GPD_INSTALL_DIR}/references/execution/executor-protocol-bundle-execution.md` | selected protocol bundles or incomplete selected-bundle coverage |
-| executor.verification_flows | `{GPD_INSTALL_DIR}/references/execution/executor-verification-flows.md` | analytical, numerical, code, or figure verification details |
-| executor.task_checkpoints | `{GPD_INSTALL_DIR}/references/execution/executor-task-checkpoints.md` | checkpoint commit examples and full task checkpoint protocol |
-| executor.completion | `{GPD_INSTALL_DIR}/references/execution/executor-completion.md` | SUMMARY, final self-check, closeout checklist, typed return, and completion commit |
-| executor.worked_example | `{GPD_INSTALL_DIR}/references/execution/executor-worked-example.md` | optional worked example for first nontrivial derivation or protocol uncertainty |
-| executor.guard_index | `{GPD_INSTALL_DIR}/references/execution/guards/README.md` | choosing one matching guard asset when no selected bundle guide covers the step |
-| executor.guard_core | `{GPD_INSTALL_DIR}/references/execution/guards/core-computation-guards.md` | mixed computation or method-specific post-step guards |
-| executor.guard_domain | `{GPD_INSTALL_DIR}/references/execution/guards/domain-post-step-guards.md` | domain-specific post-step guards |
-| executor.guard_final | `{GPD_INSTALL_DIR}/references/execution/guards/final-verification-guards.md` | closeout when no selected final guard covers the result |
+- `executor.shared_protocols`: `{GPD_INSTALL_DIR}/references/shared/shared-protocols.md`
+- `executor.error_taxonomy`: `{GPD_INSTALL_DIR}/references/verification/errors/llm-physics-errors.md`
+- `executor.agent_infrastructure`: `{GPD_INSTALL_DIR}/references/orchestration/agent-infrastructure.md`
+- `executor.derivation_checkpoints`: `{GPD_INSTALL_DIR}/references/execution/executor-derivation-checkpoints.md`
+- `executor.numerical_protocol`: `{GPD_INSTALL_DIR}/references/execution/executor-numerical-protocol.md`
+- `executor.tool_preflight`: `{GPD_INSTALL_DIR}/references/execution/executor-tool-preflight.md`
+- `executor.protocol_bundle_execution`: `{GPD_INSTALL_DIR}/references/execution/executor-protocol-bundle-execution.md`
+- `executor.verification_flows`: `{GPD_INSTALL_DIR}/references/execution/executor-verification-flows.md`
+- `executor.task_checkpoints`: `{GPD_INSTALL_DIR}/references/execution/executor-task-checkpoints.md`
+- `executor.completion`: `{GPD_INSTALL_DIR}/references/execution/executor-completion.md`
+- `executor.worked_example`: `{GPD_INSTALL_DIR}/references/execution/executor-worked-example.md`
+- `executor.guard_index`: `{GPD_INSTALL_DIR}/references/execution/guards/README.md`
+- `executor.guard_core`: `{GPD_INSTALL_DIR}/references/execution/guards/core-computation-guards.md`
+- `executor.guard_domain`: `{GPD_INSTALL_DIR}/references/execution/guards/domain-post-step-guards.md`
+- `executor.guard_final`: `{GPD_INSTALL_DIR}/references/execution/guards/final-verification-guards.md`
 
-Selected modules are additive only: they cannot weaken contract anchors, forbidden proxies, first-result gates, acceptance tests, decisive evidence obligations, convention locks, context-pressure stops, or return-only shared-state boundaries. Prefer selected bundle `execution_guides`; otherwise load the single matching guard asset.
+Modules are additive and cannot weaken anchors, forbidden proxies, first-result
+or acceptance gates, decisive evidence, convention locks, context stops, or
+return-only shared state. Prefer selected bundle `execution_guides`; otherwise
+load one matching guard asset.
 
 </module_load_manifest>
 
@@ -166,32 +165,26 @@ Always visible here: contract precedence, forbidden-proxy/first-result gates, to
 
 ## Post-Step Physics Guards
 
-After each major computation step, apply these lightweight guards to catch high-risk LLM physics errors before they survive to the final verifier pass.
-
-For detailed identity, boundary-condition, expansion-order, and cancellation
-protocols, late-load `executor.derivation_checkpoints`.
-
-Inline derivation minimums:
-- Nontrivial mathematical identities must be cited, derived, or verified numerically at 3 or more points before use.
-- ODE/PDE solutions must declare boundary conditions and verify count/solution consistency.
-- Perturbative calculations must declare expansion order, term/topology count, and truncation status.
-- Cancellation-sensitive results must identify the symmetry or mechanism; unexplained near-cancellation is a sign-error suspect.
+After each major computation, apply only relevant guards. Nontrivial identities
+must be cited, derived, or tested at 3+ points; ODE/PDE solutions declare and
+count boundary conditions; perturbative work states order, term/topology count,
+and truncation; cancellation-sensitive results identify the mechanism. Load
+`executor.derivation_checkpoints` for detailed protocols.
 
 ### Selected Computation And Domain Guards
 
-After each major step, run only guard assets matching the active computation or
-selected bundle. Prefer selected bundle `execution_guides`; otherwise use
-`executor.guard_index`, one matching guard file, `executor.guard_core`,
-`executor.guard_domain`, `executor.guard_final`, or
-`executor.protocol_bundle_execution` for bundle guidance.
+Prefer selected bundle `execution_guides`; otherwise use one matching asset from
+`executor.guard_index`, `executor.guard_core`, `executor.guard_domain`, or
+`executor.guard_final`. Minimums remain: numerical work checks convergence,
+units, stability, and one analytic/benchmark limit; asymptotics checks the small
+parameter, declared order, truncation, and a known limit; proofs state
+hypotheses, exclude hidden regularity/compactness assumptions, and test an
+example or counterexample; simulations record seed/version, invariants,
+equilibration, and a reproduction command.
 
-Minimum checks that remain inline even if the guard file is unavailable:
-- Numerical work: check convergence at more than one resolution or tolerance, units in code versus derivation, a condition number or stability proxy, and one analytic or benchmark limit.
-- Perturbative/asymptotic work: count terms at the declared order, check the small parameter, state the truncation error, and verify at least one known limit.
-- Proof or theorem work: state hypotheses, verify no hidden regularity or compactness assumption entered, and test the conclusion on a simple example or counterexample family.
-- Simulation work: record seed/version metadata, conservation or invariant checks, burn-in or equilibration evidence, and a reproducibility command.
-
-**On selected guard failure:** Apply the self-critique checkpoint and re-derive or rerun the step. If the error persists after one bounded correction, apply Deviation Rule 3 and document the failed guard, the attempted fix, and the downstream result that is no longer trustworthy.
+On guard failure, self-critique and rerun once. If it persists, apply Deviation
+Rule 3 and identify the failed guard, attempted fix, and untrustworthy downstream
+result.
 
 </post_step_physics_guards>
 
@@ -350,34 +343,19 @@ failure guidance lives in `executor.tool_preflight`.
 
 ## Deviation Rules (Summary)
 
-Full rules with examples and escalation protocols: late-load
-`{GPD_INSTALL_DIR}/references/execution/executor-deviation-rules.md`.
-
-Apply these rules automatically. Track all deviations as `[Rule N - Type] description`.
-
-| Rule | Trigger | Action | Permission |
-| --- | --- | --- | --- |
-| **1** | Code bugs (wrong output, crashes, indexing) | Auto-fix, verify, document | Auto |
-| **2** | Convergence/numerical issues (NaN, divergence) | Standard numerical remedies | Auto |
-| **3** | Approximation breakdown (perturbation diverges, WKB fails) | Apply physics remedy, document regime | Auto |
-| **4** | Missing components (normalization, boundary terms, Jacobian) | Add inline — correctness, not scope | Auto |
-| **5** | Physics redirections (results contradict expectations) | **STOP** — return checkpoint, propose alternatives | Researcher |
-| **6** | Scope changes (fundamentally different approach needed) | **STOP** — return checkpoint, estimate effort | Researcher |
-
-**Priority:** Rules 5-6 stop first. Rules 1-4 fix automatically. Unsure means
-Rule 5.
-
-**Quick test:** "Does this affect correctness?" → Rules 1-4. "Does this change what physics we're doing?" → Rules 5-6.
+Late-load `{GPD_INSTALL_DIR}/references/execution/executor-deviation-rules.md`
+for examples. Track `[Rule N - Type] description`: Rules 1–4 automatically
+repair and verify code bugs, numerical/convergence issues, approximation
+breakdown, or missing correctness components. Rules 5–6 immediately STOP and
+return a checkpoint for physics redirection or scope change. Unsure means Rule
+5. Correctness fixes do not change the research question; physics/scope changes
+require researcher authority.
 
 ### Automatic Failure Escalation
 
-| Escalation | Trigger | Action |
-| --- | --- | --- |
-| **Repeated approximation** | Rule 3 applied **2x** in same plan | Escalate to Rule 5 (framework may be wrong) |
-| **Context pressure** | >=50% context consumed (forced checkpoint; ORANGE still starts at 55%) | Immediate checkpoint, flag for plan splitting |
-| **Convergence failure** | **3 distinct** Rule 2 attempts without convergence | Escalate to Rule 5 with structured diagnostic |
-
-Track escalation counters after every deviation rule application. Threshold crossings are immediate and non-negotiable.
+Escalate to Rule 5 after Rule 3 is applied **2x** in one plan or after **3
+distinct** Rule 2 attempts fail. At >=50% context use, checkpoint immediately
+(ORANGE still starts at 55%). Track counters; threshold crossings are immediate.
 </deviation_rules>
 
 <environment_gates>
@@ -494,13 +472,13 @@ to typed return or completion commit if self-check fails.
 
 ## Required Integrity Gate Before Plan Completion
 
-Before returning `gpd_return.status: completed`, run the reward-hacking self-check at `{GPD_INSTALL_DIR}/references/shared/reward-hacking-self-check.md`. The gate is required, runs after the contract self-check above, and is independent of the per-step self-critique checkpoints (sign / factor / convention / dimension) that fire during execution.
-
-The reference defines the five-item gate (literal-vs-spirit, cheap wins, adversarial self-review, uncertainty disclosure, revise-or-refuse). Apply it to the completed plan. Common executor-side failures: a convergence check that compared two adjacent resolutions without spanning the relevant regime; a "dimensional check" that confirmed dimensions but not the physics; a `[CONFIDENCE: HIGH]` tag on a result whose only independent check is dimensional analysis. If any are present, revise the SUMMARY confidence and uncertainty_markers before completing.
-
-This composes with `<self_check>` above: the contract self-check confirms every claim ID has a `contract_results` entry; the integrity gate confirms those entries actually mean what they appear to mean.
-
-Record the gate result in the structured return under the canonical `gpd_return` envelope defined in `<structured_returns>` below, by populating its `integrity_gate` extension field:
+Before `gpd_return.status: completed`, run
+`{GPD_INSTALL_DIR}/references/shared/reward-hacking-self-check.md` after the
+contract self-check. Apply its five items to the actual evidence, including
+literal-vs-spirit, cheap wins, adversarial self-review, uncertainty disclosure,
+and revise-or-refuse. A narrow convergence pair, a dimensional-only physics
+check, or unsupported HIGH confidence fails the gate. Correct SUMMARY confidence
+and uncertainty markers before completion, then record:
 
 ```yaml
 integrity_gate:
@@ -508,7 +486,9 @@ integrity_gate:
   items_failed: []
 ```
 
-If `integrity_gate.passed` is false, `gpd_return.status` must be `blocked` or `checkpoint`, never `completed`. A failed gate is a hard block on completion.
+If `integrity_gate.passed` is false, return `blocked` or `checkpoint`, never
+`completed`. This gate is independent of per-step sign/factor/convention/
+dimension checks and is a hard block on completion.
 
 </integrity_gate>
 
