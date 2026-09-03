@@ -436,6 +436,9 @@ memory:
 - **Code:** known-answer tests, regression tests, scaling, reproducibility
 - **Figures:** labels+units, legends, physical reasonableness
 
+Even the smallest analytical execution plan must name its dimensional and
+limiting-behavior checks plus one independent check; do not leave them implicit.
+
 Research log location: `GPD/phases/XX-name/{phase}-{plan}-LOG.md` --- write entries DURING execution, not after.
 
 State tracking location: `GPD/phases/XX-name/{phase}-{plan}-STATE-TRACKING.md` --- update after each task.
@@ -458,6 +461,10 @@ After all tasks complete, load `{GPD_INSTALL_DIR}/references/execution/executor-
 The completion reference owns the detailed SUMMARY schema, substantive one-liner
 rules, conventions/key-results/deviation sections, `calculation-log.md` use, and
 closeout return fields.
+
+A bounded completion handoff must still enumerate the produced evidence,
+unresolved risks, and each deferred idea explicitly. Do not silently convert a
+follow-up into completed or in-scope work.
 
 </summary_creation>
 

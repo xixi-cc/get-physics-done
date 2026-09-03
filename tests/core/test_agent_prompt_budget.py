@@ -43,7 +43,7 @@ AGENT_BASELINES = {
     "gpd-check-proof": (81, 6_231),
     "gpd-consistency-checker": (69, 4_112),
     "gpd-debugger": (245, 9_482),
-    "gpd-executor": (588, 30_722),
+    "gpd-executor": (595, 31_080),
     "gpd-experiment-designer": (360, 21_301),
     "gpd-explainer": (241, 9_508),
     "gpd-notation-coordinator": (301, 20_042),
