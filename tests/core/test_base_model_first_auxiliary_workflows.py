@@ -19,14 +19,16 @@ def test_interactive_debug_keeps_evidence_and_fresh_context_boundaries() -> None
     assert "do not self-promote a plausible" in source.lower()
 
 
-def test_explain_keeps_independent_citation_audit_on_main_context_route() -> None:
+def test_explain_keeps_evidence_based_citation_routes() -> None:
     source = (WORKFLOWS / "explain.md").read_text(encoding="utf-8")
 
     assert "current main model writes the explanation" in source
     assert "explicitly asks" in source
     assert "for fresh isolation" in source
-    assert "bibliographer remains a fresh" in source
-    assert "independent audit on every route" in source
+    assert "citation_status: not_applicable" in source
+    assert "main agent checks authoritative metadata and exact claim support" in source
+    assert "Use a fresh independent bibliographer when requested" in source
+    assert "Unavailable sources remain unverified" in source
     assert "do not invent a child id" in source.lower()
 
 

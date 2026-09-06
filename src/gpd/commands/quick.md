@@ -1,6 +1,6 @@
 ---
 name: gpd:quick
-description: Execute a quick research task with GPD guarantees (atomic commits, state tracking) but skip optional agents
+description: Complete a small task in an initialized GPD project with durable state. Use for requested GPD quick work, not ordinary projectless questions.
 context_mode: project-required
 allowed-tools:
   - file_read
@@ -22,9 +22,8 @@ help:
 <objective>
 Execute small, ad-hoc research tasks in an initialized GPD project while
 preserving atomic commits and durable state tracking. The workflow owns the
-staged quick planner handoff, executor routing, completion record, and
-complexity promotion boundary. It spawns `gpd-planner` and `gpd-executor`
-only from the active stage authority.
+staged main-context authoring, completion record, and complexity promotion
+boundary. Load delegated planner/executor contracts only when delegation is needed.
 
 Records completion through structured `gpd state` commands and quick-task
 summary files, not a custom STATE.md table.
@@ -38,4 +37,4 @@ summary files, not a custom STATE.md table.
 @GPD/STATE.md
 </context>
 
-<process>Follow the included first-stage quick authority exactly; the active stage authority owns validation, task description, staged planner loading, planning, execution, preflight, state updates, commits, and quick-to-full promotion.</process>
+<process>Follow the included first-stage quick authority exactly; the active stage authority owns validation, task description, conditional role loading, planning, execution, preflight, state updates, commits, and quick-to-full promotion.</process>

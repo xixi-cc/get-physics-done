@@ -88,26 +88,8 @@ mkdir -p GPD/explanations
 </step>
 
 <step name="spawn_explainer">
-Resolve the cognitive route and compatible explainer model:
-
-```bash
-COGNITIVE_PROFILE=$(gpd --raw config get cognitive_profile 2>/dev/null | gpd json get .value --default classic 2>/dev/null || echo "classic")
-EXPLAINER_MODEL=$(gpd resolve-model gpd-explainer)
-```
-
-- Under `base-model-first`, the current main model writes the explanation from
-  the same prompt below so it can retain the active conceptual and notation
-  context.
-- Use a fresh `gpd-explainer` under `classic`, when the user explicitly asks
-  for fresh isolation, or when measured context pressure requires it. Record
-  the concrete trigger; do not spawn merely because an explainer role exists.
-- The route does not change the artifact structure, rigor, literature
-  requirements, or citation-audit gate. The bibliographer remains a fresh
-  independent audit on every route.
-
-@{GPD_INSTALL_DIR}/references/orchestration/runtime-delegation-note.md
-
-> Apply the canonical runtime delegation convention already loaded above.
+The current main model writes the explanation by default, preserving the active notation and conceptual context. Do not load an explainer role for this route. If the user explicitly asks
+for fresh isolation, a genuinely independent subproblem can run in parallel, or measured context pressure requires it, resolve `gpd-explainer` and load the runtime delegation convention at that time. Record the concrete reason; a role's existence is not a reason to spawn.
 
 ```markdown
 <objective>
@@ -129,21 +111,21 @@ Explain the following concept rigorously and in context: {concept}
 <requirements>
 1. Start with the short answer in one paragraph.
 2. Explain why this concept matters in the current project or requested task.
-3. Build a prerequisite ladder so the explanation is scoped correctly.
+3. Include prerequisite definitions only when needed to understand the requested concept.
 4. Give the rigorous core: definition, physical meaning, assumptions, limits, and equations/derivation where needed.
 5. Connect the concept to this project's files, conventions, current phase, or manuscript claims when available.
 6. Distinguish established literature facts from project-specific assumptions or interpretations.
 7. If structured citation-source metadata is available, use it to keep the literature guide tied to stable `reference_id` entries and openable URLs.
 8. If canonical stored-result context is available, use the direct, dependency, or impact context gathered by the shared result lookup policy.
-9. Include a literature guide with papers the user can open directly. Prefer arXiv abstract links when available; otherwise use DOI or INSPIRE links.
+9. Include sources when requested or when factual attribution requires them; do not add a literature survey to a local notation clarification. Prefer openable primary-source links.
 10. Never fabricate citations. If a reference is uncertain, mark it clearly as unverified instead of guessing.
-11. Close with common confusions, failure modes, and the next questions the user should ask.
+11. Include common confusions or follow-up questions only when they help the current request.
 </requirements>
 
 <output>
 Write to: GPD/explanations/{slug}-EXPLAIN.md
 
-Structure:
+Use only the sections needed by the requested depth; retain the frontmatter and the core explanation. Possible sections:
 
 - Frontmatter (`concept`, `date`, `mode`, `project_context`, `citation_status`)
 - Executive Summary
@@ -161,7 +143,7 @@ Structure:
 </output>
 ```
 
-For the ordinary `base-model-first` route, execute `filled_prompt` in the
+For the ordinary main-context route, execute `filled_prompt` in the
 current main context and write `GPD/explanations/{slug}-EXPLAIN.md` directly.
 Then continue to citation verification; do not invent a child id or typed
 child return for this route.
@@ -180,7 +162,11 @@ task(
 </step>
 
 <step name="verify_citations">
-After the explanation is written, run the bibliographer on the produced explanation file.
+Inspect the actual explanation for citations. If there are none, record `citation_status: not_applicable`; no bibliographer or empty audit is needed. Do not use this route to omit sources necessary to substantiate factual claims.
+
+For ordinary explanations with a bounded, directly verifiable reference set, the main agent checks authoritative metadata and exact claim support, records sources and findings in `GPD/explanations/{slug}-CITATION-AUDIT.md`, and sets citation status from actual evidence. Unavailable sources remain unverified.
+
+Use a fresh independent bibliographer when requested, when source/claim conflicts remain, or when a substantial literature synthesis needs independent review. The following delegation is conditional on that need; do not invent a child id for a direct audit.
 
 Resolve bibliographer model:
 
@@ -188,7 +174,7 @@ Resolve bibliographer model:
 BIBLIO_MODEL=$(gpd resolve-model gpd-bibliographer)
 ```
 
-Apply the canonical runtime delegation convention already loaded above.
+Before the first actual delegation, load `{GPD_INSTALL_DIR}/references/orchestration/runtime-delegation-note.md` and follow its runtime convention.
 
 ```
 task(
@@ -199,8 +185,8 @@ task(
 
 Audit the citations in `GPD/explanations/{slug}-EXPLAIN.md`.
 
-For every paper or book in the Literature Guide:
-1. Verify that the reference is real and relevant
+For every citation anywhere in the explanation, including inline citations and its associated claim:
+1. Verify that the reference is real and supports the exact associated claim; inspect source text, not only topical metadata
 2. Check title, authors, year, journal/arXiv metadata, and openable URL
 3. Flag hallucinated, inaccurate, or weakly supported references
 4. Write the audit to `GPD/explanations/{slug}-CITATION-AUDIT.md`
@@ -230,7 +216,7 @@ Return to the orchestrator with:
 - Report path
 - Project anchor (current phase / manuscript / standalone)
 - Citation verification status
-- Best papers to open next
+- Papers to open next only when sources were relevant to the request
 
 Format:
 
@@ -240,7 +226,7 @@ Format:
 **Concept:** {concept}
 **Report:** GPD/explanations/{slug}-EXPLAIN.md
 **Project anchor:** {current phase / manuscript / standalone}
-**Citation verification:** {all verified | issues found in GPD/explanations/{slug}-CITATION-AUDIT.md | unverified}
+**Citation verification:** {not_applicable | all verified | issues found in GPD/explanations/{slug}-CITATION-AUDIT.md | unverified}
 
 **Key takeaways:**
 
@@ -248,7 +234,7 @@ Format:
 2. {takeaway}
 3. {takeaway}
 
-**Papers to open next:**
+**Papers to open next (omit when not applicable):**
 
 1. {paper title} — {url}
 2. {paper title} — {url}

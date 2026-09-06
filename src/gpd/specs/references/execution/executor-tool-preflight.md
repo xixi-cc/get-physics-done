@@ -27,8 +27,8 @@ Indicators include: module not found, license expired, CUDA out of memory, MPI i
 Protocol:
 
 1. Recognize the environment gate.
-2. Stop the current task.
-3. Return `checkpoint:human-action` using the executor checkpoint return format.
+2. Pause the dependent computation and attempt an already-authorized, reversible local repair when feasible; preserve the required scientific tool/method.
+3. Return `checkpoint:human-action` only when credentials, new authority, manual resources or an unresolved blocker require the user. Continue independent authorized work.
 4. Provide exact setup steps, including install commands, environment variables, license actions, or queue/GPU requirements.
 5. Provide one verification command.
 6. Document environment gates in SUMMARY.md as normal gated flow, not as physics deviations.

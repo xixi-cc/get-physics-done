@@ -192,11 +192,14 @@ fi
 gpd state add-decision --phase "quick-${next_num}" --summary "Quick task ${next_num}: ${DESCRIPTION}" --rationale "Ad-hoc task completed outside planned phases"
 gpd state update "Last Activity" "${date}"
 
-PRE_CHECK=$(gpd pre-commit-check --files ${QUICK_DIR}/${next_num}-PLAN.md ${QUICK_DIR}/${next_num}-SUMMARY.md GPD/STATE.md 2>&1) || true
-echo "$PRE_CHECK"
-gpd commit "docs(quick-${next_num}): ${DESCRIPTION}" --files ${QUICK_DIR}/${next_num}-PLAN.md ${QUICK_DIR}/${next_num}-SUMMARY.md GPD/STATE.md
+# Only when commit_docs / explicit user commit instructions enable a commit:
+# Build an explicit allowlist from actual changed task artifacts and state,
+# including GPD/state.json when changed. Never include unrelated user changes.
+gpd pre-commit-check --files "${QUICK_DIR}/${next_num}-PLAN.md" "${QUICK_DIR}/${next_num}-SUMMARY.md" GPD/STATE.md GPD/state.json
+# If pre-commit-check fails, STOP before commit and report the failed check.
+gpd commit "docs(quick-${next_num}): ${DESCRIPTION}" --files "${QUICK_DIR}/${next_num}-PLAN.md" "${QUICK_DIR}/${next_num}-SUMMARY.md" GPD/STATE.md GPD/state.json
 ```
 
-Report the summary path and final commit hash, then offer `gpd:quick` for the next task.
+Report the summary path and actual commit hash, or state that changes remain local when committing is disabled.
 
 </process>

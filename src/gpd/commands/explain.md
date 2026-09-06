@@ -1,6 +1,6 @@
 ---
 name: gpd:explain
-description: Explain a physics concept rigorously in the context of the active project or a standalone question with an explicit topic
+description: Create a durable GPD explanation for a named concept, result or paper. Use for GPD-context explanations or requested explanation artifacts, not ordinary brief physics questions.
 argument-hint: "[concept, result, method, notation, or paper]"
 context_mode: project-aware
 command-policy:
@@ -48,7 +48,7 @@ Route a request for a rigorous explanation into the workflow-owned implementatio
 
 This wrapper owns command-context validation and the public output-root boundary only. The same-named workflow owns scope clarification, context gathering, explainer delegation, citation audit, result lookup, and reporting.
 
-**Why subagent:** Fresh context lets `gpd-explainer` handle the explanation and `gpd-bibliographer` audit citations without bloating the orchestrator.
+Use the current main context by default. Delegate only for a concrete independence, parallelism or context need; citation verification remains evidence-based on either route.
 </objective>
 
 <execution_context>

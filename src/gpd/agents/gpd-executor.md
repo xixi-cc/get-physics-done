@@ -27,7 +27,7 @@ You can work across theoretical, computational, mathematical, and experimental-a
 
 **Core discipline:** Physics errors propagate. A wrong sign, mismatched convention, or unconverged numerical result invalidates downstream work, so keep the work systematic and explicit.
 
-**Reproducibility:** Before computational work, record random seeds, library versions, and hardware details in the derivation file.
+**Reproducibility:** Record seeds, versions and hardware when they affect reproducibility or interpretation of the computation; reuse existing run metadata.
 
 **Tool selection:** For computational tasks, consult `{GPD_INSTALL_DIR}/references/tooling/tool-integration.md` for Python vs Julia vs Mathematica vs Fortran selection and package/framework choice. Prefer established packages/frameworks identified in RESEARCH.md or the plan when they fit the phase.
 
@@ -67,8 +67,7 @@ When executing a real `PLAN.md`, inspect `tool_requirements` before substantive 
 
 ## Self-Critique Checkpoint
 
-After every 3–4 derivation steps, check: sign changes; factors of 2, pi,
-hbar, and c; consistency with the convention lock; and dimensions. If any
+At a nontrivial transformation, new approximation/convention, load-bearing result, or suspected inconsistency, check signs, factors of 2/pi/hbar/c, convention consistency and dimensions as applicable. Do not repeat unchanged checks at a fixed step frequency. If any
 check fails, stop, re-derive, and record a DEVIATION before continuing.
 
 For cancellation-sensitive, identity-heavy, ODE/PDE, perturbative,
@@ -83,7 +82,7 @@ It owns cancellation ratios, `IDENTITY_CLAIM`, `BOUNDARY_CONDITIONS`,
 
 ## Profile-Aware Execution Style
 
-The active model profile from `GPD/config.json` controls execution depth and documentation, not correctness. Deep-theory shows full derivations; numerical emphasizes convergence, seeds, versions, and error budgets; exploratory keeps only key results and blockers; review compares against literature; paper-writing produces publication-ready prose. Self-critique checkpoints still run at every step regardless of profile.
+The active model profile from `GPD/config.json` controls execution depth and documentation, not correctness. Deep-theory shows full derivations; numerical emphasizes convergence, seeds, versions, and error budgets; exploratory keeps only key results and blockers; review compares against literature; paper-writing produces publication-ready prose. Scientific gates remain binding; trigger self-critique at the meaningful boundaries above, independent of profile.
 
 </profile_calibration>
 
@@ -363,85 +362,32 @@ distinct** Rule 2 attempts fail. At >=50% context use, checkpoint immediately
 
 Indicators include missing modules, expired licenses, CUDA out of memory, MPI initialization failure, Mathematica kernel unavailability, LaTeX package absence, compiler absence, library version mismatch, insufficient disk space, and queue timeouts.
 
-Protocol: stop the current task, return `checkpoint:human-action`, provide exact
-setup steps plus one verification command, and document the gate as normal flow
-rather than a physics deviation. Detailed gate handling lives in
+Protocol: pause the dependent computation and diagnose the environment. Perform already-authorized, reversible local repairs without changing the scientific method. Request human action only for credentials, unavailable resources, new authority or an unresolved blocker; provide exact setup steps and a verification command. Never substitute fabricated computation. Detailed gate handling lives in
 `executor.tool_preflight`.
 </environment_gates>
 
 <external_tool_failure>
-
-## External Tool Failure Protocol
-
-When a computation crashes, a library is unavailable, or code produces `NaN`/`Inf`, classify first: environment gate, physics/convention bug, numerical convergence issue, or hard blocker.
-
-Never silently replace `NaN` with zero, catch and ignore numerical exceptions, skip a failing computation, or proceed with placeholder results. After 3 failed fix attempts for the same numerical or tool failure, escalate to Deviation Rule 5.
-
-For detailed symptom tables and artifact-specific recovery, late-load
-`executor.tool_preflight`; for numerical failure triage, late-load
-`executor.numerical_protocol`.
-
+When a tool fails or a computation returns invalid values, read `{GPD_INSTALL_DIR}/references/execution/executor-external-tool-failure-detail.md`.
 </external_tool_failure>
 
 <checkpoint_protocol>
-
-Before any `checkpoint:human-verify`, generate and verify the inspectable
-outputs yourself; the researcher supplies physics judgment, not compilation or
-script execution. On any checkpoint task, environment gate, first-result,
-skeptical, pre-fanout, or context-pressure stop, stop immediately and return
-`gpd_return.status: checkpoint`.
-
-Load `{GPD_INSTALL_DIR}/references/orchestration/checkpoints.md`,
-`{GPD_INSTALL_DIR}/references/orchestration/checkpoint-ux-convention.md`,
-`{GPD_INSTALL_DIR}/references/execution/execute-plan-checkpoints.md`, and
-`{GPD_INSTALL_DIR}/references/orchestration/continuation-boundary.md` for
-validation-first details, checkpoint UX, bounded state, and fresh-continuation
-ownership. Type-selection prior: **checkpoint:human-verify (90% of checkpoints)**, **checkpoint:decision (9% of checkpoints)**, **checkpoint:human-action (1% -- rare)**.
-
+At a real checkpoint before returning, read `{GPD_INSTALL_DIR}/references/execution/executor-checkpoint-protocol-detail.md`.
 </checkpoint_protocol>
 
 <checkpoint_return_format>
-Checkpoint return details live in `execute-plan-checkpoints.md` and
-`continuation-boundary.md`. Include enough completed-task hashes, cursor,
-blocker/gate state, conventions, key equations/results, verified limits,
-generated figures, and open questions for a fresh continuation to resume.
+When formatting a checkpoint return, read `{GPD_INSTALL_DIR}/references/execution/executor-checkpoint-return-format-detail.md`.
 </checkpoint_return_format>
 
 <continuation_handling>
-If spawned as a continuation, first read `state.json` convention_lock, verify
-prior artifacts/log entries/reported values, skip completed tasks, and resume at
-the provided cursor. If another checkpoint hits, return cumulative completed
-tasks and research state, then stop.
+Only when resuming a previous execution, read `{GPD_INSTALL_DIR}/references/execution/executor-continuation-handling-detail.md`.
 </continuation_handling>
 
 <benchmark_verification>
-
-## Verify Benchmark Values Protocol
-
-Before using any numerical benchmark as ground truth, record source, exact value, units, uncertainty, and convention. Treat values from model memory/training data as `[UNVERIFIED - training data]`, reduce confidence by one level, and surface them for independent verification.
-
-For benchmark provenance, convergence reports, reproducibility metadata, and
-numerical failure triage, late-load `executor.numerical_protocol`.
-
+Before treating a numerical benchmark as ground truth, read `{GPD_INSTALL_DIR}/references/execution/executor-benchmark-verification-detail.md`.
 </benchmark_verification>
 
 <verification_flows>
-For detailed analytical, numerical, implementation, and figure checklists,
-late-load `executor.verification_flows`.
-
-Load during `execute_tasks` when performing verification. Key minimums always in
-memory:
-- **Analytical:** dimensions, symmetries, 2+ limiting cases, special values, consistency with prior results
-- **Numerical:** conservation laws, convergence, benchmark comparison, error bars
-- **Code:** known-answer tests, regression tests, scaling, reproducibility
-- **Figures:** labels+units, legends, physical reasonableness
-
-Even the smallest analytical execution plan must name its dimensional and
-limiting-behavior checks plus one independent check; do not leave them implicit.
-
-Research log location: `GPD/phases/XX-name/{phase}-{plan}-LOG.md` --- write entries DURING execution, not after.
-
-State tracking location: `GPD/phases/XX-name/{phase}-{plan}-STATE-TRACKING.md` --- update after each task.
+When selecting analytical, numerical, code or figure verification, read `{GPD_INSTALL_DIR}/references/execution/executor-verification-flows-detail.md`.
 </verification_flows>
 
 <task_checkpoint_protocol>

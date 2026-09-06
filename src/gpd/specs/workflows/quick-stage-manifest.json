@@ -112,7 +112,7 @@
     {
       "id": "task_authoring",
       "order": 2,
-      "purpose": "quick planner prompt assembly and task-plan authoring",
+      "purpose": "main-context quick planning, bounded execution and durable completion; conditional delegation",
       "init_spec_id": "quick.task_authoring.v1",
       "mode_paths": [
         "workflows/quick/task-authoring.md"
@@ -121,18 +121,34 @@
         "workflows/quick/task-authoring.md",
         "references/quick/quick-mode-boundary.md",
         "references/quick/quick-durability-minimum.md",
-        "references/quick/quick-reroute-rules.md",
-        "references/orchestration/runtime-delegation-note.md"
+        "references/quick/quick-reroute-rules.md"
       ],
       "produced_state": [
-        "planner handoff state",
-        "quick plan drafting state"
+        "quick plan and summary artifacts",
+        "verified task outputs",
+        "structured quick completion state"
       ],
-      "next_stages": [],
+      "next_stages": [
+        "reference_context"
+      ],
       "checkpoints": [
         "default small-task context selected",
-        "planner prompt assembled without reference runtime payload",
-        "plan artifact ready"
+        "required contract and tool gates satisfied",
+        "actual task output verified"
+      ],
+      "conditional_authorities": [
+        {
+          "when": "delegation explicitly requested, a concrete isolation/context need is present, or requested edits fall outside the stage write scope",
+          "authorities": [
+            "references/quick/quick-delegated-authoring.md",
+            "references/orchestration/runtime-delegation-note.md"
+          ]
+        }
+      ],
+      "writes_allowed": [
+        "GPD/quick/NNN-slug",
+        "GPD/STATE.md",
+        "GPD/state.json"
       ]
     },
     {
@@ -155,14 +171,20 @@
         "references/orchestration/runtime-delegation-note.md"
       ],
       "produced_state": [
-        "reference-aware planner handoff state",
-        "quick plan drafting state"
+        "reference-aware plan and summary artifacts",
+        "validated child return effects",
+        "structured quick completion state"
       ],
       "next_stages": [],
       "checkpoints": [
         "reference context explicitly selected",
         "planner prompt assembled",
         "plan artifact ready"
+      ],
+      "writes_allowed": [
+        "GPD/quick/NNN-slug",
+        "GPD/STATE.md",
+        "GPD/state.json"
       ]
     }
   ]

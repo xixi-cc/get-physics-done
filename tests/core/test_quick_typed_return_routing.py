@@ -26,7 +26,7 @@ def _child_gates_by_id(text: str) -> dict[str, ChildGateTuple]:
 
 
 def test_quick_workflow_routes_on_typed_gpd_return_and_applies_child_returns() -> None:
-    workflow = workflow_authority_text(WORKFLOWS_DIR, "quick")
+    workflow = workflow_authority_text(WORKFLOWS_DIR, "quick") + "\n" + (WORKFLOWS_DIR.parent / "references/quick/quick-delegated-authoring.md").read_text()
     gates = _child_gates_by_id(workflow)
     planner_gate = gates["quick_planner_plan"]
     executor_gate = gates["quick_executor_summary"]

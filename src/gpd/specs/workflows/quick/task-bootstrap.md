@@ -1,5 +1,5 @@
 <purpose>
-Execute small ad-hoc physics tasks with GPD guarantees while skipping optional agents. Quick mode loads staged quick init, routes through the canonical planner handoff, writes under `GPD/quick/`, and records structured completion. Allowed tasks: derivation, dimensional/OOM check, limit, DOI. Not allowed: theorem-style, publication-grade, referee-response, claim-adjudication, or `proof_obligation` closure.
+Execute small ad-hoc physics tasks with GPD guarantees while skipping optional agents. Quick mode loads staged quick init, uses main-context authoring for self-contained work, writes under `GPD/quick/`, and records structured completion. Allowed tasks: derivation, dimensional/OOM check, limit, DOI. Not allowed: theorem-style, publication-grade, referee-response, claim-adjudication, or `proof_obligation` closure.
 </purpose>
 
 <required_reading>
@@ -15,7 +15,7 @@ Read all files referenced by the invoking prompt's execution_context before star
 <process>
 **1. Intake**
 
-Ask ONE inline freeform question (NOT ask_user):
+Use the task description already supplied in $ARGUMENTS or the current request as $DESCRIPTION. Ask the following question only if no actionable task was supplied:
 
 ```text
 What quick task do you want to do? Examples:
@@ -26,7 +26,7 @@ What quick task do you want to do? Examples:
   - Look up the DOI for a specific bibliography item
 ```
 
-Store response as `$DESCRIPTION`.
+If a question was needed, store its response as `$DESCRIPTION`.
 If empty, re-prompt: "Please provide a task description."
 
 ---
@@ -56,11 +56,11 @@ Reroute explicitly to:
 - `gpd:verify-work <phase>` only after a canonical proof-redteam artifact exists.
 
 Mode behavior:
-- `autonomy=supervised` (default): Pause after the plan for user approval before execution.
+- `autonomy=supervised` (default): Honor an applicable explicit plan-approval requirement. If the user already authorized execution of this bounded task, continue without requesting the same approval again.
 - `autonomy=balanced`: Execute without pausing unless the quick task reveals a real decision point.
 - `autonomy=yolo`: Execute and commit without pausing.
 
-Before the planner handoff, reload `task_authoring` for the default small-task path, or `reference_context` only when quick boundary rules require active project anchors, existing reference artifacts, literature/research-map files, protocol/reference context, or targeted source lookup. Treat the selected staged init payload's `staged_loading` block as the handoff shape.
+Before authoring, reload `task_authoring` for the default small-task path, or `reference_context` only when quick boundary rules require active project anchors, existing reference artifacts, literature/research-map files, protocol/reference context, or targeted source lookup. Treat the selected staged init payload's `staged_loading` block as the handoff shape.
 
 ---
 
