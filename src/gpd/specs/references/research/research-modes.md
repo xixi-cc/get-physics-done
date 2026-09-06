@@ -5,181 +5,88 @@ load_when:
   - "research strategy"
   - "adaptive research"
 tier: 1
-context_cost: medium
+context_cost: low
 ---
 
-# Research Modes: Explore/Exploit Tunability
+# Research Modes
 
-GPD adapts its research strategy along an explore↔exploit spectrum. The research mode controls how broadly the system searches for approaches vs how deeply it executes a known methodology.
+Research mode controls search breadth, never correctness, evidence authority,
+write scope, or required verification. It is independent of model tier,
+cognitive profile, autonomy, and skill discovery. No mode prescribes a token
+budget, reference count, task count, phase count, or extra agent count.
 
-Explore and adaptive modes widen comparison and tangent surfacing, but they do **not** silently create git-backed hypothesis branches. Alternatives become branches only after an explicit tangent decision.
-Flag complementary approaches as tangent candidates for optional parallel investigation; only explicit tangent decisions become hypothesis branches or parallel plans.
-
-## Mode Definitions
-
-| Mode | Philosophy | When to Use |
-|---|---|---|
-| **explore** | Search the solution space. Cast a wide net. Multiple viable approaches, broad literature, diverse formalisms. Prefer breadth over depth. | New problem domain, uncertain methodology, multiple viable approaches, early-stage research, literature survey |
-| **balanced** (default) | Standard research flow. Plan one approach based on researcher recommendation, execute, verify, iterate if needed. | Most physics research — known domain, moderately established methodology, single focused investigation |
-| **exploit** | Execute efficiently. Known methodology, tight scope, fast convergence. Minimize overhead, maximize execution speed. | Established calculation technique, reproduction of known results, parameter sweep of a validated method, writing up completed work |
-| **adaptive** | Start broad enough to compare viable approaches, then narrow only after prior decisive evidence or an explicit approach lock shows the method family is stable. | Multi-phase projects where methodology should stay evidence-driven instead of phase-count-driven |
-
-## Per-Agent Behavioral Effects
-
-### gpd-researcher
-
-| Mode | Behavior |
+| Mode | Use |
 |---|---|
-| **explore** | Maximum breadth. Survey 5+ candidate approaches. Compare strengths, weaknesses, failure modes of each. Identify non-obvious alternatives from adjacent subfields. Include experimental/computational feasibility analysis. Output: ranked approach comparison table. Budget: 40-60k tokens. |
-| **balanced** | Standard research. Survey 2-3 approaches, recommend one with justification. Include regime of validity, key assumptions, validation strategy. Budget: 25-35k tokens. |
-| **exploit** | Minimal research. Confirm the chosen methodology is standard, find the key reference (textbook section or review), identify known pitfalls. No alternative survey. Budget: 10-15k tokens. |
-| **adaptive** | Begin with explore-style comparison while the method family is still open. Narrow to exploit-depth only after prior decisive evidence or an explicit approach lock stabilizes the approach. |
+| **adaptive** (default) | Infer breadth from the current task and inspected evidence. Stay focused when the method is established; compare alternatives when an unresolved choice changes the result. |
+| **explore** | Investigate materially distinct viable methods and their failure modes within the approved question. |
+| **balanced** | Develop a primary approach with targeted alternatives and relevant cross-checks. |
+| **exploit** | Execute an established method with minimal optional enrichment. |
 
-### gpd-planner
+## Automatic selection
 
-| Mode | Behavior |
-|---|---|
-| **explore** | Plans include comparison tasks when the user has chosen to compare approaches or the contract requires a decisive selection. Multiple derivation pathways should be surfaced as tangent candidates first; only explicit tangent decisions become hypothesis branches or parallel plans within a wave. Each approved variant has its own validation criteria. Include a "decision plan" that compares results and selects the best approach. 5-8 tasks per plan. |
-| **balanced** | Standard planning. Single approach, 3-5 tasks per plan with verification at key steps. Follows researcher recommendation. |
-| **exploit** | Minimal plans. 2-3 tasks per plan. No exploration tasks, no comparison tasks. Focus on execution efficiency. Larger tasks (up to 90 min) to reduce plan overhead. |
-| **adaptive** | Keep explore-style comparison tasks until prior decisive evidence or an explicit approach lock makes one method family dominant; only then collapse to exploit-style focused plans. |
+The user need not name a mode. Read the effective project configuration and
+current contract. Preserve explicit project settings. With adaptive policy,
+choose the narrowest useful work that resolves the current uncertainty; do not
+start with a broad survey merely because this is the first phase. Keep
+`research_mode` set to `adaptive`; infer the current posture from evidence,
+without rewriting configuration on each task.
 
-### gpd-verifier
+Narrow optional exploration when decisive comparisons or an explicit approach
+lock stabilize the method, conventions permit comparison, and no unresolved
+anchor failure or fundamental objection undermines that choice. If a benchmark
+fails or a real methodological alternative emerges, broaden only the affected
+question. Record a decision when it changes the research path, not for every
+routine change of attention. Phase number alone is not evidence.
 
-| Mode | Behavior |
-|---|---|
-| **explore** | Fast, contract-aware viability testing. Focus on detecting WRONG APPROACHES early, not polishing correct ones. Key question: "Is this approach viable?" not "Is this result perfect?" Compress optional depth, but still run the contract gate and every applicable decisive-anchor, forbidden-proxy, benchmark-reproduction, direct-vs-proxy, and formulation-critical check. Flag approaches that fail basic sanity checks. |
-| **balanced** | Full relevant universal verification plus every required contract-aware check. Standard confidence requirements. |
-| **exploit** | Full relevant universal verification plus every required contract-aware check, with STRICTER thresholds. Require INDEPENDENTLY CONFIRMED for all key results (even in non-deep-theory profiles). Publication-grade rigor because the approach is assumed correct — errors are in execution, not methodology. |
-| **adaptive** | Keep the same contract-critical floor at all times. Use explore-style skepticism until prior decisive evidence or an explicit approach lock exists, then narrow only optional breadth and apply exploit-style strictness to the locked method. |
+## Role effects
 
-### gpd-bibliographer
+- Researcher and bibliographer: obtain enough reliable sources and comparison
+  evidence to resolve the scientific question. Verify every citation actually
+  used; neither pad a bibliography nor skip essential source verification.
+- Planner and roadmapper: size plans and dependency waves around meaningful
+  results, real dependencies, validation, and recoverable work boundaries.
+  Surface alternatives before creating branches. Do not silently emit
+  branch-like alternative plans, set `branch: true`, or create side-work detours.
+  only explicit tangent decisions become hypothesis branches or parallel plans.
+- Executor and experiment designer: choose derivation detail, parameter coverage,
+  convergence studies, and uncertainty estimates from the claim and failure
+  mechanisms. Exploratory estimates remain labeled estimates; narrowing a
+  method never establishes its correctness or publication readiness.
+- Verifier, plan-checker, and consistency-checker: preserve contract completeness,
+  proof obligations, decisive anchors, forbidden proxies, direct-vs-proxy and
+  formulation-critical checks. Test relevant failure modes; optional breadth
+  may vary, but mode names cannot lower the contract-critical floor.
+- Referee: judge the artifact against its intended claims and target venue.
+  Exploratory work can have limited scope, but not fabricated or overstated
+  evidence. Publication claims require the applicable supporting evidence.
 
-| Mode | Behavior |
-|---|---|
-| **explore** | Broad search. Survey 20+ references across multiple approaches. Include competing methodologies, negative results, and open debates. Build a citation network: who cites whom, which groups agree/disagree. Use INSPIRE-HEP category-aware search across adjacent categories. |
-| **balanced** | Standard search. 10-15 key references for the chosen approach. Standard citation verification. |
-| **exploit** | Narrow search. 5-10 references: the seminal paper, the best review, the most recent benchmark, and 2-3 methodological references. No breadth — depth on the specific technique being used. |
-| **adaptive** | Keep broad search until decisive evidence or an explicit approach lock stabilizes the method family; then narrow to exploit-style maintenance search. |
+## Delegation and autonomy
 
-### gpd-executor
+Under `cognitive_profile: base-model-first`, the main capable agent performs
+ordinary reasoning, planning, bounded execution, and writing. Load a role body
+only when that role is actually dispatched. Delegate for an independent audit,
+a concrete separable task, fresh-context isolation, or explicit user request.
+A required independent proof or decisive verification gate remains independent.
+`research`, `plan_checker`, and `verifier` set to `auto` use their workflow's
+risk classifier; they do not mean disabled.
 
-| Mode | Behavior |
-|---|---|
-| **explore** | Multiple derivation attempts only when the approved plan already includes explicit variants from a tangent or comparison decision. Lighter self-critique (focus on feasibility, not polish). Accept "back of envelope" calculations to test approach viability. Larger deviation tolerance before escalating. Document which approaches work and which don't — failure is data. |
-| **balanced** | Standard execution. Full self-critique protocol. Deviation rules apply normally. |
-| **exploit** | Maximum rigor execution with continuous internal self-critique. Keep local checks inside coherent work; escalate unresolved deviations before dependent reasoning uses them rather than pausing mechanically every two steps. |
-| **adaptive** | Execute in explore style while the approach is still being falsified. Once a decisive benchmark or anchor confirms the method family, switch to exploit-style rigor for follow-on work. |
+Autonomy governs human checkpoints, not scientific rigor. Honor locked choices,
+STOP conditions, write authority, and first-result/dependency gates. Ask when a
+missing decision changes scope, authority, or scientific meaning; do not ask the
+user to select a workflow label. Explicit model/reasoning restrictions remain in
+force, including task-specific translation routes. Use the runtime's selected
+capable model for main-context work without inventing a model identifier or
+changing global runtime settings.
 
-### gpd-plan-checker
+## Overrides and references
 
-| Mode | Behavior |
-|---|---|
-| **explore** | Uses the exploratory subset of the dimension matrix. Focuses on: research question coverage (Dim 1), computational feasibility (Dim 5), dependency correctness (Dim 9), scope sanity (Dim 10), artifact derivation, and environment validation. Accepts plans with multiple parallel variants. Does NOT require literature comparison tasks. |
-| **balanced** | Full 16 dimensions per profile. Standard checks. |
-| **exploit** | Full 16 dimensions with EXTRA strictness on: error budgets (Dim 8), validation strategy (Dim 6), boundary conditions (Dim 14), publication readiness (Dim 12). Requires every result to have an independent verification task. |
-| **adaptive** | Use explore-style tolerance for parallel variants until the approach is locked; then apply the full exploit-style dimension set to the focused plan. |
+Advanced overrides remain available through `gpd config set research_mode
+<mode>` and `gpd:settings`. They are not prerequisites for ordinary requests.
+`research_mode` is the only persisted adaptive-mode knob; there is no separate
+`adaptive_transition` block.
 
-### gpd-consistency-checker
+- `../planning/planning-config.md`: configuration schema.
+- `../orchestration/model-profiles.md`: model tiers, independent of breadth.
+- `../../workflows/branch-hypothesis.md`: explicitly authorized branching.
 
-| Mode | Behavior |
-|---|---|
-| **explore** | Lightweight. Convention compliance + provides/requires chains only. Does not flag minor notation inconsistencies between experimental branches (they're expected to differ). Focus on detecting convention DRIFT that would make branches incomparable. |
-| **balanced** | Full semantic verification. All convention checks, sign/factor spot-checks, approximation validity. |
-| **exploit** | Maximum consistency. Numerical value matching across phases (not just symbolic). Verify that every computed quantity propagated between phases matches to stated precision. Flag any result used without independent verification. |
-| **adaptive** | Start lightweight while branches are still being compared, then escalate to exploit-style strictness once one path becomes authoritative. |
-
-### gpd-referee
-
-| Mode | Behavior |
-|---|---|
-| **explore** | Constructive review. Focus on methodology viability, not publication polish. Key questions: "Is the approach sound?" "Are the assumptions justified?" "Would this survive a referee?" Lenient on presentation, strict on physics fundamentals. |
-| **balanced** | Standard peer review. Balanced novelty/correctness/significance assessment. |
-| **exploit** | Publication-grade review. Apply the standards of the target journal. Check every claim against evidence. Verify reproducibility. Evaluate whether the paper meets the acceptance criteria of PRL/PRD/JHEP/etc. |
-| **adaptive** | Stay constructive while method choice is still open, then shift to exploit-style publication scrutiny after the approach is locked. |
-
-### gpd-experiment-designer
-
-| Mode | Behavior |
-|---|---|
-| **explore** | Exploratory design. Broader parameter ranges, coarser grids, more validation points. Include regions where multiple methods should be compared. Budget 30% for adaptive refinement. Prioritize coverage over precision. |
-| **balanced** | Standard design. Physics-informed grids, standard convergence studies (3-4 values per parameter), production-grade statistical analysis plan. |
-| **exploit** | Precision design. Tight parameter ranges around known interesting regions. Maximum convergence depth (5+ values per parameter). Highest statistical standards. Every simulation point serves the final result. |
-| **adaptive** | Start exploratory while key regimes or observables are still uncertain, then tighten to exploit-style precision after the decisive regime is identified. |
-
-### gpd-roadmapper
-
-| Mode | Behavior |
-|---|---|
-| **explore** | Alternative-aware roadmap. Surface 2-3 approaches with comparison phases and decision points. Only create explicit branch-backed workstreams after a tangent decision approves them. Larger total phase count (8-15). |
-| **balanced** | Standard roadmap. Linear phase sequence with verification checkpoints. Single approach. 5-10 phases. |
-| **exploit** | Minimal roadmap. Shortest path from problem to result. 3-6 phases. No exploratory or comparison phases. Pure execution. |
-| **adaptive** | Keep alternative paths visible only while approach choice remains open; collapse to a lean exploit-style roadmap once the method family is locked, and keep branch-backed workstreams explicit rather than implicit. |
-
-## Transition Detection (Adaptive Mode)
-
-Adaptive mode narrows from explore-style to exploit-style only when project evidence supports it:
-
-### Transition Criteria (ALL must be met)
-
-1. **Approach locked by evidence**: Prior decisive comparisons, anchor checks, or benchmark results make the current method family trustworthy for follow-on work
-2. **Methodology locked**: The planner/researcher outputs no longer show live competing method families for the same claim
-3. **Conventions established enough to compare work**: Core conventions are locked and there are no unresolved convention conflicts that would blur comparison results
-4. **No fundamental objections remain active**: Anchor failures, blocker-level methodology questions, or cross-phase contradictions are not still open
-
-### Transition Signals (Indicators, not hard requirements)
-
-- Researcher output shifts from "survey" to "focused" language
-- Planner stops producing comparison plans
-- Hypothesis branches are merged, abandoned, or downgraded to minor alternatives
-- Literature search narrows to maintenance references for the chosen technique
-
-### Transition Mechanism
-
-When the orchestrator detects transition criteria are met:
-
-1. Log the transition: `gpd state add-decision --phase N --summary "Adaptive mode narrowed toward exploit behavior" --rationale "Approach lock established in phase N: [approach description]"`
-2. Keep `research_mode` set to `adaptive`; adaptive is the persisted policy, while the current narrow/broad posture is inferred from project evidence rather than stored as a second config flag
-3. Announce to user: "Adaptive mode is narrowing around the validated [approach] methodology while keeping contract-critical checks active."
-
-The user can override at any time: `gpd:settings` or `gpd config set research_mode explore`
-
-## Interaction with Model Profiles
-
-Research mode and model profile are ORTHOGONAL:
-
-| | explore | balanced | exploit |
-|---|---|---|---|
-| **deep-theory** | Explore multiple derivation pathways, full rigor on each | Standard deep-theory | Execute ONE derivation with absolute rigor |
-| **numerical** | Try multiple numerical methods, compare convergence | Standard numerical | Run ONE validated numerical method at maximum resolution |
-| **exploratory** | Maximum breadth, minimum depth per approach | Standard exploratory | Quick execution of known method |
-| **review** | Survey multiple analyses of the same problem | Standard review | Focused reproduction of specific results |
-| **paper-writing** | Draft multiple paper structures, compare | Standard writing | Execute ONE paper structure efficiently |
-
-## Config Schema
-
-`research_mode` is the only persisted adaptive-mode knob in `GPD/config.json`. There is no separate `adaptive_transition` block; transition readiness is inferred from project state, anchors, and verification outcomes.
-
-## Command Interface
-
-```bash
-# Set research mode
-gpd config set research_mode explore
-gpd config set research_mode balanced
-gpd config set research_mode exploit
-gpd config set research_mode adaptive
-
-# Check current mode
-gpd --raw config get research_mode
-
-# In adaptive mode, inspect current project state and prior decisive evidence
-gpd state snapshot
-```
-
-## See Also
-
-- `../planning/planning-config.md` — Full config schema documentation
-- `references/orchestration/model-profiles.md` — Profile definitions (orthogonal to research mode)
-- `../../workflows/branch-hypothesis.md` — Hypothesis branching (explicit tangent outcome when a git-backed alternative path is actually desired)
-- `../../workflows/compare-branches.md` — Branch comparison (used after explicit branch-backed alternatives exist)
-- `references/orchestration/agent-infrastructure.md` — Context pressure management (affected by research mode)
+Explore and adaptive modes do **not** silently create git-backed hypothesis branches. Flag complementary approaches as tangent candidates for optional parallel investigation. Narrow on prior decisive evidence or an explicit approach lock, never on phase number alone.

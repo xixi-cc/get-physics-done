@@ -71,7 +71,7 @@ Notes:
 Suggest the most impactful next action based on current project state
 
 **`gpd:explain [concept, result, method, notation, or paper]`**
-Explain a physics concept rigorously in the context of the active project or a standalone question with an explicit topic
+Create a durable GPD explanation for a named concept, result or paper. Use for GPD-context explanations or requested explanation artifacts, not ordinary brief physics questions.
 
 - `gpd:explain "Ward identity"`
 
@@ -79,7 +79,7 @@ Explain a physics concept rigorously in the context of the active project or a s
 - Output policy: mode=managed; managed root=gpd_managed_durable; default subtree=GPD/explanations
 
 **`gpd:quick`**
-Execute a quick research task with GPD guarantees (atomic commits, state tracking) but skip optional agents
+Complete a small task in an initialized GPD project with durable state. Use for requested GPD quick work, not ordinary projectless questions.
 
 - Staged workflow: `quick`.
 

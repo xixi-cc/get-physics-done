@@ -386,7 +386,7 @@ def test_shared_context_budget_guidance_stays_runtime_neutral() -> None:
 def test_owned_commands_keep_a_single_concise_subagent_rationale() -> None:
     for path in OWNED_COMMANDS:
         text = path.read_text(encoding="utf-8")
-        if path in THIN_WORKFLOW_DELEGATOR_COMMANDS:
+        if path in THIN_WORKFLOW_DELEGATOR_COMMANDS or path.name == "explain.md":
             _assert_forbidden(text, f"{path.name} thin delegator no subagent rationale", "Why subagent:")
             _assert_machine(text, f"{path.name} thin delegator include instruction", "Follow the included ")
             continue

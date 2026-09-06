@@ -15,7 +15,7 @@ Read all files referenced by the invoking prompt's execution_context before star
 <process>
 **1. Intake**
 
-Use the task description already supplied in $ARGUMENTS or the current request as $DESCRIPTION. Ask the following question only if no actionable task was supplied:
+Use the task description already supplied in $ARGUMENTS or the current request as $DESCRIPTION. Ask ONE question inline only if no actionable task was supplied. Use freeform text, NOT ask_user with a fixed-choice menu: there are no fixed option labels to preserve.
 
 ```text
 What quick task do you want to do? Examples:

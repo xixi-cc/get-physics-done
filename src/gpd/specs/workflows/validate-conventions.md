@@ -34,7 +34,7 @@ Read mode settings:
 
 ```bash
 AUTONOMY=$(gpd --raw config get autonomy 2>/dev/null | gpd json get .value --default supervised 2>/dev/null || echo "supervised")
-COGNITIVE_PROFILE=$(gpd --raw config get cognitive_profile 2>/dev/null | gpd json get .value --default classic 2>/dev/null || echo "classic")
+COGNITIVE_PROFILE=$(gpd --raw config get cognitive_profile 2>/dev/null | gpd json get .value --default base-model-first 2>/dev/null || echo "base-model-first")
 ```
 
 Run centralized context preflight before continuing:

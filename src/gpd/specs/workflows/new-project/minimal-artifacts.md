@@ -166,10 +166,10 @@ Create `GPD/config.json` with these defaults:
 
 ```json
 {
-  "autonomy": "supervised",
-  "research_mode": "balanced",
+  "autonomy": "balanced",
+  "research_mode": "adaptive",
   "execution": {
-    "review_cadence": "dense"
+    "review_cadence": "adaptive"
   },
   "parallelization": true,
   "planning": {
@@ -177,9 +177,9 @@ Create `GPD/config.json` with these defaults:
   },
   "model_profile": "review",
   "workflow": {
-    "research": true,
-    "plan_checker": true,
-    "verifier": true
+    "research": "auto",
+    "plan_checker": "auto",
+    "verifier": "auto"
   }
 }
 ```

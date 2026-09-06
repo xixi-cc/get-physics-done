@@ -175,7 +175,7 @@ def test_codex_command_runtime_note_injection_is_idempotent() -> None:
 
 
 def test_codex_projection_profile_validation_is_closed() -> None:
-    assert normalize_codex_projection_profile(None) == "full"
+    assert normalize_codex_projection_profile(None) == "lean"
     assert normalize_codex_projection_profile(" FULL ") == "full"
     assert normalize_codex_projection_profile("lean") == "lean"
     with pytest.raises(ValueError, match="Unknown Codex projection profile"):
@@ -205,7 +205,7 @@ def test_real_lean_projection_preserves_every_canonical_command_for_explicit_inv
     assert result["commands"] == len(canonical)
     assert result["skills"] == len(canonical) + 1
     assert implicit == _CODEX_LEAN_IMPLICIT_COMMAND_SKILLS
-    assert len(explicit_only) == 56
+    assert len(explicit_only) == 60
     assert implicit | explicit_only == canonical
     assert implicit.isdisjoint(explicit_only)
     assert all((skills / skill_name / "SKILL.md").is_file() for skill_name in canonical)
@@ -624,7 +624,7 @@ class TestInstall:
         for skill_dir in gpd_skills:
             assert (skill_dir / "SKILL.md").exists()
 
-    def test_full_projection_is_default_and_preserves_current_skill_surface(
+    def test_explicit_full_projection_preserves_current_skill_surface(
         self,
         adapter: CodexAdapter,
         gpd_root: Path,
@@ -635,7 +635,7 @@ class TestInstall:
         skills = tmp_path / "skills"
         skills.mkdir()
 
-        result = adapter.install(gpd_root, target, is_global=False, skills_dir=skills)
+        result = adapter.install(gpd_root, target, is_global=False, skills_dir=skills, projection_profile="full")
         manifest = json.loads((target / "gpd-file-manifest.json").read_text(encoding="utf-8"))
         canonical = {"gpd-help", "gpd-sub-deep"}
 
@@ -690,7 +690,7 @@ class TestInstall:
         explicit_policy = skills / "gpd-sub-deep" / "agents" / "openai.yaml"
         assert explicit_policy.read_text(encoding="utf-8") == ("policy:\n  allow_implicit_invocation: false\n")
         assert "skills/gpd-sub-deep/agents/openai.yaml" in manifest["files"]
-        assert not (skills / "gpd-help" / "agents" / "openai.yaml").exists()
+        assert (skills / "gpd-help" / "agents" / "openai.yaml").read_text() == "policy:\n  allow_implicit_invocation: false\n"
 
         router = skills / _CODEX_PROJECTION_ROUTER_SKILL
         router_text = (router / "SKILL.md").read_text(encoding="utf-8")
@@ -876,7 +876,7 @@ class TestInstall:
         original_rename = Path.rename
 
         def fake_render(*args, **kwargs):
-            return None
+            return set()
 
         def fake_rename(self: Path, target_path: Path):
             if target_path == skills and self.name.endswith(".backup"):

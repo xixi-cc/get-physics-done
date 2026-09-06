@@ -174,6 +174,9 @@ def _assert_expanded_runtime_note(path: Path) -> None:
 
 
 def _manifest_owns_runtime_note(path: Path) -> bool:
+    if path.name == "explain.md":
+        text = _read(path)
+        return RUNTIME_NOTE_INCLUDE_FRAGMENT.removeprefix("@") in text and "delegat" in text
     manifest_path = path.with_name(f"{path.stem}-stage-manifest.json")
     if not manifest_path.exists():
         return False

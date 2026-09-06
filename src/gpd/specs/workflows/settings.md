@@ -55,12 +55,12 @@ cat "$PROJECT_ROOT/GPD/config.json"
 Parse current values, using the schema defaults noted below when a key is
 absent:
 
-- `autonomy` -- `"supervised"` (default), `"balanced"`, `"yolo"`
-- `research_mode` -- `"explore"`, `"balanced"` (default), `"exploit"`, `"adaptive"`
+- `autonomy` -- `"supervised"`, `"balanced"` (default), `"yolo"`
+- `research_mode` -- `"explore"`, `"balanced"`, `"exploit"`, `"adaptive"` (default)
 - `model_overrides` -- optional runtime-scoped concrete model mapping for
   `tier-1`, `tier-2`, `tier-3`
 - `workflow.research`, `workflow.plan_checker`, `workflow.verifier` -- `true`, `false`, or `"auto"`
-- `execution.review_cadence` -- `"dense"` (default), `"adaptive"`, `"sparse"`
+- `execution.review_cadence` -- `"dense"`, `"adaptive"` (default), `"sparse"`
 - `execution.max_unattended_minutes_per_plan`
 - `execution.max_unattended_minutes_per_wave`
 - `execution.project_usd_budget`

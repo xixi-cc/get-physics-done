@@ -48,7 +48,7 @@ Route a request for a rigorous explanation into the workflow-owned implementatio
 
 This wrapper owns command-context validation and the public output-root boundary only. The same-named workflow owns scope clarification, context gathering, explainer delegation, citation audit, result lookup, and reporting.
 
-Use the current main context by default. Delegate only for a concrete independence, parallelism or context need; citation verification remains evidence-based on either route.
+A standalone question with an explicit topic is supported. Use the current main context by default. Delegate to gpd-explainer or gpd-bibliographer only for a concrete independence, parallelism or context need; citation verification remains evidence-based on either route.
 </objective>
 
 <execution_context>

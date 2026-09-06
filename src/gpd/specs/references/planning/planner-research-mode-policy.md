@@ -9,7 +9,7 @@ acceptance tests, and physics verification.
 Use when the problem domain is new, the best approach is unknown, or multiple
 methods remain viable.
 
-- Identify 2-3 viable approaches during planning analysis.
+- Identify materially distinct viable approaches during planning analysis.
 - Do not silently emit branch-like alternative plans, set `branch: true`, or
   create side-work detours from explore mode alone.
 - If the user has not chosen a tangent route, create the recommended main-line
@@ -48,8 +48,8 @@ or production runs.
 
 Use for multi-phase projects where approach choice may evolve.
 
-- Start broad until prior decisive evidence or an explicit approach lock
-  justifies narrowing.
+- Use the current uncertainty to choose breadth. Start focused when the method
+  and evidence are already sufficient; broaden only for a real unresolved choice.
 - Reuse existing research only when it covers the exact method family, anchors,
   and decisive evidence path.
 - Do not infer narrowing from phase number alone.
@@ -59,4 +59,4 @@ Use for multi-phase projects where approach choice may evolve.
 ## Reading The Mode
 
 Read `research_mode` from the planner handoff. If absent, default to
-`balanced`.
+`adaptive`.

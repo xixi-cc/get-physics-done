@@ -124,14 +124,16 @@ def test_new_project_workflow_preset_gate_is_after_scope_and_before_project_arti
 
     assert SETUP_QUESTION not in scope_surface
     assert "Workflow Setup" not in scope_surface
-    assert SETUP_QUESTION in prefs_surface
-    assert "after scope approval and before\n`project_artifacts`" in prefs_surface
+    assert SETUP_QUESTION not in prefs_surface
+    assert "do not\nask the user to select a mode" in prefs_surface
+    assert "After scope approval" in prefs_surface
     assert prefs_stage["writes_allowed"] == ["GPD/config.json"]
     assert prefs_stage["next_stages"] == ["project_artifacts"]
     assert "If `GPD/config.json` is missing" in project_surface
     assert "gpd --raw init new-project --stage workflow_preferences" in project_surface
     assert project_stage["next_stages"] == ["literature_survey"]
     assert "before workflow preferences or before the first project-artifact commit" not in command_text
+
 
 
 def test_new_project_minimal_artifacts_stage_surface_excludes_deferred_full_machinery() -> None:

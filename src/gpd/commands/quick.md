@@ -23,7 +23,7 @@ help:
 Execute small, ad-hoc research tasks in an initialized GPD project while
 preserving atomic commits and durable state tracking. The workflow owns the
 staged main-context authoring, completion record, and complexity promotion
-boundary. Load delegated planner/executor contracts only when delegation is needed.
+boundary. Load delegated gpd-planner/gpd-executor contracts only when delegation is needed.
 
 Records completion through structured `gpd state` commands and quick-task
 summary files, not a custom STATE.md table.

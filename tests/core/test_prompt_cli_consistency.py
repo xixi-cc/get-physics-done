@@ -1063,22 +1063,11 @@ def test_settings_and_research_mode_docs_keep_tangent_branch_taxonomy_strict() -
     research_modes = (REPO_ROOT / "src/gpd/specs/references/research/research-modes.md").read_text(encoding="utf-8")
     preset_labels = _workflow_preset_labels()
 
-    assert "Which starting workflow preset should GPD use for `GPD/config.json`?" in new_project
-    _assert_semantic_fragments(
-        new_project,
-        "new-project preset gate stays explicit",
-        (
-            "First offer a preset choice.",
-            "bundles over existing config keys only",
-            "Do not create, persist, or infer a separate preset block.",
-        ),
-    )
-    assert "preview" in new_project
-    assert "Before writing `GPD/config.json`" in new_project
+    assert "Which starting workflow preset" not in new_project
+    assert "bundles over existing config keys only" in new_project
+    assert "Do not create, persist, or infer a separate preset block." in new_project
     assert "Core research" in preset_labels
-    assert '"Core research (Recommended)"' in new_project
-    for label in sorted(preset_labels - {"Core research"}):
-        assert f'"{label}"' in new_project
+    assert "Before writing `GPD/config.json`" in new_project
     assert "multiple hypothesis branches" not in settings
     assert "Minimal branching, fast convergence." not in settings
     _assert_semantic_absent(
@@ -1106,6 +1095,7 @@ def test_settings_and_research_mode_docs_keep_tangent_branch_taxonomy_strict() -
             "Flag complementary approaches as tangent candidates for optional parallel investigation",
         ),
     )
+
 
 
 def test_new_project_and_help_surface_runtime_default_and_state_backup_gitignore_guidance() -> None:

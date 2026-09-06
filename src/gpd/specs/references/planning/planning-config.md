@@ -8,16 +8,16 @@ Configuration options for `GPD/` directory behavior in physics research projects
 "planning": {
   "commit_docs": true
 },
-"autonomy": "supervised",
+"autonomy": "balanced",
 "execution": {
-  "review_cadence": "dense",
+  "review_cadence": "adaptive",
   "max_unattended_minutes_per_plan": 15,
   "max_unattended_minutes_per_wave": 30,
   "checkpoint_after_n_tasks": 1,
   "checkpoint_after_first_load_bearing_result": true,
   "checkpoint_before_downstream_dependent_tasks": true
 },
-"research_mode": "balanced",
+"research_mode": "adaptive",
 "parallelization": true,
 "model_profile": "review",
 "git": {
@@ -26,31 +26,31 @@ Configuration options for `GPD/` directory behavior in physics research projects
   "milestone_branch_template": "gpd/{milestone}-{slug}"
 },
 "workflow": {
-  "research": true,
-  "verifier": true,
-  "plan_checker": true
+  "research": "auto",
+  "verifier": "auto",
+  "plan_checker": "auto"
 }
 ```
 
 | Option                          | Default                      | Description                                                                                    |
 | ------------------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------- |
 | `planning.commit_docs`          | `true`                       | Whether to commit planning artifacts to git                                                    |
-| `autonomy`                      | `"supervised"`               | Human-in-the-loop level: `"supervised"`, `"balanced"`, `"yolo"`                                    |
-| `execution.review_cadence`      | `"dense"`                    | How aggressively long-running execution injects bounded review points                            |
+| `autonomy`                      | `"balanced"`               | Human-in-the-loop level: `"supervised"`, `"balanced"`, `"yolo"`                                    |
+| `execution.review_cadence`      | `"adaptive"`                 | How aggressively long-running execution injects bounded review points                            |
 | `execution.max_unattended_minutes_per_plan` | `15`             | Wall-clock budget before a bounded continuation segment must be created, even if the run feels smooth |
 | `execution.max_unattended_minutes_per_wave` | `30`             | Wave-level unattended budget before forcing a bounded review                                     |
 | `execution.checkpoint_after_n_tasks` | `1`                    | Task budget before forcing a bounded continuation segment                                        |
 | `execution.checkpoint_after_first_load_bearing_result` | `true` | Require a first-result sanity gate before fanout, especially when decisive evidence is not yet in hand |
 | `execution.checkpoint_before_downstream_dependent_tasks` | `true` | `true`, `false`, or `"auto"`; auto requires a gate only for an uncleared load-bearing result and reuses fresh equivalent checks |
-| `research_mode`                 | `"balanced"`                 | Research strategy: `"explore"` (breadth), `"balanced"`, `"exploit"` (depth), `"adaptive"`       |
+| `research_mode`                 | `"adaptive"`                 | Research strategy: `"explore"` (breadth), `"balanced"`, `"exploit"` (depth), `"adaptive"`       |
 | `parallelization`               | `true`                       | Execute plans within a wave in parallel (`true`) or sequentially (`false`)                     |
 | `model_profile`                 | `"review"`                   | Research profile: `"deep-theory"`, `"numerical"`, `"exploratory"`, `"review"`, `"paper-writing"` |
 | `git.branching_strategy`        | `"none"`                     | Git branching approach: `"none"`, `"per-phase"`, or `"per-milestone"`                          |
 | `git.phase_branch_template`     | `"gpd/phase-{phase}-{slug}"` | Branch template for the `per-phase` strategy                                                   |
 | `git.milestone_branch_template` | `"gpd/{milestone}-{slug}"`   | Branch template for the `per-milestone` strategy                                               |
-| `workflow.research`             | `true`                       | `true`, `false`, or `"auto"`; auto spawns only for research-risk triggers                      |
-| `workflow.verifier`             | `true`                       | `true`, `false`, or `"auto"`; auto verifies load-bearing, conflicting, or promoted results     |
-| `workflow.plan_checker`         | `true`                       | `true`, `false`, or `"auto"`; auto checks only risk-bearing plans                              |
+| `workflow.research`             | `"auto"`                       | `true`, `false`, or `"auto"`; auto spawns only for research-risk triggers                      |
+| `workflow.verifier`             | `"auto"`                       | `true`, `false`, or `"auto"`; auto verifies load-bearing, conflicting, or promoted results     |
+| `workflow.plan_checker`         | `"auto"`                       | `true`, `false`, or `"auto"`; auto checks only risk-bearing plans                              |
 
 </config_schema>
 
@@ -283,3 +283,5 @@ Squash merge is recommended -- keeps main branch history clean while preserving 
 </branching_strategy_behavior>
 
 </planning_config>
+
+Default cognition is `base-model-first`; workflow research, plan_checker and verifier default to `auto`, and review cadence to `adaptive`. Explicit project values override defaults.

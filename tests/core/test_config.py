@@ -115,9 +115,9 @@ class TestGPDProjectConfigDefaults:
     def test_defaults(self):
         cfg = GPDProjectConfig()
         assert cfg.model_profile == ModelProfile.REVIEW
-        assert cfg.autonomy == AutonomyMode.SUPERVISED
-        assert cfg.review_cadence == ReviewCadence.DENSE
-        assert cfg.research_mode == ResearchMode.BALANCED
+        assert cfg.autonomy == AutonomyMode.BALANCED
+        assert cfg.review_cadence == ReviewCadence.ADAPTIVE
+        assert cfg.research_mode == ResearchMode.ADAPTIVE
         assert cfg.model_routing_mode == "shadow"
         assert cfg.commit_docs is True
         assert cfg.parallelization is True
@@ -180,7 +180,7 @@ class TestConfigKeyContracts:
         assert effective_config_value(cfg, "execution") == (
             True,
             {
-                "review_cadence": "dense",
+                "review_cadence": "adaptive",
                 "model_routing_mode": "shadow",
                 "max_unattended_minutes_per_plan": 15,
                 "max_unattended_minutes_per_wave": 30,

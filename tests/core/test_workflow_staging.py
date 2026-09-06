@@ -1186,7 +1186,7 @@ def test_validate_workflow_stage_manifest_payload_loads_quick_manifest() -> None
     assert "reference_artifacts_content" not in authoring.required_init_fields
     assert "derived_manuscript_proof_review_status" not in authoring.required_init_fields
     assert "templates/planner-subagent-prompt.md" in authoring.must_not_eager_load
-    assert authoring.writes_allowed == ("GPD/quick/NNN-slug/NNN-PLAN.md",)
+    assert authoring.writes_allowed == ("GPD/quick/NNN-slug", "GPD/STATE.md", "GPD/state.json")
 
     assert "contract_intake" in reference_context.required_init_fields
     assert reference_context.loaded_authorities[0] == "workflows/quick/reference-context.md"
@@ -1198,7 +1198,7 @@ def test_validate_workflow_stage_manifest_payload_loads_quick_manifest() -> None
     assert "protocol_bundle_context" not in reference_context.required_init_fields
     assert "reference_artifacts_content" not in reference_context.required_init_fields
     assert "derived_manuscript_proof_review_status" in reference_context.required_init_fields
-    assert reference_context.writes_allowed == ("GPD/quick/NNN-slug/NNN-PLAN.md",)
+    assert reference_context.writes_allowed == ("GPD/quick/NNN-slug", "GPD/STATE.md", "GPD/state.json")
 
 
 @pytest.mark.parametrize(
@@ -1460,7 +1460,7 @@ def test_quick_reference_context_is_only_bundle_capable_stage() -> None:
     assert bundle_fields.issubset(manifest.stage("reference_context").required_init_fields)
     assert body_fields.isdisjoint(manifest.stage("reference_context").required_init_fields)
     assert "`reference_context` only for targeted source lookup or tasks that need active project anchors" in quick_text
-    assert "Default Reference Runtime:** not loaded for `task_authoring`" in quick_text
+    assert "Do not load the workflow index or unrelated roles" in quick_text
     assert "If `TASK_AUTHORING_INIT.staged_loading.stage_id` is `reference_context`" in quick_text
     assert "<selected_protocol_bundle_ids>" in quick_text
     assert "<protocol_bundle_load_manifest>" in quick_text

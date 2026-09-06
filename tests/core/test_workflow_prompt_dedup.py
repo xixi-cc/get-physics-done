@@ -476,10 +476,10 @@ def test_runtime_delegation_note_is_loaded_once_per_workflow() -> None:
     include = "@{GPD_INSTALL_DIR}/references/orchestration/runtime-delegation-note.md"
     workflows_using_short_references = {
         "audit-milestone.md",
-        "explain.md",
         "quick.md",
     }
     workflows_using_manifest_conditional_references = {
+        "explain.md": "{GPD_INSTALL_DIR}/references/orchestration/runtime-delegation-note.md",
         "write-paper.md": "{GPD_INSTALL_DIR}/references/orchestration/runtime-delegation-note.md",
     }
 

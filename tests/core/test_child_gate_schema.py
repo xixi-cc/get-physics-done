@@ -88,14 +88,14 @@ def _workflow_child_gates() -> tuple[WorkflowChildGate, ...]:
     gates: list[WorkflowChildGate] = []
     errors: list[str] = []
 
-    for path in sorted(WORKFLOWS_DIR.rglob("*.md")):
+    for path in sorted([*WORKFLOWS_DIR.rglob("*.md"), WORKFLOWS_DIR.parent / "references/quick/quick-delegated-authoring.md"]):
         text = path.read_text(encoding="utf-8")
         for match in _YAML_BLOCK_RE.finditer(text):
             body = match.group("body")
             if "child_gate" not in body:
                 continue
             line = text[: match.start()].count("\n") + 1
-            source = str(path.relative_to(WORKFLOWS_DIR))
+            source = ("../references/quick/quick-delegated-authoring.md" if path.parent.name == "quick" and "references" in path.parts else str(path.relative_to(WORKFLOWS_DIR)))
             try:
                 payload = yaml.safe_load(body)
             except Exception as exc:
@@ -136,14 +136,14 @@ def _workflow_aggregate_child_gates() -> tuple[WorkflowAggregateChildGate, ...]:
     gates: list[WorkflowAggregateChildGate] = []
     errors: list[str] = []
 
-    for path in sorted(WORKFLOWS_DIR.rglob("*.md")):
+    for path in sorted([*WORKFLOWS_DIR.rglob("*.md"), WORKFLOWS_DIR.parent / "references/quick/quick-delegated-authoring.md"]):
         text = path.read_text(encoding="utf-8")
         for match in _YAML_BLOCK_RE.finditer(text):
             body = match.group("body")
             if "aggregate_child_gate" not in body:
                 continue
             line = text[: match.start()].count("\n") + 1
-            source = str(path.relative_to(WORKFLOWS_DIR))
+            source = ("../references/quick/quick-delegated-authoring.md" if path.parent.name == "quick" and "references" in path.parts else str(path.relative_to(WORKFLOWS_DIR)))
             try:
                 gates.append(
                     WorkflowAggregateChildGate(
@@ -207,8 +207,8 @@ _EXPECTED_WORKFLOW_CHILD_GATE_SOURCES = {
     "post_execution_verifier": "execute-phase/verification-handoff.md",
     "project_roadmapper": "new-project/roadmap-authoring.md",
     "proof_critic_wave_audit": "execute-phase/proof-critic-dispatch.md",
-    "quick_executor_summary": ("quick/task-authoring.md", "quick/reference-context.md"),
-    "quick_planner_plan": ("quick/task-authoring.md", "quick/reference-context.md"),
+    "quick_executor_summary": ("../references/quick/quick-delegated-authoring.md", "quick/reference-context.md"),
+    "quick_planner_plan": ("../references/quick/quick-delegated-authoring.md", "quick/reference-context.md"),
     "rapid_consistency_check": "execute-phase/consistency-check.md",
     "respond_to_referees_revision_section": "respond-to-referees/response-authoring.md",
     "verify_work_gap_plan_checker": "verify-work/gap-repair.md",

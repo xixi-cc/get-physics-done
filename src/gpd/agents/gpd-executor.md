@@ -539,3 +539,5 @@ for physics TDD, and `{GPD_INSTALL_DIR}/references/shared/cross-project-patterns
 for pattern-library lifecycle.
 
 </on_demand_references>
+
+For checkpoint presentation, read `{GPD_INSTALL_DIR}/references/orchestration/checkpoints.md` and `{GPD_INSTALL_DIR}/references/orchestration/checkpoint-ux-convention.md` only when needed. A commit is partial evidence; it does not establish handoff completeness or fresh artifacts.

@@ -31,7 +31,7 @@ MANUSCRIPT_ENTRYPOINT=$(echo "$INIT" | gpd json get .manuscript_entrypoint --def
 MANUSCRIPT_BASENAME="${MANUSCRIPT_ENTRYPOINT##*/}"
 AUTONOMY=$(echo "$INIT" | gpd json get .autonomy --default balanced)
 RESEARCH_MODE=$(echo "$INIT" | gpd json get .research_mode --default balanced)
-COGNITIVE_PROFILE=$(echo "$INIT" | gpd json get .cognitive_profile --default classic)
+COGNITIVE_PROFILE=$(echo "$INIT" | gpd json get .cognitive_profile --default base-model-first)
 if command -v pdflatex >/dev/null 2>&1; then
   PDFLATEX_AVAILABLE=true
 else

@@ -14,7 +14,7 @@ approved scope is missing or not authoritative, stop and reload
 </stage_boundary>
 
 **Mode-aware behavior:**
-- Use `research_mode=balanced` as the recommended default for new projects.
+- Use `research_mode=adaptive` as the recommended default for new projects.
 - Preserve explicit `research_mode=explore`, `research_mode=exploit`, and
   `research_mode=adaptive` choices when the user selects them.
 
@@ -72,52 +72,18 @@ stage and outside `GPD/config.json`; they stay in `GPD/state.json` and
 </allowed_config_keys>
 
 <preset_gate>
-This preset gate is intentionally after scope approval and before
-`project_artifacts`, because `project_artifacts` cannot run without
-`GPD/config.json`. First offer a preset choice. If a preset is selected,
-resolve it into the allowed keys above, preview the changed knobs, then ask
-whether to apply the bundle or customize.
+After scope approval, infer workflow settings from the authorized task; do not
+ask the user to select a mode or approve routine configuration separately.
+For an absent configuration use balanced autonomy, adaptive research and review,
+base-model-first cognition, and auto research/plan-checker/verifier policies.
+Use the effective config defaults for remaining keys. Keep explicit session and
+project choices. Model profile remains review unless the task clearly warrants
+another supported profile; this does not change the runtime's main model.
 
-Use ask_user:
-
-- header: "Workflow Setup"
-- question: "Which starting workflow preset should GPD use for `GPD/config.json`?"
-- options:
-  - "Core research (Recommended)" -- supervised, balanced, parallel, dense review, commit docs, all workflow agents, review profile
-  - "Theory" -- tier-1 deep derivation with sparse process cadence and risk-triggered independent agents
-  - "Numerics" -- computation-heavy workflow with `model_profile=numerical`
-  - "Publication / manuscript" -- paper-writing workflow with `model_profile=paper-writing`
-  - "Full research" -- core research defaults plus publication-readiness tracking through existing workflow toggles
-  - "Customize settings" -- choose the allowed keys individually
-
-The recommended `core-research` preview is:
-
-```json
-{
-  "autonomy": "supervised",
-  "research_mode": "balanced",
-  "parallelization": true,
-  "planning": {
-    "commit_docs": true
-  },
-  "execution": {
-    "review_cadence": "dense"
-  },
-  "model_profile": "review",
-  "workflow": {
-    "research": true,
-    "plan_checker": true,
-    "verifier": true
-  }
-}
-```
-
-Display:
-
-```text
-Config: Supervised autonomy | Dense review cadence | Balanced research mode | Parallel | All agents | Review profile
-(Change anytime with gpd:settings)
-```
+Advanced preset selection and customization remain available when explicitly
+requested. Resolve a chosen preset into allowed keys; do not create a preset
+block. Ask only if a missing choice changes authority, scope, or scientific
+meaning. Preserve required independent checks and hard stops.
 </preset_gate>
 
 <customize_settings>
@@ -146,7 +112,7 @@ the stored policy at their own write boundaries.
 </customize_settings>
 
 <write_config>
-Map the final preset/custom answers into these variables:
+Map inferred defaults or explicit preset/custom choices into these variables:
 
 - `SELECTED_AUTONOMY`
 - `SELECTED_RESEARCH_MODE`

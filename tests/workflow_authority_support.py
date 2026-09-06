@@ -121,7 +121,7 @@ def _append_declared_workflow_authority(
 ) -> None:
     if not isinstance(value, str):
         return
-    if not value.startswith(f"workflows/{workflow_name}/") or not value.endswith(".md"):
+    if not value.startswith((f"workflows/{workflow_name}/", f"references/{workflow_name}/")) or not value.endswith(".md"):
         return
     path = workflows_dir.parent / value
     if path.exists() and path not in seen:

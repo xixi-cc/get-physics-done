@@ -267,13 +267,7 @@ def test_new_project_customize_settings_matches_supervised_dense_defaults() -> N
         forbidden='Balanced (Recommended)", description: "Routine work is automatic',
         context="new-project customize round-one shape",
     )
-    _mf(
-        new_project,
-        '"autonomy": "supervised"',
-        '"review_cadence": "dense"',
-        '"commit_docs": true',
-        context="new-project customize supervised dense defaults",
-    )
+    _sf(new_project, "balanced autonomy", "adaptive research and review", "auto research/plan-checker/verifier", context="adaptive setup defaults")
 
 
 def test_undo_backtrack_hook_collects_complete_backtrack_row_fields() -> None:

@@ -144,7 +144,7 @@ This runs in parallel - all issues investigated simultaneously.
 ```bash
 DEBUGGER_MODEL=$(gpd resolve-model gpd-debugger)
 AUTONOMY=$(gpd --raw config get autonomy 2>/dev/null | gpd json get .value --default supervised 2>/dev/null || echo "supervised")
-COGNITIVE_PROFILE=$(gpd --raw config get cognitive_profile 2>/dev/null | gpd json get .value --default classic 2>/dev/null || echo "classic")
+COGNITIVE_PROFILE=$(gpd --raw config get cognitive_profile 2>/dev/null | gpd json get .value --default base-model-first 2>/dev/null || echo "base-model-first")
 ```
 
 **Choose the cognitive route before dispatch:**

@@ -314,23 +314,11 @@ def test_consistency_checker_stays_one_shot_and_does_not_claim_resolution_work()
 
 def test_executor_checkpoint_frequency_guidance_is_consistent() -> None:
     source = _read_agent("gpd-executor")
-
-    assert_prompt_contracts(
-        source,
-        machine_exact(
-            "executor checkpoint frequency guidance",
-            (
-                "**checkpoint:human-verify (90% of checkpoints)**",
-                "**checkpoint:decision (9% of checkpoints)**",
-                "**checkpoint:human-action (1% -- rare)**",
-            ),
-        ),
-        machine_exact(
-            "executor stale checkpoint frequency guidance",
-            ("**checkpoint:decision (25%)**", "**checkpoint:human-action (5%)**"),
-            mode=FragmentMode.ABSENT,
-        ),
-    )
+    assert "90% of checkpoints" not in source
+    assert "9% of checkpoints" not in source
+    assert "every 3-4" not in source
+    assert "checkpoint" in source
+    assert "first-result" in source
 
 
 def test_roadmapper_shallow_mode_keeps_contract_identity_visible() -> None:

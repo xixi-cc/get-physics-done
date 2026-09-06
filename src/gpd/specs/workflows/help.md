@@ -207,7 +207,7 @@ Notes: The local CLI `gpd progress` is a read-only renderer with `json|bar|table
 Suggest the most impactful next action based on current project state
 
 **`gpd:explain [concept, result, method, notation, or paper]`**
-Explain a physics concept rigorously in the context of the active project or a standalone question with an explicit topic
+Create a durable GPD explanation for a named concept, result or paper. Use for GPD-context explanations or requested explanation artifacts, not ordinary brief physics questions.
 Usage: `gpd:explain "Ward identity"`
 
 **`gpd:discover [phase or topic] [--depth quick|medium|deep]`**

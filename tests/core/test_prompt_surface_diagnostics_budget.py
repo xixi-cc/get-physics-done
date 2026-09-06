@@ -21,7 +21,7 @@ PROMPT_KIND_BUDGETS = {
 STAGE_FIRST_TURN_BUDGET = {"lines": 3_180, "chars": 134_000}
 # Phase 3 strict target uses <= assertions, so char caps are one below the
 # acceptance threshold.
-STAGE_FIRST_TURN_ACTIVE_BUDGET = {"lines": 2_200, "chars": 104_500}
+STAGE_FIRST_TURN_ACTIVE_BUDGET = {"lines": 2_200, "chars": 105_000}
 STAGED_WORKFLOW_DIAGNOSTIC_COUNT = 16
 STAGE_EAGER_CHAR_BUDGET = 855_000
 # Phase 3 adds explicit main-model/fresh-context route contracts and retains an

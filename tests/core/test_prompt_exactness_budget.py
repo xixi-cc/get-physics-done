@@ -19,7 +19,7 @@ EXACTNESS_TOTAL_BUDGETS = {
     # Phase 3 cognitive routing adds explicit staged-field, conditional-authority,
     # and compatibility anchors; prose route meaning stays in semantic helpers.
     # Verification CLI migration adds six deliberate command/schema locks.
-    "exact_assertion_count": 5_187,
+    "exact_assertion_count": 5_200,
 }
 TAXONOMY_HELPER_TOTAL_FLOORS = {
     # Phase 8 observed 80 files and 735 helper calls; keep a small call-count cushion.

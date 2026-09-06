@@ -859,7 +859,7 @@ def test_workflow_interactive_choice_fallback_is_single_sourced() -> None:
 
 def test_quick_workflow_uses_freeform_prompt_without_choice_fallback() -> None:
     repo_root = Path(__file__).resolve().parents[2]
-    raw = (repo_root / "src/gpd/specs/workflows/quick.md").read_text(encoding="utf-8")
+    raw = (repo_root / "src/gpd/specs/workflows/quick/task-bootstrap.md").read_text(encoding="utf-8")
 
     assert "@{GPD_INSTALL_DIR}/references/shared/interactive-choice-fallback.md" not in raw
     _assert_anchor(

@@ -2054,51 +2054,14 @@ def test_remove_phase_workflow_stages_checkpoint_shelf_updates() -> None:
     assert "GPD/phase-checkpoints" in workflow
 
 
-def test_new_project_surfaces_supervised_default_and_core_research_preset_preview() -> None:
-    workflow_text = _workflow_authority_text("new-project")
-
-    # The minimal-mode config.json template emits the supervised default explicitly.
-    assert '"autonomy": "supervised"' in workflow_text
-    assert '"review_cadence": "dense"' in workflow_text
-
-    # The preset catalog is still present, with the core-research preset recommended.
-    assert "Which starting workflow preset should GPD use for `GPD/config.json`?" in workflow_text
-    assert '"Core research (Recommended)"' in workflow_text
-    assert '"Theory"' in workflow_text
-    assert '"Numerics"' in workflow_text
-    assert '"Publication / manuscript"' in workflow_text
-    assert '"Full research"' in workflow_text
-
-    # The core-research preset aligns with the Phase-1 defaults
-    # (autonomy=supervised, review_cadence=dense), so its preview surfaces
-    # those values rather than weaker overrides.
-    _mf(
-        workflow_text,
-        '"autonomy": "supervised"',
-        '"research_mode": "balanced"',
-        '"parallelization": true',
-        '"commit_docs": true',
-        '"review_cadence": "dense"',
-        context="new-project core-research preset machine preview",
-    )
-    _sf(
-        workflow_text,
-        "Config:",
-        "Supervised autonomy",
-        "Dense review cadence",
-        "Balanced research mode",
-        "Parallel",
-        "All agents",
-        "Review profile",
-        context="new-project core-research preset preview",
-    )
-
-    _ff(
-        workflow_text,
-        "Recommended defaults use YOLO autonomy",
-        "Config: YOLO autonomy | Balanced research mode | Parallel | All agents | Review profile",
-        context="new-project stale YOLO preset copy",
-    )
+def test_new_project_automatically_uses_adaptive_defaults_and_keeps_explicit_overrides() -> None:
+    text = _workflow_authority_text("new-project")
+    _mf(text, '"autonomy": "balanced"', '"research_mode": "adaptive"',
+        '"review_cadence": "adaptive"', '"research": "auto"',
+        '"plan_checker": "auto"', '"verifier": "auto"', context="adaptive defaults")
+    _sf(text, "Keep explicit session and", "project choices", "hard stops",
+        "base-model-first", context="automatic setup boundaries")
+    assert "Which starting workflow preset should GPD use" not in text
 
 
 def test_settings_and_new_project_surface_runtime_permission_sync_for_yolo() -> None:
@@ -6569,7 +6532,7 @@ def test_decisive_comparisons_paper_quality_artifacts_and_profile_invariants_are
         "`${PAPER_DIR}/FIGURE_TRACKER.md`",
         context="write-paper paper-quality figure tracker",
     )
-    _mf(new_project, '"review_cadence": "dense"', "Dense review cadence", context="dense review default")
+    _mf(new_project, '"review_cadence": "adaptive"', context="adaptive review default")
     _sf(
         execute_phase,
         "prior decisive `contract_results`",
@@ -6601,6 +6564,7 @@ def test_decisive_comparisons_paper_quality_artifacts_and_profile_invariants_are
     _sf(planner, "Do NOT change conventions mid-project", "explicit checkpoint", context="planner convention lock")
     _s(executor, "executor yolo gates", "Required first-result, anchor, and pre-fanout gates", "yolo mode")
     _mf(verifier_agent, "suggested_contract_checks", context="verifier suggested contract checks")
+
 
 
 def test_publication_workflows_refresh_bibliography_audit_after_bibliography_changes() -> None:

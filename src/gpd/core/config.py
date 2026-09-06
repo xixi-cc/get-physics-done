@@ -325,17 +325,17 @@ class GPDProjectConfig(BaseModel):
     """
 
     model_profile: ModelProfile = ModelProfile.REVIEW
-    autonomy: AutonomyMode = AutonomyMode.SUPERVISED
-    review_cadence: ReviewCadence = ReviewCadence.DENSE
-    research_mode: ResearchMode = ResearchMode.BALANCED
-    cognitive_profile: CognitiveProfile = CognitiveProfile.CLASSIC
+    autonomy: AutonomyMode = AutonomyMode.BALANCED
+    review_cadence: ReviewCadence = ReviewCadence.ADAPTIVE
+    research_mode: ResearchMode = ResearchMode.ADAPTIVE
+    cognitive_profile: CognitiveProfile = CognitiveProfile.BASE_MODEL_FIRST
     model_routing_mode: Literal["shadow", "enforce"] = "shadow"
 
     # Workflow toggles
     commit_docs: bool = True
-    research: WorkflowAgentPolicy = True
-    plan_checker: WorkflowAgentPolicy = True
-    verifier: WorkflowAgentPolicy = True
+    research: WorkflowAgentPolicy = "auto"
+    plan_checker: WorkflowAgentPolicy = "auto"
+    verifier: WorkflowAgentPolicy = "auto"
     parallelization: bool = True
     max_unattended_minutes_per_plan: int = Field(default=15, ge=1)
     max_unattended_minutes_per_wave: int = Field(default=30, ge=1)

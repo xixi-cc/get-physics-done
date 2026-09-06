@@ -110,25 +110,21 @@ _CODEX_DEFAULT_SANDBOX_MODE = "workspace-write"
 _CODEX_YOLO_APPROVAL_POLICY = "never"
 _CODEX_YOLO_SANDBOX_MODE = "danger-full-access"
 _CODEX_PROJECTION_PROFILES = ("full", "lean")
-_CODEX_DEFAULT_PROJECTION_PROFILE = "full"
+_CODEX_DEFAULT_PROJECTION_PROFILE = "lean"
 _CODEX_PROJECTION_ROUTER_SKILL = "gpd-router"
 _CODEX_LEAN_IMPLICIT_COMMAND_SKILLS = frozenset(
     {
-        "gpd-autonomous",
-        "gpd-discuss-phase",
-        "gpd-execute-phase",
-        "gpd-help",
-        "gpd-map-research",
-        "gpd-new-project",
-        "gpd-plan-phase",
+        "gpd-start",
+        "gpd-resume-work",
         "gpd-progress",
         "gpd-quick",
-        "gpd-resume-work",
-        "gpd-route",
-        "gpd-settings",
-        "gpd-start",
-        "gpd-suggest-next",
+        "gpd-plan-phase",
+        "gpd-execute-phase",
+        "gpd-write-paper",
+        "gpd-peer-review",
         "gpd-verify-work",
+        "gpd-literature-review",
+        "gpd-derive-equation",
     }
 )
 
@@ -1052,7 +1048,7 @@ class CodexAdapter(RuntimeAdapter):
         skills_dir = getattr(self, "_skills_dir", None)
         if isinstance(skills_dir, Path):
             tracked_skill_dirs = set(_load_manifest_codex_cleanup_skill_dirs(target_dir))
-            planned_skill_dirs = _planned_codex_skill_dirs(gpd_root / "commands", "gpd")
+            planned_skill_dirs = (_planned_codex_skill_dirs(gpd_root / "commands", "gpd") or set())
             if getattr(self, "_projection_profile", _CODEX_DEFAULT_PROJECTION_PROFILE) == "lean":
                 planned_skill_dirs.add(_CODEX_PROJECTION_ROUTER_SKILL)
             for skill_name in sorted(tracked_skill_dirs | planned_skill_dirs):
@@ -1839,8 +1835,7 @@ def _render_codex_projection_router_skill(*, launcher: str, path_prefix: str) ->
         f"{_GPD_CODEX_SKILL_MARKER}\n"
         "Route only requests that clearly ask to use GPD or an existing GPD project. Use the GPD skills MCP "
         "`route_skill` result as advisory routing, then load the suggested canonical command with `get_skill` "
-        "or invoke its explicit `$gpd-*` skill. Preserve the user's scope and authorization. Do not perform "
-        "scientific work, write project state, or invent a command. If routing tools are unavailable or no route "
+        "or read the matching installed `$gpd-*` SKILL.md and continue its workflow in this task. Do not ask the user to name a mode. Preserve the user's scope and authorization. The router itself grants no scientific write authority; the selected workflow supplies the scope. Do not invent a command. If routing tools are unavailable or no route "
         "is clear, use `$gpd-start` for project entry or `$gpd-help` for the command index.\n"
     )
 
