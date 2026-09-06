@@ -2,6 +2,10 @@
 Restore derivation history, continuity anchors, and convention status without mutating derivation state.
 </purpose>
 
+For sustained analytical work or derivation recovery, read
+`{GPD_INSTALL_DIR}/references/research/long-derivation.md`.
+
+
 <process>
 
 <step name="restore_persistent_state">
@@ -35,23 +39,12 @@ fi
 
 **If DERIVATION-STATE.md exists:**
 
-### Check Session Cap (Last 5 Sessions)
-
-During read-only restoration, count session blocks and warn if over cap. Do not prune, rewrite, replace, or otherwise modify `GPD/DERIVATION-STATE.md` from `gpd:resume-work`.
-
-```bash
-SESSION_COUNT=$(grep -c "^## Session:" GPD/DERIVATION-STATE.md 2>/dev/null || echo 0)
-
-if [ "$SESSION_COUNT" -gt 5 ]; then
-  echo "WARNING: DERIVATION-STATE.md has ${SESSION_COUNT} session blocks (recommended cap: 5)."
-  echo "Read and summarize the file as-is; do not prune, rewrite, or replace it during resume restoration."
-  echo "After restoration, suggest the pause-work runtime command or an explicit maintenance pass if the researcher wants capping."
-fi
-```
-
-This is a report-only check. Mutating cap enforcement belongs to explicit write/maintenance workflows.
-
-1. **Read the full file** to reconstruct the complete equation/convention/result history across all sessions. If the latest handoff or session continuity metadata already carries a canonical `last_result_id`, prefer that value as the rerun anchor before rediscovering the target from prose or older summaries.
+1. **Read the latest relevant handoff and referenced derivation sections.**
+   Follow equation/result dependencies into older sessions as needed. Preserve
+   the full file; no session cap or mutation during read-only restoration.
+   Prefer the canonical `last_result_id` when available. If a dependency is
+   missing, report the precise gap instead of assuming or re-deriving it silently.
+   Do not load unrelated cumulative history just because it exists.
 2. **Cross-reference against state.json intermediate_results** to find any gaps:
    - Are there result IDs in DERIVATION-STATE.md that are missing from state.json? (suggests state.json was reset or corrupted)
    - Are there intermediate_results in state.json that are NOT in DERIVATION-STATE.md? (suggests a session did not properly pause)

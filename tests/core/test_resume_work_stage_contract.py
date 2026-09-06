@@ -143,13 +143,7 @@ def test_resume_work_derivation_restore_does_not_rewrite_derivation_state() -> N
     text = workflow_authority_text(WORKFLOWS_DIR, "resume-work")
     section = _workflow_step(text, "restore_persistent_state")
 
-    assert_prompt_contracts(
-        section,
-        semantic_anchor(
-            "derivation restore is read-only and report-only",
-            ("Do not prune", "rewrite", "`GPD/DERIVATION-STATE.md`", "report-only", "as-is"),
-        ),
-    )
+    assert_prompt_contracts(section, semantic_anchor("read-only derivation restoration", ("no session cap", "read-only restoration")))
     assert "TMP_FILE" not in section
     assert "Pruning oldest" not in section
     assert "Pruned file" not in section

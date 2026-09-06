@@ -2,6 +2,12 @@
 Check research progress, summarize recent work and what lies ahead, then show the code-owned suggested next action. Provides situational awareness before continuing research.
 </purpose>
 
+For related operations, consult
+`{GPD_INSTALL_DIR}/references/shared/workflow-catalog.md` on demand.
+In lean installations, operation IDs absent from the native skill list are loaded with
+MCP `get_skill`; do not ask the user to invoke a missing slash skill.
+
+
 <required_reading>
 Read all files referenced by the invoking prompt's execution_context before starting.
 </required_reading>

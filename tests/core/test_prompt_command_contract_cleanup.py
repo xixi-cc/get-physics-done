@@ -97,7 +97,10 @@ def test_owned_project_aware_commands_use_validated_context_instead_of_raw_gpd_i
     for command_file in command_files:
         text = _read(COMMANDS_DIR / command_file)
         _assert_forbidden(text, f"{command_file} no raw GPD include", "@GPD/")
-        _assert_machine(text, f"{command_file} validated command context", "Validated command-context")
+        if command_file == "sensitivity-analysis.md":
+            assert "@{GPD_INSTALL_DIR}/workflows/sensitivity-analysis.md" in text
+        else:
+            _assert_machine(text, f"{command_file} validated command context", "Validated command-context")
 
 
 def test_help_reference_stays_static_and_delegates_next_action_routing() -> None:

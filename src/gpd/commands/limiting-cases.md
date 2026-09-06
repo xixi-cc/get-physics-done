@@ -40,46 +40,11 @@ help:
   root_detail_order: 150
 ---
 
-
 <objective>
-Route a limiting-cases request into the workflow-owned implementation.
-
-This wrapper owns command-context validation and the public output-root boundary only. The same-named workflow owns target resolution, convention loading, limit enumeration, verification, diagnosis, and reporting.
+Execute the `limiting-cases` operation for `$ARGUMENTS` under its command requirements.
+The shared analysis workflow owns target resolution, persistence and checking.
 </objective>
-
-<context>
-Target: $ARGUMENTS
-
-Phase-backed runs write `${phase_dir}/LIMITING-CASES.md`. Standalone current-workspace runs write `GPD/analysis/limits-{slug}.md` rooted at the invoking workspace.
-For standalone analysis, bare numeric tokens are not valid standalone targets.
-
-</context>
 
 <execution_context>
 @{GPD_INSTALL_DIR}/workflows/limiting-cases.md
 </execution_context>
-
-<process>
-
-**Pre-flight check:**
-```bash
-CONTEXT=$(gpd --raw validate command-context limiting-cases "$ARGUMENTS")
-if [ $? -ne 0 ]; then
-  echo "$CONTEXT"
-  exit 1
-fi
-```
-
-Parse the returned JSON before continuing.
-
-The workflow owns canonical target resolution plus `slug` and `OUTPUT_PATH` selection. Do not promise phase-local artifacts, project state mutation, or commits when authoritative phase context is absent.
-
-Follow the included limiting-cases workflow.
-</process>
-
-<success_criteria>
-
-- [ ] Command context validated
-- [ ] Limiting-cases workflow executed as the authority for mechanics
-- [ ] Output-root boundaries preserved
-</success_criteria>

@@ -12,12 +12,12 @@ methods remain viable.
 - Identify materially distinct viable approaches during planning analysis.
 - Do not silently emit branch-like alternative plans, set `branch: true`, or
   create side-work detours from explore mode alone.
-- If the user has not chosen a tangent route, create the recommended main-line
-  plan and checkpoint when multiple live alternatives still matter.
-- Request comprehensive researcher/literature coverage: multiple methods,
-  tradeoffs, known failures, and precedent.
-- Add comparison tasks only when the user selected comparison inside this phase
-  or through a bounded side investigation.
+- If the user has not chosen a tangent route, keep viable methods provisional within the authorized objective. Ask only
+  when their choice changes scope, a locked assumption or required authority.
+- Load research needed to distinguish live methods, including decisive
+  tradeoffs, known failures and precedent; reuse sufficient existing evidence.
+- Compare methods within the approved objective when needed to resolve it.
+  Creating a separate hypothesis branch or side investigation retains its scope gate.
 
 ## Balanced Mode (`research_mode: "balanced"`)
 
@@ -26,8 +26,8 @@ Use for standard research when one approach is reasonably clear.
 - Create one primary plan.
 - Mention alternatives as plan context rather than separate plans.
 - Use targeted literature coverage around the selected method.
-- Include standard cross-checks: limiting cases, dimensional analysis,
-  symmetries, convergence, and anchors.
+- Select informative cross-checks for the actual result; honor required
+  limiting cases, conventions, convergence evidence and contract anchors.
 - Route failed or newly viable alternatives through the tangent decision model.
 
 ## Exploit Mode (`research_mode: "exploit"`)

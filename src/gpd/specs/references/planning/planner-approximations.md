@@ -29,5 +29,5 @@ approximations:
 
 1. Never mix orders -- if working to O(g^2), ALL terms to O(g^2) must be included
 2. Document what is being neglected and estimate the size of neglected terms
-3. Every approximation must have a validity check task in the plan
+3. Every consequential approximation needs validity evidence; group related checks when they share one decisive calculation
 4. If two approximations are combined, verify they are compatible (e.g., non-relativistic + weak field is fine; ultra-relativistic + non-relativistic is contradictory)

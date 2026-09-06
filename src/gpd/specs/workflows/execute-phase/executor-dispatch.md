@@ -2,6 +2,10 @@
 Execute the wave locally or create fresh executor tasks when isolation helps.
 </purpose>
 
+For sustained analytical work or derivation recovery, read
+`{GPD_INSTALL_DIR}/references/research/long-derivation.md`.
+
+
 <stage_boundary>
 This stage routes bounded work to the main context or fresh executors. It does not create checkpoints, spawn proof critics, accept completion, apply returns, or infer child closure.
 </stage_boundary>

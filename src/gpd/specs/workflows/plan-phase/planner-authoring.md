@@ -2,6 +2,10 @@
 Author phase plans through the staged planner handoff and planner artifact gate.
 </purpose>
 
+For sustained analytical work or derivation recovery, read
+`{GPD_INSTALL_DIR}/references/research/long-derivation.md`.
+
+
 <stage_boundary>
 Third-stage authority: existing-plan handling, planner prompt assembly, planner child return handling, roadmap-update consumption, fresh-plan validation, and planner checkpoint handling. Do not load checker/revision authority here until the planner gate completes.
 </stage_boundary>

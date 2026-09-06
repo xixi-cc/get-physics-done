@@ -41,52 +41,11 @@ help:
   root_detail_order: 160
 ---
 
-
 <objective>
-Route a numerical-convergence request into the workflow-owned validation flow.
-
-Keep standalone/current-workspace durable outputs under `GPD/analysis/` rooted at the invoking workspace. Only authoritative phase-backed runs may write phase-local reports. Standalone/current-workspace runs stop after writing the analysis artifact, do not mutate `STATE.md` or `state.json`, and do not assume a standalone commit step.
+Execute the `numerical-convergence` operation for `$ARGUMENTS` under its command requirements.
+The shared analysis workflow owns target resolution, persistence and checking.
 </objective>
 
 <execution_context>
 @{GPD_INSTALL_DIR}/workflows/numerical-convergence.md
 </execution_context>
-
-<context>
-Target: $ARGUMENTS
-
-Interpretation:
-
-- If a number: test convergence for that current-workspace phase only when authoritative phase context exists
-- If a file path: test convergence for computations in that file
-- If empty in current-workspace project mode: ask one focused question to identify the phase or file target
-- If empty outside a project: command-context validation rejects the request; require an explicit phase number or file path
-- Phase-local reports are honest only when authoritative phase context exists in the current workspace. Otherwise write the durable artifact under `GPD/analysis/numerical-{slug}.md`
-
-</context>
-
-<process>
-## 0. Validate Context
-
-```bash
-CONTEXT=$(gpd --raw validate command-context numerical-convergence "$ARGUMENTS")
-if [ $? -ne 0 ]; then
-  echo "$CONTEXT"
-  exit 1
-fi
-```
-
-Execute the included numerical-convergence workflow end-to-end.
-The workflow owns target resolution, decisive checks, report content, and the
-phase-backed vs standalone/current-workspace persistence split.
-</process>
-
-<success_criteria>
-
-- [ ] Numerical target resolved from the explicit request or authoritative current-workspace phase context
-- [ ] Convergence study design and grading recorded for each computation tested
-- [ ] Output path is phase-local only when authoritative phase context exists
-- [ ] Standalone/current-workspace runs write only under `GPD/analysis/` and do not mutate project state
-- [ ] Final report contains enough detail to reproduce the convergence study
-
-</success_criteria>

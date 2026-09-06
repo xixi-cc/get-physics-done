@@ -190,7 +190,7 @@ def test_settings_model_cost_onboarding_stays_qualitative_and_runtime_default_fi
     )
 
     rows_by_header = _settings_rows_by_header(settings_workflow)
-    assert rows_by_header["Autonomy"]["Options and mapping"].startswith("`Supervised (Recommended)`")
+    assert rows_by_header["Autonomy"]["Options and mapping"].startswith("`Balanced (Recommended)`")
     assert rows_by_header["Tier Models"]["Options and mapping"].count("`") >= 6
     assert "runtime defaults" in settings_workflow
     assert "gpd:set-tier-models" in settings_workflow
@@ -321,29 +321,13 @@ def test_settings_update_config_selected_variables_are_collected_before_use() ->
     assert "SELECTED_MILESTONE_BRANCH_TEMPLATE" not in selected_vars_used
 
 
-def test_settings_and_profile_docs_keep_supervised_dense_defaults_consistent() -> None:
-    settings_workflow = (WORKFLOWS_DIR / "settings.md").read_text(encoding="utf-8")
-    set_profile_workflow = (WORKFLOWS_DIR / "set-profile.md").read_text(encoding="utf-8")
-    continuous_execution = (REFERENCES_DIR / "orchestration" / "continuous-execution.md").read_text(encoding="utf-8")
-
-    _assert_semantic_contract(
-        settings_workflow,
-        "settings defaults favor supervised dense profile preview",
-        required=("core research", "supervised", "default bundle", "schema defaults"),
-        forbidden=("balanced default bundle",),
-    )
-
-    _assert_semantic_contract(
-        set_profile_workflow,
-        "profile docs keep dense publication cadence",
-        required=("execution.review_cadence=dense", "publication-quality"),
-        forbidden=("`execution.review_cadence=adaptive` or `sparse` usually fits",),
-    )
-
-    assert "| **Supervised** (default)         | `supervised`" in continuous_execution
-    _assert_semantic_contract(
-        continuous_execution,
-        "supervised is default and auto-advance is opt-in",
-        required=("explicit opt-in", "default `supervised` posture", "auto-advance", "balanced", "yolo"),
-        forbidden=("The default autonomy setting. The assistant auto-advances",),
-    )
+def test_settings_default_guidance_matches_config_without_changing_explicit_profiles():
+    config = GPDProjectConfig()
+    assert config.autonomy == "balanced"
+    assert config.review_cadence == "adaptive"
+    settings = (WORKFLOWS_DIR / "settings.md").read_text()
+    assert "Balanced (Recommended)" in settings
+    assert "Adaptive (Recommended)" in settings
+    profile = (WORKFLOWS_DIR / "set-profile.md").read_text()
+    assert 'gpd config set model_profile "$PROFILE"' in profile
+    assert 'gpd config set review_cadence' not in profile

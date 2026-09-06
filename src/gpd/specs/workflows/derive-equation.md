@@ -3,10 +3,14 @@ Perform a rigorous physics derivation with explicit assumptions, locked
 conventions, checkable algebra, decisive physics checks, and honest persistence.
 </purpose>
 
+For sustained analytical work or derivation recovery, read
+`{GPD_INSTALL_DIR}/references/research/long-derivation.md`.
+
+
 <core_principle>
-A derivation is a proof chain from stated assumptions to a stated result. Every
-major step must expose the operation, conventions, approximation domain, and at
-least one decisive check. Intuition may motivate the route; it does not certify
+A derivation is a proof chain from stated assumptions to a stated result. Expose the operation, conventions and approximation domain at major steps.
+Place decisive checks where a concrete failure mode or downstream dependency
+makes them informative; do not require a new check after every algebraic step. Intuition may motivate the route; it does not certify
 the result.
 </core_principle>
 
@@ -72,8 +76,8 @@ Write the derivation objective before calculating:
 
 **Goal:** Derive [expression/relation/equation] for [system/quantity].
 **Starting point:** [Given Lagrangian/Hamiltonian/action/equation]
-**Expected result:** [Known expression or symmetry/dimensional form]
-**Method:** [Variational/perturbative/exact/saddle-point/RG/etc.]
+**Known constraints:** [Established expression, symmetry or dimensional constraints; unknown results remain unknown]
+**Initial method:** [Candidate route and unresolved obstacles; revise within scope as evidence develops]
 ```
 </step>
 
@@ -141,8 +145,10 @@ For each major operation:
 1. Name the operation: variation, integration by parts, expansion, saddle
    approximation, series sum, analytic continuation, basis projection, etc.
 2. Show the key algebra with enough context that a physicist can verify it.
-3. Record the convention assertion for the step.
-4. Check dimensions, at least one simple limit, and relevant symmetry.
+3. Record convention assertions where signs, normalization or definitions change.
+4. At consequential transitions, choose checks that test the actual risk;
+   reuse still-applicable evidence instead of repeating dimensions/limits/symmetry
+   after each operation.
 5. For approximations, state the neglected terms, the controlling parameter,
    and the leading error scale.
 

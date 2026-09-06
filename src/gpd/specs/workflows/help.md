@@ -2,6 +2,12 @@
 Display the complete GPD command reference. Output ONLY the reference content. Do NOT add project-specific analysis, git status, next-step suggestions, or any commentary beyond the reference.
 </purpose>
 
+For related operations, consult
+`{GPD_INSTALL_DIR}/references/shared/workflow-catalog.md` on demand.
+In lean installations, operation IDs absent from the native skill list are loaded with
+MCP `get_skill`; do not ask the user to invoke a missing slash skill.
+
+
 <reference>
 # GPD Command Reference
 

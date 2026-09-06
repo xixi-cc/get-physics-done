@@ -280,7 +280,7 @@ def _install_real_repo_for_runtime(tmp_path: Path, runtime: str, source_root: Pa
         target.mkdir()
         skills = tmp_path / "skills"
         skills.mkdir()
-        CodexAdapter().install(source_root, target, is_global=False, skills_dir=skills)
+        CodexAdapter().install(source_root, target, is_global=False, skills_dir=skills, projection_profile="full")
         return target
 
     if runtime == "gemini":
@@ -1104,7 +1104,7 @@ class TestCodexRoundtrip:
         _, skills = installed
         src_count = sum(1 for _ in (REPO_GPD_ROOT / "commands").rglob("*.md"))
         skill_count = sum(1 for d in skills.iterdir() if d.is_dir() and d.name.startswith("gpd-"))
-        assert skill_count == src_count + 1
+        assert skill_count == src_count
 
     def test_agents_not_installed_as_skills(self, installed: tuple[Path, Path]) -> None:
         """Codex agents are registered as roles, not duplicated as discoverable skills."""

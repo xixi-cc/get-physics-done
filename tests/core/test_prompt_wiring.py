@@ -1487,7 +1487,12 @@ def test_representative_prompts_use_centralized_command_context_preflight() -> N
 
     for path, token in expected.items():
         text = _workflow_authority_text(path.stem) if path.parent == WORKFLOWS_DIR else path.read_text(encoding="utf-8")
-        assert token in text, path
+        if path.stem in {"dimensional-analysis", "limiting-cases", "numerical-convergence", "sensitivity-analysis"}:
+            assert f"@{{GPD_INSTALL_DIR}}/workflows/{path.stem}.md" in text
+            shared = (WORKFLOWS_DIR / "technical-analysis.md").read_text()
+            assert 'gpd --raw validate command-context "${ANALYSIS_OPERATION}"' in shared
+        else:
+            assert token in text, path
 
 
 def test_current_workspace_project_aware_workflows_disable_recent_project_reentry() -> None:
@@ -3366,7 +3371,8 @@ def test_audit_milestone_command_does_not_preload_raw_verification_globs() -> No
 
 
 def test_sensitivity_analysis_workflow_uses_canonical_cli_commands() -> None:
-    workflow = (WORKFLOWS_DIR / "sensitivity-analysis.md").read_text(encoding="utf-8")
+    from gpd.registry import _inline_model_visible_includes
+    workflow = _inline_model_visible_includes((WORKFLOWS_DIR / "sensitivity-analysis.md").read_text(encoding="utf-8"))
 
     _mf(
         workflow,
@@ -6768,7 +6774,7 @@ def test_adaptive_mode_and_review_cadence_docs_stay_aligned() -> None:
         context="new-milestone adaptive mode gate",
     )
     _s(verify_work, "verify-work review cadence floor", "same contract-critical floor")
-    _m(set_profile, "set-profile review cadence field boundary", "does NOT rewrite `execution.review_cadence`")
+    assert "does not itself change" in set_profile and "review cadence" in set_profile
     _f(set_profile, "set-profile stale cadence field", "verify_between_waves")
     _s(settings, "settings review cadence independence", "independent of `model_profile`", "`research_mode`")
     _sf(

@@ -2,6 +2,12 @@
 Compatibility index for the staged `verify-work` workflow.
 </purpose>
 
+For related operations, consult
+`{GPD_INSTALL_DIR}/references/shared/workflow-catalog.md` on demand.
+In lean installations, operation IDs absent from the native skill list are loaded with
+MCP `get_skill`; do not ask the user to invoke a missing slash skill.
+
+
 <stage_authority_index>
 This file is an index only. Do not load this index as a stage authority; load
 only the stage map here, then enter `session_router`. Stage ownership, status

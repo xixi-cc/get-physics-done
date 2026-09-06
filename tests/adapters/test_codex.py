@@ -182,7 +182,7 @@ def test_codex_projection_profile_validation_is_closed() -> None:
         normalize_codex_projection_profile("minimal")
 
 
-def test_real_lean_projection_preserves_every_canonical_command_for_explicit_invocation(tmp_path: Path) -> None:
+def test_real_lean_projection_keeps_workflow_entries_and_registry_operations(tmp_path: Path) -> None:
     gpd_root = Path(__file__).resolve().parents[2] / "src" / "gpd"
     target = tmp_path / ".codex"
     target.mkdir()
@@ -203,12 +203,14 @@ def test_real_lean_projection_preserves_every_canonical_command_for_explicit_inv
 
     assert len(canonical) == 71
     assert result["commands"] == len(canonical)
-    assert result["skills"] == len(canonical) + 1
+    from gpd.adapters.codex import _CODEX_LEAN_COMMAND_SKILLS
+    from gpd.registry import get_skill
+    assert result["skills"] == len(_CODEX_LEAN_COMMAND_SKILLS) + 1
     assert implicit == _CODEX_LEAN_IMPLICIT_COMMAND_SKILLS
-    assert len(explicit_only) == 71
-    assert implicit | explicit_only == canonical
+    assert explicit_only == _CODEX_LEAN_COMMAND_SKILLS
+    assert all(get_skill(name).name for name in canonical)
     assert implicit.isdisjoint(explicit_only)
-    assert all((skills / skill_name / "SKILL.md").is_file() for skill_name in canonical)
+    assert all((skills / skill_name / "SKILL.md").is_file() for skill_name in explicit_only)
     assert all(
         (skills / skill_name / "agents" / "openai.yaml").read_text(encoding="utf-8")
         == "policy:\n  allow_implicit_invocation: false\n"
@@ -1057,7 +1059,7 @@ class TestInstall:
         gpd_root = Path(__file__).resolve().parents[2] / "src" / "gpd"
         target = tmp_path / ".codex"
         target.mkdir()
-        adapter.install(gpd_root, target, is_global=False)
+        adapter.install(gpd_root, target, projection_profile="full", is_global=False)
         local_skills = tmp_path / ".agents" / "skills"
 
         expected_bridge = expected_codex_bridge(target, is_global=False)
@@ -1158,7 +1160,7 @@ class TestInstall:
         gpd_root = Path(__file__).resolve().parents[2] / "src" / "gpd"
         target = tmp_path / ".codex"
         target.mkdir()
-        adapter.install(gpd_root, target, is_global=False)
+        adapter.install(gpd_root, target, projection_profile="full", is_global=False)
         local_skills = tmp_path / ".agents" / "skills"
 
         help_skill = (local_skills / "gpd-help" / "SKILL.md").read_text(encoding="utf-8")
@@ -2022,7 +2024,7 @@ description: Nested command include expansion regression
         target.mkdir()
         skills = tmp_path / "skills"
         skills.mkdir()
-        adapter.install(gpd_root, target, skills_dir=skills)
+        adapter.install(gpd_root, target, projection_profile="full", skills_dir=skills)
 
         content = (skills / "gpd-update" / "SKILL.md").read_text(encoding="utf-8")
         assert "<!-- [included: update.md] -->" in content
@@ -2140,7 +2142,7 @@ description: Nested command include expansion regression
         target.mkdir()
         skills = tmp_path / "skills"
         skills.mkdir()
-        adapter.install(gpd_root, target, skills_dir=skills)
+        adapter.install(gpd_root, target, projection_profile="full", skills_dir=skills)
 
         content = (skills / "gpd-complete-milestone" / "SKILL.md").read_text(encoding="utf-8")
         assert_compact_workflow_reference_shim(

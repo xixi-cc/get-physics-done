@@ -72,18 +72,19 @@ The first time you run Codex, it should prompt you to sign in with your ChatGPT 
 
 ### Optional: reduce automatic skill discovery
 
-The default `full` projection keeps every GPD command available for automatic
-discovery. If the full command surface is too noisy, install the `lean`
-projection instead:
+The default `lean` projection installs 14 workflow skills plus one automatic
+`gpd-router` entry. The other 57 canonical operation IDs remain available through
+MCP `get_skill`, with their original command requirements and state authority.
+They are not native `$gpd-*` slash skills in lean installations. Describe the
+task normally; the router selects and loads the operation without a manual mode.
 
 ```bash
 gpd install codex --local --projection lean
 ```
 
-Lean keeps a small core discoverable automatically and marks every other GPD
-command as explicit-only. No command is removed: `$gpd-...` invocations still
-work, and `$gpd-router` can route an explicit request to the right command.
-Return to the default at any time with `--projection full`.
+Use `--projection full` when a client needs all 71 native slash skill entries.
+This changes discovery/installation, not scientific contracts or model settings.
+The grouped operation catalog is `references/shared/workflow-catalog.md`.
 
 ## What success looks like
 

@@ -1,0 +1,97 @@
+{
+  "navigation": [
+    "start",
+    "progress",
+    "suggest-next",
+    "show-phase",
+    "help",
+    "tour"
+  ],
+  "continuity": [
+    "new-project",
+    "map-research",
+    "resume-work",
+    "pause-work"
+  ],
+  "planning": [
+    "plan-phase",
+    "discuss-phase",
+    "discover",
+    "research-phase",
+    "list-phase-assumptions",
+    "literature-review"
+  ],
+  "execution": [
+    "execute-phase",
+    "autonomous",
+    "quick",
+    "derive-equation",
+    "debug"
+  ],
+  "verification": [
+    "verify-work",
+    "dimensional-analysis",
+    "limiting-cases",
+    "validate-conventions",
+    "numerical-convergence",
+    "regression-check"
+  ],
+  "comparison": [
+    "compare-experiment",
+    "compare-results",
+    "parameter-sweep",
+    "sensitivity-analysis",
+    "error-propagation"
+  ],
+  "branches": [
+    "branch-hypothesis",
+    "compare-branches",
+    "tangent",
+    "route"
+  ],
+  "roadmap": [
+    "add-phase",
+    "insert-phase",
+    "remove-phase",
+    "merge-phases",
+    "revise-phase",
+    "new-milestone",
+    "audit-milestone",
+    "complete-milestone",
+    "plan-milestone-gaps"
+  ],
+  "knowledge": [
+    "record-insight",
+    "record-backtrack",
+    "decisions",
+    "error-patterns",
+    "add-todo",
+    "check-todos",
+    "explain",
+    "digest-knowledge",
+    "review-knowledge",
+    "graph"
+  ],
+  "manuscript": [
+    "write-paper",
+    "peer-review",
+    "respond-to-referees"
+  ],
+  "delivery": [
+    "export",
+    "arxiv-submission",
+    "slides"
+  ],
+  "maintenance": [
+    "settings",
+    "set-profile",
+    "set-tier-models",
+    "health",
+    "sync-state",
+    "compact-state",
+    "undo",
+    "update",
+    "reapply-patches",
+    "export-logs"
+  ]
+}

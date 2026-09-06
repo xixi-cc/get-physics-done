@@ -27,7 +27,7 @@ TEMPLATES_DIR = REPO_ROOT / "src/gpd/specs/templates"
 AGENTS_DIR = REPO_ROOT / "src/gpd/agents"
 COMMANDS_DIR = REPO_ROOT / "src/gpd/commands"
 REFERENCES_DIR = REPO_ROOT / "src/gpd/specs/references"
-RESULT_LOOKUP_WORKFLOWS = ("explain.md", "compare-experiment.md", "limiting-cases.md")
+RESULT_LOOKUP_WORKFLOWS = ("explain.md", "compare-experiment.md")
 
 
 def _read(name: str) -> str:

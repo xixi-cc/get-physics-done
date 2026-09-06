@@ -2,6 +2,10 @@
 Create the canonical `.continue-here.md` continuation handoff artifact for `gpd:resume-work`, `gpd resume`, and `gpd resume --recent`. It is a handoff surface, not the durable authority.
 </purpose>
 
+For sustained analytical work or derivation recovery, read
+`{GPD_INSTALL_DIR}/references/research/long-derivation.md`.
+
+
 <required_reading>
 Read all files referenced by the invoking prompt's execution_context before starting.
 </required_reading>
@@ -80,6 +84,9 @@ Draft this session block as text first. Replace every placeholder with actual se
 
 ### Approximations Used
 [Fill: approximations invoked, validity conditions, how checked]
+
+### Unresolved Work and Failed Routes
+[Fill: unproved steps, counterexamples or failed approaches with reasons, exact source/equation references, and the next useful calculation]
 ```
 
 3. **Append only the filled section** with actual content from the current session before proceeding.
@@ -87,60 +94,13 @@ Draft this session block as text first. Replace every placeholder with actual se
 
 4. **Tag each entry** with the current phase and plan context so the history is traceable.
 
-5. **Prune stale entries after appending (cap enforcement):**
+5. **Preserve the complete derivation history.**
 
-   After appending the new session block, check total size and prune if over limit so the file stays bounded without a resume-work read cycle.
-
-   **IMPORTANT: Atomic read-modify-write through .tmp to prevent race conditions.**
-   Read, transform, write a .tmp file, validate it, then atomically replace the original. If any step fails, preserve the original.
-
-   ```bash
-   # Count session blocks
-   SESSION_COUNT=$(grep -c "^## Session:" GPD/DERIVATION-STATE.md 2>/dev/null || echo 0)
-
-   if [ "$SESSION_COUNT" -gt 5 ]; then
-     echo "DERIVATION-STATE.md has ${SESSION_COUNT} session blocks (cap: 5). Pruning oldest..."
-
-     # Atomic read-modify-write: write to same-directory temp, validate, then rename
-     TMP_FILE=$(mktemp GPD/DERIVATION-STATE.md.tmp.XXXXXX) || {
-       echo "WARNING: Failed to create DERIVATION-STATE.md temp file. Keeping original."
-       exit 1
-     }
-     trap "rm -f '$TMP_FILE'" EXIT
-
-     # Keep only the 5 most recent session blocks
-     KEEP_FROM=$(grep -n "^## Session:" GPD/DERIVATION-STATE.md | tail -5 | head -1 | cut -d: -f1)
-     HEADER_END=$(grep -n "^## Session:" GPD/DERIVATION-STATE.md | head -1 | cut -d: -f1)
-     HEADER_END=$((HEADER_END - 1))
-     {
-       head -n "$HEADER_END" GPD/DERIVATION-STATE.md
-       echo ""
-       echo "> Older session entries archived in git history."
-       echo "> Use \`git log -p -- GPD/DERIVATION-STATE.md\` to recover."
-       echo ""
-       tail -n +"$KEEP_FROM" GPD/DERIVATION-STATE.md
-     } > "$TMP_FILE"
-
-     # Validate the tmp file before replacing
-     TMP_LINES=$(wc -l < "$TMP_FILE")
-     if [ "$TMP_LINES" -lt 5 ]; then
-       echo "WARNING: Pruned file suspiciously small (${TMP_LINES} lines). Keeping original."
-       rm -f "$TMP_FILE"
-     elif ! grep -q "^# Derivation State" "$TMP_FILE"; then
-       echo "WARNING: Pruned file missing required header. Keeping original."
-       rm -f "$TMP_FILE"
-     else
-       # Same-directory rename is atomic on the project filesystem.
-       if ! mv -f "$TMP_FILE" GPD/DERIVATION-STATE.md; then
-         echo "WARNING: Failed to replace DERIVATION-STATE.md. Original preserved."
-         rm -f "$TMP_FILE"
-       fi
-     fi
-     trap - EXIT
-   fi
-   ```
-
-   **Size cap per session block:** Each session block should target ~50-100 lines. If a session produced many equations, summarize older entries within the block rather than listing every intermediate step. The DERIVATION-STATE.md file is a reference index, not a full derivation log.
+   Keep prior session blocks intact. Record source paths and equation labels for
+   long derivations instead of duplicating the full document. Never discard old
+   sessions to satisfy a count or length target, and never assume an uncommitted
+   record can be recovered from Git. Archiving is a separate maintenance action
+   requiring a verified durable copy and valid references.
 
 6. **Commit the updated file:**
 

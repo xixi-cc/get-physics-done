@@ -63,6 +63,7 @@ from gpd.adapters.runtime_catalog import get_manifest_metadata_list_policy_key, 
 from gpd.adapters.tool_names import build_runtime_alias_map, reference_translation_map, translate_for_runtime
 from gpd.command_labels import validated_public_command_prefix
 from gpd.core.observability import gpd_span
+from gpd.core.workflow_catalog import grouped_operation_skills
 from gpd.mcp import managed_integrations as _managed_integrations
 from gpd.registry import AgentDef, list_commands, load_agents_from_dir
 
@@ -113,6 +114,14 @@ _CODEX_PROJECTION_PROFILES = ("full", "lean")
 _CODEX_DEFAULT_PROJECTION_PROFILE = "lean"
 _CODEX_PROJECTION_ROUTER_SKILL = "gpd-router"
 _CODEX_LEAN_IMPLICIT_COMMAND_SKILLS: frozenset[str] = frozenset()
+# Workflow entries; other canonical operation IDs stay available through MCP.
+_CODEX_LEAN_COMMAND_SKILLS = frozenset({
+    "gpd-start", "gpd-resume-work", "gpd-plan-phase", "gpd-execute-phase",
+    "gpd-verify-work", "gpd-compare-results", "gpd-branch-hypothesis",
+    "gpd-progress", "gpd-digest-knowledge", "gpd-write-paper",
+    "gpd-peer-review", "gpd-export", "gpd-settings", "gpd-help",
+})
+
 
 
 def normalize_codex_projection_profile(value: str | None) -> str:
@@ -1735,6 +1744,8 @@ def _copy_commands_as_skills(
             launcher=launcher,
             path_prefix=path_prefix,
         )
+        if normalized_profile == "lean":
+            generated_skill_dirs.difference_update(grouped_operation_skills() - _CODEX_LEAN_COMMAND_SKILLS)
         if projection_router_dir is not None:
             generated_skill_dirs.add(projection_router_dir)
 
@@ -1776,12 +1787,17 @@ def _apply_codex_projection_profile(
     launcher: str,
     path_prefix: str,
 ) -> tuple[set[str], set[str], str | None]:
-    """Apply Codex discovery metadata without removing canonical command skills."""
+    """Project workflow entries; retain canonical operation IDs in the registry."""
     if projection_profile == "full":
         return set(canonical_skill_dirs), set(), None
 
     implicit_skill_dirs = set(_CODEX_LEAN_IMPLICIT_COMMAND_SKILLS & canonical_skill_dirs)
-    explicit_only_skill_dirs = canonical_skill_dirs - implicit_skill_dirs
+    projected_skill_dirs = canonical_skill_dirs - (grouped_operation_skills() - _CODEX_LEAN_COMMAND_SKILLS)
+    for skill_name in sorted(canonical_skill_dirs - projected_skill_dirs):
+        # This directory is freshly generated inside the install transaction.
+        # User-owned live directories were checked/preserved before staging.
+        shutil.rmtree(skills_dir / skill_name)
+    explicit_only_skill_dirs = projected_skill_dirs - implicit_skill_dirs
     for skill_name in sorted(explicit_only_skill_dirs):
         _write_codex_skill_invocation_policy(skills_dir / skill_name, allow_implicit_invocation=False)
 
@@ -1830,8 +1846,8 @@ to satisfy a workflow. Do not label such an answer a verified project result.
 
 Use a canonical workflow for requested durable artifacts, cross-session work,
 project initialization/resumption, phase execution, publication-grade results,
-proof obligations or state updates. An explicit legacy `$gpd-*` command retains
-its contract. Use `route_skill` as advisory discovery and `get_skill` to load
+proof obligations or state updates. A legacy `gpd-*` operation retains its canonical contract through MCP
+`get_skill`, even when it is not an installed slash skill. Use `route_skill` as advisory discovery and `get_skill` to load
 one command, or read its installed SKILL.md. Continue the selected workflow;
 do not ask the user to reissue the request with a mode label. The router grants
 no write or scientific-promotion authority beyond the selected workflow.
@@ -1844,7 +1860,11 @@ No generic router, planner or checker is needed just to select the next action.
 For project entry use `$gpd-start`, continuity `$gpd-resume-work` or
 `$gpd-progress`; sustained research uses `$gpd-plan-phase` / `$gpd-execute-phase`;
 verification uses `$gpd-verify-work`; manuscript work uses `$gpd-write-paper` /
-`$gpd-peer-review`. Other commands remain reachable through `$gpd-help` or MCP.
+`$gpd-peer-review`. Other operation IDs remain reachable through `$gpd-help` or MCP `get_skill`.
+For the grouped operation map, read
+`{path_prefix}references/shared/workflow-catalog.md` only when needed.
+For sustained analytical work, read
+`{path_prefix}references/research/long-derivation.md`.
 Read only the selected implementation and its necessary references. If tools
 are unavailable, report the concrete limitation; do not fabricate GPD state.
 """

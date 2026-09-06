@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from gpd.registry import _inline_model_visible_includes
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 COMPARE_EXPERIMENT = REPO_ROOT / "src/gpd/specs/workflows/compare-experiment.md"
@@ -51,8 +52,8 @@ def test_explain_surfaces_result_deps_for_upstream_context() -> None:
 
 
 def test_lookup_first_validation_workflows_surface_result_show_after_search() -> None:
-    numerical_text = NUMERICAL_CONVERGENCE.read_text(encoding="utf-8")
-    limiting_text = LIMITING_CASES.read_text(encoding="utf-8")
+    numerical_text = _inline_model_visible_includes(NUMERICAL_CONVERGENCE.read_text(encoding="utf-8"))
+    limiting_text = _inline_model_visible_includes(LIMITING_CASES.read_text(encoding="utf-8"))
 
     assert "gpd result search" in numerical_text
     assert 'gpd result show "{result_id}"' in numerical_text
@@ -62,12 +63,14 @@ def test_lookup_first_validation_workflows_surface_result_show_after_search() ->
 def test_numerical_convergence_command_doc_uses_centralized_command_context_gate() -> None:
     text = NUMERICAL_CONVERGENCE_COMMAND.read_text(encoding="utf-8")
 
-    assert 'gpd --raw validate command-context numerical-convergence "$ARGUMENTS"' in text
+    assert "@{GPD_INSTALL_DIR}/workflows/numerical-convergence.md" in text
+    shared = (REPO_ROOT / "src/gpd/specs/workflows/technical-analysis.md").read_text()
+    assert 'gpd --raw validate command-context "${ANALYSIS_OPERATION}" "$ARGUMENTS"' in shared
     assert "- If empty: prompt for target" not in text
 
 
 def test_sensitivity_analysis_prompts_for_result_deps_after_canonical_lookup() -> None:
-    text = SENSITIVITY_ANALYSIS.read_text(encoding="utf-8")
+    text = _inline_model_visible_includes(SENSITIVITY_ANALYSIS.read_text(encoding="utf-8"))
 
     assert "gpd result search" in text
     assert 'gpd result show "{result_id}"' in text

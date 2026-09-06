@@ -10,7 +10,9 @@ REFERENCES_DIR = REPO_ROOT / "src/gpd/specs/references"
 
 
 def _workflow(name: str) -> str:
-    return (WORKFLOWS_DIR / f"{name}.md").read_text(encoding="utf-8")
+    from gpd.registry import _inline_model_visible_includes
+    text = (WORKFLOWS_DIR / f"{name}.md").read_text(encoding="utf-8")
+    return _inline_model_visible_includes(text) if name in {"dimensional-analysis", "limiting-cases", "numerical-convergence", "sensitivity-analysis"} else text
 
 
 def _assert_all_present(text: str, fragments: tuple[str, ...]) -> None:

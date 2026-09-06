@@ -1043,6 +1043,15 @@ def build_command_context_preflight(
                 guidance=runtime_arguments_detail,
             )
 
+    if (
+        public_command_name in {"gpd:dimensional-analysis", "gpd:limiting-cases", "gpd:numerical-convergence"}
+        and not project_exists
+        and re.fullmatch(r"\d+(?:\.\d+)*", (arguments or "").strip())
+    ):
+        detail = "A phase number requires a current-workspace project; supply an explicit file path."
+        add_check("standalone_target", False, detail, blocking=True)
+        return build_result(passed=False, project_exists=False, explicit_inputs=[], guidance=detail)
+
     if effective_context_mode == "global":
         add_check("project_context", True, "command runs without project context", blocking=False)
         return build_result(

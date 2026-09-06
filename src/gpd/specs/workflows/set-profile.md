@@ -67,61 +67,12 @@ Agents will now operate in this mode:
 
 Canonical per-agent tier assignments live in `MODEL_PROFILES` and the installed reference `references/orchestration/model-profiles.md`. Do not copy the agent/tier matrix here; use that reference when exact tier rows are needed.
 
-**deep-theory**
-Focus: Rigorous analytical derivations, formal proofs, exact results
+The profile maps abstract role tiers for deep-theory, numerical, exploratory,
+review or paper-writing work. It does not itself change task counts, research
+mode, review cadence, proof requirements or the current model's reasoning effort.
+Report the actual selected profile; read the canonical matrix only when exact
+agent/tier assignments are requested.
 
-Best for: Deriving new results, proving identities, establishing exact relations, formal perturbation theory, renormalization group calculations.
-
-Behavioral highlights: Tier-1 planner and executor preserve maximum derivational depth, explicit assumptions, exact reasoning, controlled approximations, and local dimensional/sign/index/limit/convention checks. These checks stay inside the coherent derivation instead of forcing user-facing checkpoints after each algebraic step. Independent agents and bounded stops remain controlled separately by `workflow.*` policy and `execution.review_cadence`. Use `workflow.*="auto"` with sparse cadence for daily theory construction; request dense cadence and always-on agents for a formal audit. Paper-writer includes proofs in main text, and debugging retains formal root-cause depth.
-
-**numerical**
-Focus: Computational implementation, optimization, convergence, performance
-
-Best for: Implementing solvers, running simulations, optimizing code, convergence studies, parallelization, data pipeline construction.
-
-Behavioral highlights: Convergence testing task added to every numerical computation. Grid/basis/timestep refinement required before results accepted. Richardson extrapolation automatic. Plan-checker emphasizes numerical stability and error budgets. `execution.review_cadence` stays independent; `dense` is the default, giving frequent review gates; drop to `adaptive` when you want a lighter cadence.
-
-**exploratory**
-Focus: Rapid prototyping, hypothesis testing, parameter space exploration
-
-Best for: Early-stage investigation, scanning parameter spaces, testing new ideas, order-of-magnitude estimates, dimensional analysis, building intuition.
-
-Behavioral highlights: 3-4 tasks per plan, larger tasks (up to 90 min), only final results verified (skips intermediate checkpoints). Plan-checker uses the exploratory subset of its dimension matrix. Quick-triage debugging (max 2 rounds). Verifier runs only dimensional analysis + limiting cases + spot-checks + plausibility. Use `execution.review_cadence=sparse` or `adaptive` if you want fewer bounded review stops, but required correctness gates still remain.
-
-**review** (default)
-Focus: Critical assessment, error checking, literature comparison
-
-Best for: Pre-submission review, debugging wrong results, resolving discrepancies, preparing referee responses, validating collaborator work.
-
-Behavioral highlights: Exhaustive debugging documentation. All verifier checks run plus cross-validation against 2+ literature values. Plan-checker runs its full dimension matrix plus testability checks. Every step cross-references the literature source it implements. This profile often benefits from `execution.review_cadence=dense`, but cadence remains a separate setting.
-
-**paper-writing**
-Focus: Clear exposition, LaTeX production, figure generation, narrative flow
-
-Best for: Writing manuscripts, preparing talks, generating figures, formatting for journal submission, writing supplementary material.
-
-Behavioral highlights: Plans organized by paper sections with tasks mapped to figures, tables, and equations. Narrative-focused execution with clean intermediate expressions. Publication-readiness verification (figures match data, notation consistent, all symbols defined). The full plan-checker dimension matrix is checked with emphasis on publication readiness. Full BibTeX formatting against target journal style. Rapid first drafts with multiple revision passes. Keep `execution.review_cadence=dense` for publication-quality passes; use `adaptive` or `sparse` only for bounded editorial polish where correctness gates are already satisfied. Cadence is not profile-owned.
-
----
-
-**Review cadence interaction:**
-
-`set-profile` changes abstract tier assignments and behavior depth. It does NOT rewrite `execution.review_cadence`.
-
-- `dense` (default): forces first-result and pre-fanout gates on every wave, regardless of risk classifier
-- `adaptive`: injects first-result and risky-fanout gates only when the classifier marks the wave risky
-- `sparse`: fewest bounded review stops beyond the required correctness gates
-
-Change cadence with `gpd:settings` or by editing `GPD/config.json` (`execution.review_cadence`: `"dense"` / `"adaptive"` / `"sparse"`).
-
-If you also want to pin concrete runtime model strings for `tier-1`, `tier-2`, or `tier-3`, use `gpd:set-tier-models` for the direct path or `gpd:settings` for the broader unattended/configuration flow. `set-profile` changes the abstract tier assignments, not the runtime-native model IDs.
-
-For full agent tier assignments across all 20 agents, see `references/orchestration/model-profiles.md`.
-For detailed behavioral effect descriptions per agent per profile, see the "Behavioral Effects" section in `references/orchestration/model-profiles.md`.
-
-Next spawned agents will use the new profile.
-
-```
 </step>
 
 </process>

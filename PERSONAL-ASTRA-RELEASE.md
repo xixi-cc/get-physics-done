@@ -1,34 +1,31 @@
-# Personal Astra integration — 2026-09-06
+# Personal Astra research integration
 
-This is the maintained personal GPD 1.2.2 integration, not a new upstream
-release or a model named mode. Authoritative branch: `local/astra-current`.
+Baseline: `aede787c` (2026-09-06). This integration retains the user's earlier
+base-model-first lineage. The Python package version remains 1.2.2; identify
+personal revisions by Git commit and ~/.gpd/ACTIVE-SOURCE.json, a maintenance
+receipt rather than a runtime selector.
 
-Based on `6d2463c5` (includes `7a31b895` and the 2026-09-02
-base-model-first work), preserving the validated working-tree quick/explain
-and executor changes. Integrates thin-referee commits `54478f3d`, `6813f907`.
-The uncommitted thin-planner experiment remains separate; this release retains
-the established planner contract surface, with adaptive defaults and task sizing.
+- Long analytical work stays in the main capable context unless actual isolation,
+  useful parallelism or required independent review calls for delegation.
+- Planning can leave methods provisional within the approved scientific objective.
+  Locked assumptions, scope changes and proof obligations retain their gates.
+- Pause preserves all derivation sessions; resume reads relevant dependencies.
+  The former five-session pruning recipe is removed. Existing scientific files
+  are not rewritten by installation.
+- Missing-config guidance matches balanced autonomy and adaptive review. Explicit
+  project settings and named preset bundles remain unchanged.
+- Lean projection installs 14 workflow skills plus one automatic gpd-router.
+  All 71 registry operation IDs retain command contracts through MCP get_skill.
+  The other 57 operations are not native slash skills in lean; full projection
+  restores the complete native surface. See references/shared/workflow-catalog.md.
+- Four technical analyses share one preflight, evidence and persistence workflow
+  with method-specific references. Standalone numeric phase targets are rejected
+  mechanically. File reports cannot silently acquire phase persistence.
+- Current model/provider/effort and translation-specific routes are not changed.
+  Runtime reasoning effort is not controlled by a workflow prompt.
 
-Absent project settings now use base-model-first cognition, adaptive research
-and review cadence, balanced autonomy, and auto optional workflow agents.
-Explicit project settings and scientific gates remain authoritative. New-project
-setup infers ordinary settings without requiring the user to name a mode.
-Main-context work uses the runtime-selected model. Existing concrete model routes,
-including task-specific translation limits, remain in force.
-
-Codex projection defaults to native lean: one automatic router. All seventy-one canonical commands remain explicitly
-invocable, with their workflow code retained. No duplicate custom router or
-second disabled-command registry is required. Full projection remains available.
-The selection is a maintainable initial policy, not a measured global optimum.
-
-The Python runtime, command registry, validators, state schemas, artifact
-freshness, proof redteam, and approved write scopes remain necessary harness.
-ChatGPT Work can use these runtime-neutral workflows when its environment
-actually exposes the GPD runtime and project files. Local installation alone
-does not provision a separate cloud Work environment.
-
-Follow-up: ordinary temporary questions and local sanity checks use the main
-context without ceremonial project artifacts. Numeric time/task stops default
-to zero (disabled), while explicit positive limits and scientific review gates
-remain effective. Progress saving is independent of human approval. Tests now
-exercise event-driven guards, including load-bearing and missing-anchor cases.
+Validation includes registry authority comparison, adapter migrations, scientific
+preflight tests, core/adapters/MCP regression, bounded Astra prompt-slice trials,
+and fresh-context handoff trials. The trials are small descriptive checks; they
+do not establish optimality, general speed gains or publication-grade correctness.
+Independent cloud clients require actual runtime tools and project-file access.

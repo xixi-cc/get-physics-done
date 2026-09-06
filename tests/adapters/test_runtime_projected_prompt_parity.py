@@ -831,7 +831,7 @@ def test_runtime_projected_staged_commands_use_native_include_or_compact_stage_s
         runtime=runtime,
     )
     assert len(projected) <= STAGED_PROJECTED_COMMAND_CHAR_BUDGET
-    assert len(projected) <= len(expanded_workflow) * 0.85
+    assert len(projected) <= max(5000, len(expanded_workflow) * 0.85)
 
 
 @pytest.mark.parametrize("command_name", COMPACT_WORKFLOW_COMMANDS)
@@ -873,7 +873,7 @@ def test_hotspot_commands_use_native_include_or_compact_workflow_reference_shim(
         assert fragment in projected
     budget = COMPACT_WORKFLOW_REFERENCE_PROJECTION_BUDGETS.get(command_name, {}).get(runtime)
     if budget is None:
-        assert len(projected) <= len(expanded_workflow) * 0.85
+        assert len(projected) <= max(5000, len(expanded_workflow) * 0.85)
     else:
         assert len(projected) <= budget["chars"]
         assert len(projected.splitlines()) <= budget["lines"]

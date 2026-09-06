@@ -6,6 +6,8 @@ sync. Use `gpd:set-tier-models` for the narrow direct path for `tier-1`,
 `tier-2`, and `tier-3` model ids.
 </purpose>
 
+
+
 <preset_guidance>
 Workflow presets resolve into existing config keys only. Do not create, persist,
 or infer a separate `preset` block in `GPD/config.json`.
@@ -102,9 +104,9 @@ are written.
 
 @{GPD_INSTALL_DIR}/references/shared/interactive-choice-fallback.md
 
-Treat this as the guided unattended-use flow. Recommend `Supervised` as the
-default advisor cadence; point users at `Balanced` when they want fewer routine
-pauses after trust is established.
+Use current effective values as defaults. For a new configuration, recommend
+`Balanced` autonomy and `Adaptive` review cadence. Explicit project settings
+and named preset values remain authoritative; no silent preset application.
 
 **Checkpoint keystrokes.** Most supervised checkpoints render a one-line
 summary and resume with `[Y/n/e]`: Enter or `Y` accepts, `n` rejects, `e` edits
@@ -124,8 +126,8 @@ Broader local references stay outside this settings-specific list: `gpd doctor`,
 
 Before detailed questions, offer preset preview choices:
 
-- Core research (Recommended): preview the supervised default bundle over the existing knobs, then apply or customize
-- Theory: preview balanced autonomy, deep-theory/max-quality reasoning, sequential execution, sparse cadence, and risk-triggered workflow agents, then apply or customize
+- Core research: preview its supervised preset bundle over the existing knobs, then apply or customize
+- Theory: preview balanced autonomy, deep-theory role tiers, sequential execution, sparse cadence, and risk-triggered workflow agents, then apply or customize
 - Numerics: preview the computation-heavy bundle over the existing knobs, then apply or customize
 - Publication / manuscript: preview the paper-writing bundle over the existing knobs, then apply or customize
 - Full research: preview core-research plus publication readiness over the existing knobs, then apply or customize
@@ -136,15 +138,15 @@ and preserves these labels/mappings:
 
 | Header | Question | Options and mapping |
 | --- | --- | --- |
-| `Autonomy` | How much autonomy should the AI have? | `Supervised (Recommended)` -> `autonomy=supervised`; `Balanced` -> `autonomy=balanced`; `YOLO` -> `autonomy=yolo`. |
-| `Research Mode` | Research strategy? | `Explore` -> `research_mode=explore`; `Balanced (Recommended)` -> `research_mode=balanced`; `Exploit` -> `research_mode=exploit`; `Adaptive` -> `research_mode=adaptive`. |
+| `Autonomy` | How much autonomy should the AI have? | `Balanced (Recommended)` -> `autonomy=balanced`; `Supervised` -> `autonomy=supervised`; `YOLO` -> `autonomy=yolo`. |
+| `Research Mode` | Research strategy? | `Explore` -> `research_mode=explore`; `Balanced (Recommended)` -> `research_mode=balanced`; `Exploit` -> `research_mode=exploit`; `Adaptive (Recommended)` -> `research_mode=adaptive`. |
 | `Research Profile` | Which research profile for agents? | `Deep Theory` -> `model_profile=deep-theory`; `Numerical` -> `model_profile=numerical`; `Exploratory` -> `model_profile=exploratory`; `Review (Recommended)` -> `model_profile=review`; `Paper Writing` -> `model_profile=paper-writing`. |
 | `Model Cost Posture` | What model-cost posture should GPD optimize for? | `Max Quality`; `Balanced (Recommended)`; `Budget-aware`. Qualitative only: no persisted key, billing promise, or spend enforcement. |
 | `Tier Models` | How should GPD handle concrete tier models for the active runtime? | `Leave current setting unchanged` preserves `model_overrides.<SELECTED_RUNTIME>` exactly; `Use runtime defaults` clears that runtime's tier map; `Configure explicit tier models` asks for runtime-native `tier-1`, `tier-2`, and `tier-3` strings. |
 | `Research` | When should GPD spawn the Plan Researcher? | `Auto (Recommended)` -> `workflow.research="auto"`; `Always` -> `workflow.research=true`; `Never` -> `workflow.research=false`. Auto follows the risk-triggered research route. |
 | `Plan Check` | When should GPD spawn the Plan Checker? | `Auto (Recommended)` -> `workflow.plan_checker="auto"`; `Always` -> `workflow.plan_checker=true`; `Never` -> `workflow.plan_checker=false`. Auto follows the risk-triggered plan-check route. |
 | `Verifier` | When should GPD spawn the Execution Verifier? | `Auto (Recommended)` -> `workflow.verifier="auto"`; `Always` -> `workflow.verifier=true`; `Never` -> `workflow.verifier=false` for only the generic post-execution verifier. Auto follows the risk-triggered verifier route; neither auto nor false disables mandatory proof red-teaming. |
-| `Cadence` | How aggressively should execution inject review gates? | `Dense (Recommended)` -> `execution.review_cadence=dense`; `Adaptive` -> `execution.review_cadence=adaptive`; `Sparse` -> `execution.review_cadence=sparse`. Sparse cadence does not waive proof red-teaming for proof-bearing work. |
+| `Cadence` | How aggressively should execution inject review gates? | `Dense` -> `execution.review_cadence=dense`; `Adaptive (Recommended)` -> `execution.review_cadence=adaptive`; `Sparse` -> `execution.review_cadence=sparse`. Sparse cadence does not waive proof red-teaming for proof-bearing work. |
 | `Planning Commit Docs` | Should planning artifacts be committed to git? | `Commit planning docs` -> `planning.commit_docs=true`; `Keep planning docs local-only` -> `planning.commit_docs=false`. |
 | `Parallel` | Execute plans within a wave in parallel? | `Yes (Recommended)` -> `parallelization=true`; `No` -> `parallelization=false`. |
 | `Branching` | Git branching strategy? | `none (Recommended)` -> `git.branching_strategy=none`; `per-phase` -> `git.branching_strategy=per-phase`; `per-milestone` -> `git.branching_strategy=per-milestone`. |
