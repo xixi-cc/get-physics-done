@@ -121,15 +121,16 @@ class TestGPDProjectConfigDefaults:
         assert cfg.model_routing_mode == "shadow"
         assert cfg.commit_docs is True
         assert cfg.parallelization is True
-        assert cfg.max_unattended_minutes_per_plan == 15
-        assert cfg.max_unattended_minutes_per_wave == 30
-        assert cfg.checkpoint_after_n_tasks == 1
+        assert cfg.max_unattended_minutes_per_plan == 0
+        assert cfg.max_unattended_minutes_per_wave == 0
+        assert cfg.checkpoint_after_n_tasks == 0
         assert cfg.checkpoint_after_first_load_bearing_result is True
-        assert cfg.checkpoint_before_downstream_dependent_tasks is True
+        assert cfg.checkpoint_before_downstream_dependent_tasks == "auto"
         assert cfg.project_usd_budget is None
         assert cfg.session_usd_budget is None
         assert cfg.branching_strategy == BranchingStrategy.NONE
         assert cfg.model_overrides is None
+
 
     def test_workflow_auto_policy_is_accepted_without_changing_boolean_defaults(self):
         cfg = GPDProjectConfig(
@@ -182,11 +183,11 @@ class TestConfigKeyContracts:
             {
                 "review_cadence": "adaptive",
                 "model_routing_mode": "shadow",
-                "max_unattended_minutes_per_plan": 15,
-                "max_unattended_minutes_per_wave": 30,
-                "checkpoint_after_n_tasks": 1,
+                "max_unattended_minutes_per_plan": 0,
+                "max_unattended_minutes_per_wave": 0,
+                "checkpoint_after_n_tasks": 0,
                 "checkpoint_after_first_load_bearing_result": True,
-                "checkpoint_before_downstream_dependent_tasks": True,
+                "checkpoint_before_downstream_dependent_tasks": "auto",
                 "project_usd_budget": None,
                 "session_usd_budget": None,
             },
@@ -207,6 +208,7 @@ class TestConfigKeyContracts:
                 "never_auto_close_child_agents": False,
             },
         )
+
 
     def test_mixed_storage_paths_are_preserved_for_nested_alias_updates(self) -> None:
         updated, canonical = apply_config_update({"review_cadence": "sparse"}, "execution.review_cadence", "adaptive")

@@ -69,40 +69,13 @@ def test_research_phase_keeps_supervised_review_and_artifact_gate_mode_rules() -
     assert "artifact gate" in section
 
 
-def test_autonomy_prompt_defaults_preserve_supervised_default() -> None:
-    fallback_workflows = (
-        "audit-milestone.md",
-        "debug.md",
-        "digest-knowledge.md",
-        "validate-conventions.md",
-    )
-
-    for name in fallback_workflows:
-        autonomy_lines = [line for line in _read_workflow(name).splitlines() if line.startswith("AUTONOMY=")]
-        assert autonomy_lines, name
-        assert all("--default supervised" in line for line in autonomy_lines), name
-        assert all('|| echo "balanced"' not in line for line in autonomy_lines), name
-        assert all('|| echo "supervised"' in line for line in autonomy_lines), name
-
-    for name in (
-        "audit-milestone.md",
-        "debug.md",
-        "literature-review.md",
-        "respond-to-referees.md",
-        "plan-phase.md",
-        "parameter-sweep.md",
-        "quick.md",
-        "new-milestone.md",
-    ):
-        workflow = _read_workflow(name)
-        assert (
-            "--default supervised" in workflow
-            or "`autonomy=supervised` (default)" in workflow
-            or "`autonomy=supervised`:" in workflow
-            or "supervised pauses" in workflow
-        ), name
-        assert "`autonomy=balanced` (default)" not in workflow, name
-
+def test_unavailable_autonomy_lookup_uses_conservative_fallback() -> None:
+    # Missing configuration cannot be interpreted as broader human authority.
+    # Normal project defaults are covered by configuration and execution tests.
+    for name in ("audit-milestone.md", "debug.md", "digest-knowledge.md", "validate-conventions.md"):
+        lines = [line for line in _read_workflow(name).splitlines() if line.startswith("AUTONOMY=")]
+        assert lines, name
+        assert all('|| echo "supervised"' in line for line in lines), name
 
 def test_help_dedupes_runtime_permission_readiness_trio() -> None:
     help_workflow = _read_workflow("help.md")

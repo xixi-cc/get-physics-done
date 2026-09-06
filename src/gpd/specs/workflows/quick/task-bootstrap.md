@@ -56,8 +56,8 @@ Reroute explicitly to:
 - `gpd:verify-work <phase>` only after a canonical proof-redteam artifact exists.
 
 Mode behavior:
-- `autonomy=supervised` (default): Honor an applicable explicit plan-approval requirement. If the user already authorized execution of this bounded task, continue without requesting the same approval again.
-- `autonomy=balanced`: Execute without pausing unless the quick task reveals a real decision point.
+- `autonomy=supervised`: Honor an applicable explicit plan-approval requirement. If the user already authorized execution of this bounded task, continue without requesting the same approval again.
+- `autonomy=balanced` (default): Execute without pausing unless the quick task reveals a real decision point.
 - `autonomy=yolo`: Execute and commit without pausing.
 
 Before authoring, reload `task_authoring` for the default small-task path, or `reference_context` only when quick boundary rules require active project anchors, existing reference artifacts, literature/research-map files, protocol/reference context, or targeted source lookup. Treat the selected staged init payload's `staged_loading` block as the handoff shape.

@@ -153,7 +153,7 @@ PLAN.md is the prompt, not a narrative artifact. It must state the objective, th
 
 ## Budget Rule
 
-Plans should stay near half-context. More plans, smaller scope, consistent rigor. Task count follows meaningful execution and verification boundaries.
+Keep enough context for execution, validation and recovery. Task count follows meaningful execution and verification boundaries.
 
 ## Anti-Patterns
 

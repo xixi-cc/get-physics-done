@@ -16,8 +16,7 @@ setup infers ordinary settings without requiring the user to name a mode.
 Main-context work uses the runtime-selected model. Existing concrete model routes,
 including task-specific translation limits, remain in force.
 
-Codex projection defaults to native lean: one router plus eleven ordinary
-implicit command skills. Sixty other canonical commands remain explicitly
+Codex projection defaults to native lean: one automatic router. All seventy-one canonical commands remain explicitly
 invocable, with their workflow code retained. No duplicate custom router or
 second disabled-command registry is required. Full projection remains available.
 The selection is a maintainable initial policy, not a measured global optimum.
@@ -27,3 +26,9 @@ freshness, proof redteam, and approved write scopes remain necessary harness.
 ChatGPT Work can use these runtime-neutral workflows when its environment
 actually exposes the GPD runtime and project files. Local installation alone
 does not provision a separate cloud Work environment.
+
+Follow-up: ordinary temporary questions and local sanity checks use the main
+context without ceremonial project artifacts. Numeric time/task stops default
+to zero (disabled), while explicit positive limits and scientific review gates
+remain effective. Progress saving is independent of human approval. Tests now
+exercise event-driven guards, including load-bearing and missing-anchor cases.

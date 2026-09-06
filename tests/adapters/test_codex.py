@@ -205,7 +205,7 @@ def test_real_lean_projection_preserves_every_canonical_command_for_explicit_inv
     assert result["commands"] == len(canonical)
     assert result["skills"] == len(canonical) + 1
     assert implicit == _CODEX_LEAN_IMPLICIT_COMMAND_SKILLS
-    assert len(explicit_only) == 60
+    assert len(explicit_only) == 71
     assert implicit | explicit_only == canonical
     assert implicit.isdisjoint(explicit_only)
     assert all((skills / skill_name / "SKILL.md").is_file() for skill_name in canonical)

@@ -142,8 +142,8 @@ Resolve plan-local bounds using orchestrator tags first, then plan shape:
 - if the orchestrator passed `<first_result_gate>true</first_result_gate>`, honor it
 - if `review_cadence=dense`, treat `FIRST_RESULT_GATE_REQUIRED=true` as forced; do not recompute it from per-plan heuristics
 - if the orchestrator passed `<segment_task_cap>N</segment_task_cap>`, honor it
-- otherwise require bounded execution when the plan has no authored checkpoints and `task_count >= CHECKPOINT_AFTER_N_TASKS`
-- also require bounded execution when the uninterrupted segment is likely to exceed `MAX_UNATTENDED_MINUTES_PER_PLAN`
+- otherwise require bounded execution when the plan has no authored checkpoints and `CHECKPOINT_AFTER_N_TASKS > 0` and `task_count >= CHECKPOINT_AFTER_N_TASKS`
+- also require bounded execution when `MAX_UNATTENDED_MINUTES_PER_PLAN > 0` and the uninterrupted segment is likely to exceed that explicit limit
 - also require bounded execution when the plan establishes a new baseline, new estimator, new ansatz, or first decisive-comparison path that many downstream tasks depend on
 - phase ordering, prior momentum, or "we are already deep into execution" never waive a required bounded stop
 
@@ -222,7 +222,7 @@ Load `execute-plan-validation.md` when the first active task starts. Deviations 
 4. Confirm `<success_criteria>` met.
 5. Document deviations in SUMMARY.
 
-Context is finite. After each task, consult `{GPD_INSTALL_DIR}/references/orchestration/context-budget.md`; force a bounded pause before quality degrades or when `MAX_UNATTENDED_MINUTES_PER_PLAN` / `SEGMENT_TASK_CAP` is hit. If pausing mid-plan, commit current work and return checkpoint intent plus the matching `execution_segment`; the orchestrator writes `.continue-here.md` and persists `continuation.bounded_segment` through `gpd apply-return-updates --checkpoint-resume-file`.
+Context is finite. Consult `{GPD_INSTALL_DIR}/references/orchestration/context-budget.md` when measured context pressure or recovery needs warrant it; pause before quality degrades or a positive explicit `MAX_UNATTENDED_MINUTES_PER_PLAN` / `SEGMENT_TASK_CAP` limit is hit. Zero disables that numeric limit. If pausing mid-plan, commit current work and return checkpoint intent plus the matching `execution_segment`; the orchestrator writes `.continue-here.md` and persists `continuation.bounded_segment` through `gpd apply-return-updates --checkpoint-resume-file`.
 </step>
 
 <task_commit>
@@ -339,3 +339,14 @@ When plan execution fails, see `execute-plan-recovery.md` for the full recovery 
 - Validation events documented
 - Checkpoint tag cleaned up on success and retained on failure
 </success_criteria>
+
+<continuity_and_review>
+Saving progress, checking scientific evidence and asking the user are separate
+actions. Save recoverable work at meaningful result or interruption boundaries;
+this alone does not require a new agent, approval or end of turn. A scientific
+review gate is cleared only by its required evidence and scoped transition.
+Ask the user only for an explicit human gate or a missing decision changing
+scope, authority or scientific meaning. Never clear a pending gate merely
+because the current model is capable. Explicit positive time/task limits keep
+their configured stop behavior; zero leaves genuine event-driven gates active.
+</continuity_and_review>

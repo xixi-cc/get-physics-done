@@ -112,21 +112,7 @@ _CODEX_YOLO_SANDBOX_MODE = "danger-full-access"
 _CODEX_PROJECTION_PROFILES = ("full", "lean")
 _CODEX_DEFAULT_PROJECTION_PROFILE = "lean"
 _CODEX_PROJECTION_ROUTER_SKILL = "gpd-router"
-_CODEX_LEAN_IMPLICIT_COMMAND_SKILLS = frozenset(
-    {
-        "gpd-start",
-        "gpd-resume-work",
-        "gpd-progress",
-        "gpd-quick",
-        "gpd-plan-phase",
-        "gpd-execute-phase",
-        "gpd-write-paper",
-        "gpd-peer-review",
-        "gpd-verify-work",
-        "gpd-literature-review",
-        "gpd-derive-equation",
-    }
-)
+_CODEX_LEAN_IMPLICIT_COMMAND_SKILLS: frozenset[str] = frozenset()
 
 
 def normalize_codex_projection_profile(value: str | None) -> str:
@@ -1821,23 +1807,47 @@ def _write_codex_skill_invocation_policy(skill_dir: Path, *, allow_implicit_invo
 
 
 def _render_codex_projection_router_skill(*, launcher: str, path_prefix: str) -> str:
-    """Render the lean projection's non-canonical, read-only discovery router."""
+    """Single discovery entry; canonical commands remain available on demand."""
     snippet_path = _codex_runtime_snippet_path(path_prefix)
-    return (
-        "---\n"
-        f"name: {_CODEX_PROJECTION_ROUTER_SKILL}\n"
-        "description: Route GPD research workflow requests to the matching canonical GPD command without "
-        "performing the research task itself.\n"
-        "---\n"
-        "<codex_runtime_notes>\n"
-        f"Ref: `{snippet_path}#runtime-shell-bridge`; bridge `{launcher}`; labels `gpd ...`/`$gpd-...`.\n"
-        "</codex_runtime_notes>\n\n"
-        f"{_GPD_CODEX_SKILL_MARKER}\n"
-        "Route only requests that clearly ask to use GPD or an existing GPD project. Use the GPD skills MCP "
-        "`route_skill` result as advisory routing, then load the suggested canonical command with `get_skill` "
-        "or read the matching installed `$gpd-*` SKILL.md and continue its workflow in this task. Do not ask the user to name a mode. Preserve the user's scope and authorization. The router itself grants no scientific write authority; the selected workflow supplies the scope. Do not invent a command. If routing tools are unavailable or no route "
-        "is clear, use `$gpd-start` for project entry or `$gpd-help` for the command index.\n"
-    )
+    return f"""---
+name: {_CODEX_PROJECTION_ROUTER_SKILL}
+description: Work in an existing GPD research project or fulfill an explicit GPD request. Select only the needed workflow; ordinary standalone physics questions need no GPD activation.
+---
+
+{_GPD_CODEX_SKILL_MARKER}
+
+<codex_runtime_notes>
+Ref: `{snippet_path}#runtime-shell-bridge`; bridge `{launcher}`.
+</codex_runtime_notes>
+
+Infer the task from the request and relevant project evidence. The user need not
+name a mode. A temporary explanation, local inspection or sanity check that
+neither changes shared research state nor establishes a result for downstream
+use can be completed in the current context. Read relevant authoritative files,
+honor frozen evidence, conventions and scope, and return the answer without
+creating a PLAN, SUMMARY, quick directory, commit or state transition merely
+to satisfy a workflow. Do not label such an answer a verified project result.
+
+Use a canonical workflow for requested durable artifacts, cross-session work,
+project initialization/resumption, phase execution, publication-grade results,
+proof obligations or state updates. An explicit legacy `$gpd-*` command retains
+its contract. Use `route_skill` as advisory discovery and `get_skill` to load
+one command, or read its installed SKILL.md. Continue the selected workflow;
+do not ask the user to reissue the request with a mode label. The router grants
+no write or scientific-promotion authority beyond the selected workflow.
+
+Ordinary reasoning stays in the main capable context. Delegate for required
+independence, a useful separable parallel task, context isolation or explicit
+user request. Never duplicate a pending worker's job or synthesize its return.
+No generic router, planner or checker is needed just to select the next action.
+
+For project entry use `$gpd-start`, continuity `$gpd-resume-work` or
+`$gpd-progress`; sustained research uses `$gpd-plan-phase` / `$gpd-execute-phase`;
+verification uses `$gpd-verify-work`; manuscript work uses `$gpd-write-paper` /
+`$gpd-peer-review`. Other commands remain reachable through `$gpd-help` or MCP.
+Read only the selected implementation and its necessary references. If tools
+are unavailable, report the concrete limitation; do not fabricate GPD state.
+"""
 
 
 def _canonical_codex_command_fingerprint(src_dir: Path, canonical_skill_dirs: set[str]) -> str:

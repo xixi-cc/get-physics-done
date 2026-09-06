@@ -133,7 +133,7 @@ The mapping between autonomy modes and execution behavior:
 
 **`review_cadence` interaction:** `review_cadence` is independent of autonomy: it controls the density of soft checkpoints (wave-level review gates). Under the default `supervised` + `dense` posture, those gates are shown for approval. `balanced` may auto-advance only where cadence and hard-checkpoint rules do not require a pause; `yolo` may auto-continue soft gates only after they are explicitly cleared. Hard checkpoints are never affected by `review_cadence`.
 
-**`checkpoint_after_n_tasks` interaction:** This config value controls task-level checkpoints within plan execution. It operates independently of the phase-level checkpoint protocol defined here. Both systems can fire checkpoints; neither overrides the other.
+**`checkpoint_after_n_tasks` interaction:** A positive explicit value controls task-level checkpoints within plan execution; zero disables count-driven stops. It operates independently of the phase-level checkpoint protocol defined here. Both systems can fire checkpoints; neither overrides the other.
 
 ## Continuation Routing Decision Tree
 
@@ -157,3 +157,5 @@ After phase completion, the orchestrator evaluates:
 ```
 
 This tree is evaluated in the `offer_next` step of the execute-phase workflow. See `{GPD_INSTALL_DIR}/workflows/execute-phase.md` for the concrete implementation.
+
+Progress saving does not itself imply human approval. Keep recoverable artifacts at meaningful boundaries and continue authorized work; independent scientific review and explicit user decision gates retain their own evidence and authority requirements.

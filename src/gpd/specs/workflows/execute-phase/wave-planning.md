@@ -172,8 +172,8 @@ the first downstream consumer of the load-bearing result.
 
 For each wave, classify downstream fanout as risky when any of these holds:
 - multiple plans and any later wave depends on it
-- any plan has `task_count >= CHECKPOINT_AFTER_N_TASKS`, no authored checkpoints, or likely exceeds `MAX_UNATTENDED_MINUTES_PER_PLAN`
-- derivation, formalism, numerical, or validation phase classes
+- an explicit positive task/time limit is reached: `CHECKPOINT_AFTER_N_TASKS > 0` and `task_count >= CHECKPOINT_AFTER_N_TASKS`, or `MAX_UNATTENDED_MINUTES_PER_PLAN > 0` and the plan likely exceeds it; missing authored checkpoints alone is not a scientific risk
+- unresolved claim or method uncertainty in derivation, formalism, numerical, or validation work; the phase label alone does not require extra review
 - file conflicts, convention-lock requirements, or benchmark-critical anchors
 - new estimator, baseline, or branch point whose downstream value depends on a decisive comparison still to be earned
 - sparse evidence where the first material result validates only a proxy or supporting artifact while decisive anchors remain unresolved
@@ -181,7 +181,7 @@ For each wave, classify downstream fanout as risky when any of these holds:
 When a wave is risky:
 - set `FIRST_RESULT_GATE_REQUIRED=true`
 - set `PRE_FANOUT_REVIEW_REQUIRED=true`
-- set `SEGMENT_TASK_CAP=${CHECKPOINT_AFTER_N_TASKS}`
+- set `SEGMENT_TASK_CAP=${CHECKPOINT_AFTER_N_TASKS}`; zero means no count cap, not permission to cross an unresolved scientific gate
 - force bounded continuation segments even when the authored plan has no checkpoints
 
 When `review_cadence=dense`, treat every wave as risky and require both first-result and pre-fanout gates.

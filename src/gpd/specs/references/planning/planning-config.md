@@ -11,11 +11,11 @@ Configuration options for `GPD/` directory behavior in physics research projects
 "autonomy": "balanced",
 "execution": {
   "review_cadence": "adaptive",
-  "max_unattended_minutes_per_plan": 15,
-  "max_unattended_minutes_per_wave": 30,
-  "checkpoint_after_n_tasks": 1,
+  "max_unattended_minutes_per_plan": 0,
+  "max_unattended_minutes_per_wave": 0,
+  "checkpoint_after_n_tasks": 0,
   "checkpoint_after_first_load_bearing_result": true,
-  "checkpoint_before_downstream_dependent_tasks": true
+  "checkpoint_before_downstream_dependent_tasks": "auto"
 },
 "research_mode": "adaptive",
 "parallelization": true,
@@ -37,9 +37,9 @@ Configuration options for `GPD/` directory behavior in physics research projects
 | `planning.commit_docs`          | `true`                       | Whether to commit planning artifacts to git                                                    |
 | `autonomy`                      | `"balanced"`               | Human-in-the-loop level: `"supervised"`, `"balanced"`, `"yolo"`                                    |
 | `execution.review_cadence`      | `"adaptive"`                 | How aggressively long-running execution injects bounded review points                            |
-| `execution.max_unattended_minutes_per_plan` | `15`             | Wall-clock budget before a bounded continuation segment must be created, even if the run feels smooth |
-| `execution.max_unattended_minutes_per_wave` | `30`             | Wave-level unattended budget before forcing a bounded review                                     |
-| `execution.checkpoint_after_n_tasks` | `1`                    | Task budget before forcing a bounded continuation segment                                        |
+| `execution.max_unattended_minutes_per_plan` | `0`             | Positive explicit wall-clock limit; 0 disables automatic time stops |
+| `execution.max_unattended_minutes_per_wave` | `0`             | Positive explicit wave limit; 0 disables automatic time stops                                     |
+| `execution.checkpoint_after_n_tasks` | `0`                    | Positive explicit task limit; 0 disables automatic count stops                                        |
 | `execution.checkpoint_after_first_load_bearing_result` | `true` | Require a first-result sanity gate before fanout, especially when decisive evidence is not yet in hand |
 | `execution.checkpoint_before_downstream_dependent_tasks` | `true` | `true`, `false`, or `"auto"`; auto requires a gate only for an uncleared load-bearing result and reuses fresh equivalent checks |
 | `research_mode`                 | `"adaptive"`                 | Research strategy: `"explore"` (breadth), `"balanced"`, `"exploit"` (depth), `"adaptive"`       |
@@ -285,3 +285,5 @@ Squash merge is recommended -- keeps main branch history clean while preserving 
 </planning_config>
 
 Default cognition is `base-model-first`; workflow research, plan_checker and verifier default to `auto`, and review cadence to `adaptive`. Explicit project values override defaults.
+
+A zero time/task limit disables automatic numeric stops, not saving, evidence checks or explicit scientific/human gates. Positive values remain supported as deliberate project limits. Default downstream checkpoint policy is `auto`: reuse a current applicable check and stop for an uncleared load-bearing dependency.

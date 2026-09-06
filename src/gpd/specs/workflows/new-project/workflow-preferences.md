@@ -100,7 +100,7 @@ Workflow research agent: true / false / auto
 Workflow plan checker: true / false / auto
 Workflow verifier: true / false / auto
 Model profile: deep-theory / numerical / exploratory / review / paper-writing
-Unattended minutes per plan / wave: positive integers
+Unattended minutes per plan / wave: nonnegative integers (0 disables the numeric stop)
 Checkpoint after N tasks: positive integer
 First load-bearing result checkpoint: true / false
 Pre-dependent checkpoint: true / false / auto

@@ -337,11 +337,12 @@ class GPDProjectConfig(BaseModel):
     plan_checker: WorkflowAgentPolicy = "auto"
     verifier: WorkflowAgentPolicy = "auto"
     parallelization: bool = True
-    max_unattended_minutes_per_plan: int = Field(default=15, ge=1)
-    max_unattended_minutes_per_wave: int = Field(default=30, ge=1)
-    checkpoint_after_n_tasks: int = Field(default=1, ge=1)
+    # Zero disables automatic count/time stops; explicit positive project limits remain enforced.
+    max_unattended_minutes_per_plan: int = Field(default=0, ge=0)
+    max_unattended_minutes_per_wave: int = Field(default=0, ge=0)
+    checkpoint_after_n_tasks: int = Field(default=0, ge=0)
     checkpoint_after_first_load_bearing_result: bool = True
-    checkpoint_before_downstream_dependent_tasks: DownstreamCheckpointPolicy = True
+    checkpoint_before_downstream_dependent_tasks: DownstreamCheckpointPolicy = "auto"
     project_usd_budget: float | None = Field(default=None, gt=0)
     session_usd_budget: float | None = Field(default=None, gt=0)
 
