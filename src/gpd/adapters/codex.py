@@ -1862,9 +1862,9 @@ For project entry use `$gpd-start`, continuity `$gpd-resume-work` or
 verification uses `$gpd-verify-work`; manuscript work uses `$gpd-write-paper` /
 `$gpd-peer-review`. Other operation IDs remain reachable through `$gpd-help` or MCP `get_skill`.
 For the grouped operation map, read
-`{path_prefix}references/shared/workflow-catalog.md` only when needed.
+`{path_prefix}get-physics-done/references/shared/workflow-catalog.md` only when needed.
 For sustained analytical work, read
-`{path_prefix}references/research/long-derivation.md`.
+`{path_prefix}get-physics-done/references/research/long-derivation.md`.
 Read only the selected implementation and its necessary references. If tools
 are unavailable, report the concrete limitation; do not fabricate GPD state.
 """
