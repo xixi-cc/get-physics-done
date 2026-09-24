@@ -34,9 +34,9 @@ It covers:
 
 - `src/gpd/commands/*.md`: `71`
 - `src/gpd/agents/*.md`: `20`
-- `src/gpd/specs/workflows/*.md`: `72`
+- `src/gpd/specs/workflows/*.md`: `73`
 - `src/gpd/specs/templates/**/*.md`: `81`
-- `src/gpd/specs/references/**/*.md`: `250`
+- `src/gpd/specs/references/**/*.md`: `256`
 - `src/gpd/adapters/*.py`: `16`
 - `src/gpd/hooks/*.py`: `11`
 - `src/gpd/mcp/*.py`: `6`
@@ -69,7 +69,7 @@ Prompt stem inventory:
 <!-- repo-graph-prompt-stem-inventory:start -->
 - Same-stem command/workflow prompt stems: `69`
 - Command-only prompt stems: `health`, `suggest-next`
-- Workflow-only prompt stems: `execute-plan`, `transition`, `verify-phase`
+- Workflow-only prompt stems: `execute-plan`, `technical-analysis`, `transition`, `verify-phase`
 <!-- repo-graph-prompt-stem-inventory:end -->
 
 Generated-output families are modeled when code or tests depend on them:

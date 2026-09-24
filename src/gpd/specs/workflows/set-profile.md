@@ -65,7 +65,7 @@ Agents will now operate in this mode:
 
 **Profile definitions:**
 
-Canonical per-agent tier assignments live in `MODEL_PROFILES` and the installed reference `references/orchestration/model-profiles.md`. Do not copy the agent/tier matrix here; use that reference when exact tier rows are needed.
+Canonical per-agent tier assignments live in `MODEL_PROFILES` and the installed reference `references/orchestration/model-profiles.md`; the profiles cover assignments across all 20 agents. Do not copy the agent/tier matrix here; use that reference when exact tier rows are needed.
 
 The profile maps abstract role tiers for deep-theory, numerical, exploratory,
 review or paper-writing work. It does not itself change task counts, research

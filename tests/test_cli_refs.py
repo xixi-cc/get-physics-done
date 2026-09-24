@@ -16,6 +16,8 @@ from gpd.cli import app
 
 runner = CliRunner()
 
+# CliRunner.output interleaves stderr logs; raw JSON is a stdout contract.
+
 
 def _invoke(args: list[str]) -> object:
     return runner.invoke(app, ["--raw", *args], catch_exceptions=False)
@@ -35,7 +37,7 @@ def test_refs_errors_list_matches_core_payload() -> None:
     result = _invoke(["refs", "errors"])
 
     assert result.exit_code == 0, result.output
-    assert json.loads(result.output) == expected
+    assert json.loads(result.stdout) == expected
     assert expected["count"] > 0
 
 
@@ -47,9 +49,9 @@ def test_refs_errors_domain_filter_matches_core_payload() -> None:
     result = _invoke(["refs", "errors", "--domain", "core"])
 
     assert result.exit_code == 0, result.output
-    payload = json.loads(result.output)
+    payload = json.loads(result.stdout)
     assert payload == expected
-    assert payload["count"] < json.loads(_invoke(["refs", "errors"]).output)["count"]
+    assert payload["count"] < json.loads(_invoke(["refs", "errors"]).stdout)["count"]
 
 
 def test_refs_errors_by_id_matches_core_payload() -> None:
@@ -60,7 +62,7 @@ def test_refs_errors_by_id_matches_core_payload() -> None:
     result = _invoke(["refs", "errors", "--id", "3"])
 
     assert result.exit_code == 0, result.output
-    assert json.loads(result.output) == expected
+    assert json.loads(result.stdout) == expected
     assert expected["id"] == 3
     assert expected["detection_strategy"]
 
@@ -76,9 +78,9 @@ def test_refs_errors_detection_and_traceability_match_core_payloads() -> None:
     traceability_result = _invoke(["refs", "errors", "--id", "3", "--traceability"])
 
     assert detection_result.exit_code == 0, detection_result.output
-    assert json.loads(detection_result.output) == expected_detection
+    assert json.loads(detection_result.stdout) == expected_detection
     assert traceability_result.exit_code == 0, traceability_result.output
-    assert json.loads(traceability_result.output) == expected_traceability
+    assert json.loads(traceability_result.stdout) == expected_traceability
     assert expected_detection != expected_traceability
 
 
@@ -90,7 +92,7 @@ def test_refs_errors_unknown_id_emits_the_full_core_envelope_and_exits_one() -> 
     result = _invoke(["refs", "errors", "--id", "99999"])
 
     assert result.exit_code == 1
-    assert json.loads(result.output) == expected
+    assert json.loads(result.stdout) == expected
     assert expected == {
         "valid_range": error_catalog.ERROR_ID_RANGE_LABEL,
         "total_classes": _error_store().count,
@@ -111,7 +113,7 @@ def test_refs_errors_unknown_domain_emits_error_envelope_and_exits_one() -> None
     result = _invoke(["refs", "errors", "--domain", "bogus"])
 
     assert result.exit_code == 1
-    payload = json.loads(result.output)
+    payload = json.loads(result.stdout)
     assert payload["schema_version"] == 1
     assert "unknown domain 'bogus'" in payload["error"]
 
@@ -130,7 +132,7 @@ def test_refs_protocols_list_matches_mcp_tool_payload() -> None:
     result = _invoke(["refs", "protocols"])
 
     assert result.exit_code == 0, result.output
-    assert json.loads(result.output) == expected
+    assert json.loads(result.stdout) == expected
     assert expected["count"] > 0
 
 
@@ -144,7 +146,7 @@ def test_refs_protocols_domain_filter_matches_mcp_tool_payload() -> None:
     result = _invoke(["refs", "protocols", "--domain", domain])
 
     assert result.exit_code == 0, result.output
-    assert json.loads(result.output) == expected
+    assert json.loads(result.stdout) == expected
     assert 0 < expected["count"] < unfiltered["count"]
     assert {protocol["domain"] for protocol in expected["protocols"]} == {domain}
 
@@ -153,7 +155,7 @@ def test_refs_protocols_unknown_domain_emits_error_envelope_and_exits_one() -> N
     result = _invoke(["refs", "protocols", "--domain", "bogus"])
 
     assert result.exit_code == 1
-    payload = json.loads(result.output)
+    payload = json.loads(result.stdout)
     assert payload == {"error": "Unknown protocol domain: bogus", "schema_version": 1}
 
 
@@ -181,7 +183,7 @@ def test_refs_protocols_by_name_matches_mcp_tool_payload() -> None:
     result = _invoke(["refs", "protocols", "--name", name])
 
     assert result.exit_code == 0, result.output
-    assert json.loads(result.output) == expected
+    assert json.loads(result.stdout) == expected
     assert expected["name"] == name
 
 
@@ -194,7 +196,7 @@ def test_refs_protocols_route_matches_mcp_tool_payload() -> None:
     result = _invoke(["refs", "protocols", "--route", query])
 
     assert result.exit_code == 0, result.output
-    assert json.loads(result.output) == expected
+    assert json.loads(result.stdout) == expected
     assert expected["query"] == query
 
 
@@ -207,7 +209,7 @@ def test_refs_protocols_checkpoints_matches_mcp_tool_payload() -> None:
     result = _invoke(["refs", "protocols", "--checkpoints", name])
 
     assert result.exit_code == 0, result.output
-    assert json.loads(result.output) == expected
+    assert json.loads(result.stdout) == expected
     assert expected["name"] == name
 
 
@@ -218,7 +220,7 @@ def test_refs_protocols_unknown_name_lists_available_and_exits_one() -> None:
     result = _invoke(["refs", "protocols", "--name", "not-a-protocol"])
 
     assert result.exit_code == 1
-    payload = json.loads(result.output)
+    payload = json.loads(result.stdout)
     assert payload == expected
     assert payload["error"] == "Protocol 'not-a-protocol' not found"
     assert payload["schema_version"] == 1

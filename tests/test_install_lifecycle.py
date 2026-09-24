@@ -141,7 +141,7 @@ def test_external_skills_runtime_lifecycle_round_trip(tmp_path: Path, gpd_root: 
     skills_dir = tmp_path / ".agents" / "skills"
     skills_dir.mkdir(parents=True)
 
-    _install_and_finalize(adapter, gpd_root, target, is_global=True, skills_dir=skills_dir)
+    _install_and_finalize(adapter, gpd_root, target, is_global=True, skills_dir=skills_dir, projection_profile="full")
 
     gpd_skills = [d for d in skills_dir.iterdir() if d.is_dir() and d.name.startswith("gpd-")]
     assert gpd_skills

@@ -1,9 +1,11 @@
+import json
 from pathlib import Path
 
 import pytest
 
 from gpd import registry
-from gpd.adapters.codex import _CODEX_LEAN_COMMAND_SKILLS, CodexAdapter
+from gpd.adapters.codex import CodexAdapter
+from gpd.adapters.install_utils import MANIFEST_NAME
 from gpd.core.workflow_catalog import operation_group, workflow_catalog
 
 
@@ -33,10 +35,11 @@ def test_full_lean_full_migration_preserves_user_skill_and_operation_contracts(t
         assert custom.read_text() == "user-owned"
         assert adapter.has_complete_install(target)
         installed = {p.parent.name for p in skills.glob("gpd-*/SKILL.md")}
+        manifest = json.loads((target / MANIFEST_NAME).read_text(encoding="utf-8"))
         expected = (
             {"gpd-" + x for x in registry.list_commands()}
             if profile == "full"
-            else set(_CODEX_LEAN_COMMAND_SKILLS) | {"gpd-router"}
+            else set(manifest["codex_explicit_only_skill_dirs"]) | {manifest["codex_projection_router_dir"]}
         )
         assert installed == expected
         # Retired native entries still resolve exact command policy and durable roots.
