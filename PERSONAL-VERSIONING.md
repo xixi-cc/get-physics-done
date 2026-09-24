@@ -49,7 +49,8 @@ not the newest dirty working tree or the newest official release.
 ## Current promoted release
 
 - Historical rollout label: `personal-astra-theory-20260906`
-- Formal personal tag: `xixi-v1.2.2-astra.20260907.1`
+- Formal personal tag: `xixi-v1.2.2-astra.20260924.1`
 - Upstream package baseline: `1.2.2`
 - Astra optimization completed: 2026-09-06
 - Version governance and dual-host promotion completed: 2026-09-07
+- Skill discovery description release: 2026-09-24
