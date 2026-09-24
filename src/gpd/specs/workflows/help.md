@@ -229,7 +229,7 @@ Create detailed execution plan for a phase (PLAN.md) with verification loop
 Notes: `--skip-verify` may skip routine verification, but proof-bearing plans still require checker review or an equivalent main-context audit.
 
 **`gpd:execute-phase <phase-number> [--gaps-only]`**
-Execute all plans in a phase with wave-based parallelization
+Execute GPD phase plans with project state and checkpoints
 
 **`gpd:verify-work [phase] [--dimensional] [--limits] [--convergence] [--regression] [--all]`**
 Verify research results through physics consistency checks

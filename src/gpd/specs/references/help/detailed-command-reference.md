@@ -132,7 +132,7 @@ Notes:
 - Staged workflow: `plan-phase`.
 
 **`gpd:execute-phase <phase-number> [--gaps-only]`**
-Execute all plans in a phase with wave-based parallelization
+Execute GPD phase plans with project state and checkpoints
 
 - Requires files: `GPD/ROADMAP.md`
 - Staged workflow: `execute-phase`.

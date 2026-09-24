@@ -1,6 +1,6 @@
 ---
 name: gpd:execute-phase
-description: Execute all plans in a phase with wave-based parallelization
+description: Execute GPD phase plans with project state and checkpoints
 argument-hint: "<phase-number> [--gaps-only]"
 context_mode: project-required
 requires:
