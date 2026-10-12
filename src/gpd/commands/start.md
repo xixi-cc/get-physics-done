@@ -38,6 +38,12 @@ Requested choice or short goal: $ARGUMENTS
 </inline_guidance>
 
 <process>
+
+Carry explicit session onboarding authorization into the unambiguous selected
+workflow; reuse unchanged approved scope there. A menu choice alone grants no
+writes. Ask for unresolved scientific scope or new state reconciliation. The
+chooser-only defaults below apply when separate authorization is absent.
+
 Follow the included start workflow end-to-end. Preserve the routing-first rule: detect the folder state, show plain-language choices, then hand off to the real existing workflow instead of duplicating its logic here.
 
 In one-shot or headless runtime prompts, render the first chooser as plain text and stop instead of calling a structured input tool that cannot receive a reply. If the same user message that invokes `gpd:start` already includes an explicit choice such as `tour`, `fast start`, `full guided setup`, or the matching choice number after the command label, treat that text as the user's answer and route once through the normal choice mapping instead of stopping at the chooser. Add `Reply with the number or the option name.` and do not choose an option, infer approval, create files, or route into a downstream command until the user answers. A same-message explicit choice counts only as the chooser answer. It is not downstream write approval and not approval for downstream intake, scope approval, file creation, git initialization, state repair, map creation, mapper spawning, progress writes, or executing a recommended next action. Surrounding automation instructions, goals, or explanations do not count as chooser answers or downstream approval.

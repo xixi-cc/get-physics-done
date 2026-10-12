@@ -1,6 +1,6 @@
 ---
 name: gpd:write-paper
-description: Structure and write a physics paper from project research results or a bounded external-authoring intake
+description: Author a complete GPD physics paper from research results or an explicit external-authoring intake
 argument-hint: "[--intake path/to/write-paper-authoring-input.json]"
 context_mode: project-aware
 command-policy:
@@ -122,11 +122,13 @@ help:
 
 
 <objective>
-Structure and write a physics paper from completed research results or a bounded explicit external-authoring intake.
+Author a complete paper from project results or an explicit external intake.
 
-Keep the wrapper thin and let the workflow own the full pipeline.
+Draft bounded edits locally; verify affected claims, equations and citations.
+Complete authoring retains all proof, reproducibility, review and publication
+gates. Local drafts do not satisfy these gates or advance research state.
 
-**Why subagent:** Publication drafting and review coordination burn context fast.
+**Why subagent:** Isolate full authoring.
 </objective>
 
 <execution_context>
@@ -136,13 +138,13 @@ Keep the wrapper thin and let the workflow own the full pipeline.
 <context>
 Project manuscript context or intake: $ARGUMENTS
 
-Use only the two frontmatter-authorized lanes: project-backed authoring, or the
-explicit `--intake path/to/write-paper-authoring-input.json` external-authoring
-manifest. External authoring is fail-closed: no workspace mining,
-positional-folder discovery, or `PAPER-CONFIG.json` as intake. Boundary
-reference: `{GPD_INSTALL_DIR}/references/publication/publication-pipeline-modes.md`.
-Stage 1 owns validation, manuscript-root binding, and durable
-`GPD/publication/{subject_slug}/...` routing; `.../intake/` is provenance only.
+Use project-backed authoring or an explicit
+`--intake path/to/write-paper-authoring-input.json` manifest. External authoring
+is fail-closed: no workspace mining, positional-folder discovery, or
+`PAPER-CONFIG.json` as intake. Stage 1 validates and binds manuscript-root outputs
+to `GPD/publication/{subject_slug}/...`; `.../intake/` is provenance only.
+See `{GPD_INSTALL_DIR}/references/publication/publication-pipeline-modes.md`
+on demand.
 </context>
 
 <process>

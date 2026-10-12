@@ -1,6 +1,6 @@
 ---
 name: gpd:digest-knowledge
-description: Create or update a draft knowledge document in the current workspace from a topic, source file, arXiv ID, or canonical knowledge path
+description: Create or update a draft GPD knowledge document under GPD/knowledge from a topic or source
 argument-hint: "[topic | source file | arXiv ID | current-workspace GPD/knowledge/K-*.md]"
 context_mode: project-aware
 command-policy:

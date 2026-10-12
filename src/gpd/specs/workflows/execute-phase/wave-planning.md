@@ -124,7 +124,13 @@ fi
 
 **Suppression:** if `confirmed_at` is set AND the current `contract_fingerprint == confirmed_contract_hash` AND `context_guidance_fingerprint == confirmed_context_hash`, skip and log `claim_deliverable_alignment_check: skipped (already confirmed this session)`.
 
-**Render:** when fired and not suppressed, render one screen comparing CONTEXT/ContractContextIntake to `gpd contract alignment-summary`. Cover observables, deliverables, required references, stop/rethink conditions, claims, and acceptance tests; cap each side at 5 bullets.
+**Existing session authorization:** reuse explicit session approval only when bound
+to current nonempty contract/context hashes and the selected wave, with unchanged
+approved scope and acceptance. Record the current hashes below. Generic execution
+requests, stale or unbound approval are insufficient; otherwise ask. Independent
+proof and verification gates still apply.
+
+**Render:** when fired, not suppressed, and no same-contract authorization exists, render one screen comparing CONTEXT/ContractContextIntake to `gpd contract alignment-summary`. Cover observables, deliverables, required references, stop/rethink conditions, claims, and acceptance tests; cap each side at 5 bullets.
 
 **ask_user:** present exactly one question with 4 options. Enter selects `Y`.
 
@@ -144,7 +150,7 @@ ask_user([
 ])
 ```
 
-Only explicit `Y: proceed` authorizes record-alignment. Missing `ask_user`, timeout, empty answer, or noninteractive run is not confirmation; STOP before writes, scripts, computations, dispatches, subagents, or artifacts.
+When no same-contract prior authorization exists, only explicit `Y: proceed` authorizes record-alignment. Missing `ask_user`, timeout, empty answer, or noninteractive run is not confirmation; STOP before writes, scripts, computations, dispatches, subagents, or artifacts.
 
 On `Y: proceed` record alignment and continue:
 

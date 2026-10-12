@@ -1,6 +1,6 @@
 ---
 name: gpd:progress
-description: Check research progress, show context, and route to next action (execute or plan)
+description: Report GPD project progress and suggest the next canonical action
 argument-hint: "[--brief | --full | --reconcile]"
 context_mode: project-required
 project_reentry_capable: true

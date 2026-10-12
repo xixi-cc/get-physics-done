@@ -205,7 +205,7 @@ Notes: `state.json.continuation` is the durable authority. Canonical continuatio
 Create continuation handoff when pausing research mid-phase
 
 **`gpd:progress [--brief | --full | --reconcile]`**
-Check research progress, show context, and route to next action (execute or plan)
+Report GPD project progress and suggest the next canonical action
 Usage: `gpd:progress --full`; `gpd:progress --brief`; `gpd:progress --reconcile`
 Notes: The local CLI `gpd progress` is a read-only renderer with `json|bar|table` output. Local CLI: `gpd progress json|bar|table`.
 
@@ -259,11 +259,11 @@ Systematic parameter sweep with parallel execution and result aggregation
 Usage: `gpd:parameter-sweep --param beta --range 0.1:1.0`
 
 **`gpd:compare-experiment [prediction, dataset, phase, or comparison target]`**
-Systematically compare theoretical predictions with experimental or observational data
+Compare GPD theoretical results with experimental or observational data
 Usage: `gpd:compare-experiment data/results.csv`
 
 **`gpd:compare-results [phase, artifact, or comparison target]`**
-Compare internal results, baselines, or methods and emit decisive verdicts
+Compare GPD research artifacts or baselines and emit decisive verdicts
 Usage: `gpd:compare-results GPD/comparisons/baseline.md`
 Notes: Writes a decisive comparison artifact under GPD/comparisons/ for the current workspace.
 
@@ -280,7 +280,7 @@ Notes: Complements the technical-analysis lane; use separate commands such as gp
 Track how uncertainties propagate through multi-step calculations across phases
 
 **`gpd:digest-knowledge [topic|arXiv id|source file|knowledge path]`**
-Create or update a draft knowledge document in the current workspace from a topic, source file, arXiv ID, or canonical knowledge path
+Create or update a draft GPD knowledge document under GPD/knowledge from a topic or source
 Usage: `gpd:digest-knowledge "renormalization group fixed points"`; `gpd:digest-knowledge 2401.12345v2`; `gpd:digest-knowledge hep-th/9901001`; `gpd:digest-knowledge ./notes/rg-notes.md`; `gpd:digest-knowledge ./sources/review.docx`; `gpd:digest-knowledge ./data/observables.csv`; `gpd:digest-knowledge GPD/knowledge/K-renormalization-group-fixed-points.md`
 Notes: Creates a current-workspace knowledge document draft from a topic, paper, source file, or explicit knowledge path. Example document source: `gpd:digest-knowledge ./sources/review.docx`; example tabular source: `gpd:digest-knowledge ./data/observables.csv`. Knowledge lifecycle states are draft, in_review, stable, and superseded; use gpd:review-knowledge for approval. Stable knowledge enters shared runtime reference surfaces as reviewed background synthesis; it is a separate authority tier and does not override stronger evidence. Resolves one canonical `GPD/knowledge/{knowledge_id}.md` target in the current workspace and stops on ambiguity. Supports an arXiv identifier with accepted prefixes.
 
@@ -295,7 +295,7 @@ Usage: `gpd:literature-review "holographic superconductors"`
 Notes: Runs on the current project or an explicit topic: a physics research topic or research question, and writes under GPD/literature/ in the current workspace.
 
 **`gpd:write-paper [--intake path/to/write-paper-authoring-input.json]`**
-Structure and write a physics paper from project research results or a bounded external-authoring intake
+Author a complete GPD physics paper from research results or an explicit external-authoring intake
 Usage: `gpd:write-paper`; `gpd:write-paper --intake intake/write-paper-authoring-input.json`
 Notes: Uses a bounded external-authoring lane driven by an explicit intake manifest only. GPD-authored outputs live under `GPD/publication/{subject_slug}/...`; `GPD/publication/{subject_slug}/intake/` stores intake/provenance state only. It does not mine arbitrary folders, and embedded external staged-review parity is out of scope. Project-backed review/response/package outputs remain in the resolved GPD manuscript lane.
 
@@ -315,7 +315,7 @@ Usage: `gpd:arxiv-submission paper/`
 Notes: Packages the GPD-owned manuscript root or a supported .tex entrypoint; it does not package arbitrary external material.
 
 **`gpd:settings`**
-Configure autonomy, unattended execution budgets, runtime permission sync, workflow preset bundles, model-cost posture, runtime-specific tier model overrides, review cadence, and git preferences
+Configure GPD autonomy, workflow, runtime permissions, model-cost posture, and git preferences
 Notes: Autonomy vocabulary: Supervised, Max quality, Balanced, Budget-aware, runtime defaults, YOLO. Configuration keys include `execution.review_cadence`, `planning.commit_docs`, `git.branching_strategy`, and statuses such as `needs-calculation`; model tiers are `tier-1`, `tier-2`, and `tier-3`. Use `gpd observe execution` and `gpd cost` from the normal terminal for read-only status and usage review.
 
 **`gpd:route [--frozen=yes|no] [--change=extend|revise] [--layer=new|change]`**

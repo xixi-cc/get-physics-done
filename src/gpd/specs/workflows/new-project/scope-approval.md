@@ -49,7 +49,11 @@ locators.
 </contract_authoring>
 
 <approval_gate>
-Present a concise scoping summary and require explicit approval:
+Reuse current-session approval of this exact unchanged contract and onboarding
+outputs. Ask for changed or unresolved scope, acceptance, or reconciliation;
+onboarding alone is not contract approval.
+
+Otherwise present a concise scoping summary and require explicit approval:
 
 - header: "Scope"
 - question: "Does this scoping contract look right before I generate the project artifacts?"

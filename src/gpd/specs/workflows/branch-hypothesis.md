@@ -9,6 +9,16 @@ Read all files referenced by the invoking prompt's execution_context before star
 <process>
 
 <step name="init" priority="first">
+Run centralized context preflight before continuing:
+
+```bash
+CONTEXT=$(gpd --raw validate command-context branch-hypothesis "$ARGUMENTS")
+if [ $? -ne 0 ]; then
+  echo "$CONTEXT"
+  exit 1
+fi
+```
+
 Load project context:
 
 ```bash
@@ -55,36 +65,17 @@ Example: "Use dimensional regularization instead of hard cutoff"
 </step>
 
 <step name="verify_git_state">
-Verify the repository is in a clean state for branching:
+Inspect changes and the intended write paths before branching:
 
 ```bash
-# Check for uncommitted changes
 git status --porcelain
 ```
 
-**If uncommitted changes exist:**
-
-Offer to stash instead of hard-failing:
-
-```
-Uncommitted changes detected:
-{list of files from git status}
-
-Options:
-1. "Stash changes" — Auto-stash and continue
-2. "Abort" — I'll handle this manually
-```
-
-**If "Stash changes":**
-
-```bash
-git stash push -m "gpd: auto-stash before hypothesis branch ${SLUG}"
-```
-
-Inform user: "Changes stashed. Recover later with `git stash pop`."
-Continue to create_branch.
-
-**If "Abort":** Exit.
+Compatible unrelated edits may remain in place when checkout preserves them and
+hypothesis/state writes cannot overwrite them. Keep user changes intact. If edits
+conflict with the intended writes or their ownership is unclear, stop and ask for
+one decision: isolate work in a separate worktree, explicitly stash the affected
+changes, or abort. Never auto-stash, reset, discard, or delete an existing branch.
 
 Record the current branch name for the hypothesis metadata:
 
@@ -108,7 +99,7 @@ ERROR: Branch hypothesis/{slug} already exists.
 Either:
 1. Switch to it: git checkout hypothesis/{slug}
 2. Choose a different description
-3. Delete it first: git branch -D hypothesis/{slug}
+3. Retain it and use an isolated worktree if appropriate
 ```
 
 Exit.
@@ -174,16 +165,6 @@ INIT=$(gpd --raw init progress --include roadmap,state)
 
 Parse from INIT JSON: `project_exists`, `state_exists`, `current_phase` (object with `number`, `name`, `directory`), `state_content`, `roadmap_content`.
 
-Run centralized context preflight before continuing:
-
-```bash
-CONTEXT=$(gpd --raw validate command-context branch-hypothesis "$ARGUMENTS")
-if [ $? -ne 0 ]; then
-  echo "$CONTEXT"
-  exit 1
-fi
-```
-
 Then find the current phase directory:
 
 ```bash
@@ -203,7 +184,7 @@ Using the hypothesis description, project state, and latest research results, dr
 
 - **Motivation:** Infer from the description what limitation of the current approach this addresses. Reference specific results or methods from STATE.md / SUMMARY that motivate the alternative.
 - **Expected Outcome:** Based on the hypothesis, predict what observable differences should exist. Be specific: "If dimensional regularization preserves gauge invariance better, we expect the Ward identity violation to decrease from O(epsilon) to O(epsilon^2)."
-- **Success Criteria:** Generate 3 concrete, testable criteria derived from the expected outcome. Each criterion should be a checkable statement, not vague: "Energy eigenvalues agree with exact solution to within 1%" not "Results are accurate."
+- **Success Criteria:** Generate the concrete, testable criteria needed for this hypothesis derived from the expected outcome. Each criterion should be a checkable statement, not vague: "Energy eigenvalues agree with exact solution to within 1%" not "Results are accurate."
 
 **3. Update HYPOTHESIS.md with drafts:**
 
@@ -228,7 +209,7 @@ Replace the placeholder sections with the generated content, clearly marked as A
 
 - [ ] {specific testable criterion 1}
 - [ ] {specific testable criterion 2}
-- [ ] {specific testable criterion 3}
+<!-- Add further criteria only when scientifically necessary. -->
 ```
 
 **4. Present to researcher:**
@@ -238,7 +219,7 @@ Drafted motivation, expected outcome, and success criteria from project context.
 Review and edit: GPD/hypotheses/{slug}/HYPOTHESIS.md
 
 The AI-drafted content is marked with <!-- AI-drafted --> comments.
-Edit these sections before proceeding to planning.
+Confirm or edit these drafted sections before proceeding to planning.
 ```
 
 </step>

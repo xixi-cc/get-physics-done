@@ -1,6 +1,6 @@
 ---
 name: gpd:compare-branches
-description: Compare results across hypothesis branches side-by-side
+description: Compare results across GPD hypothesis branches side-by-side
 context_mode: project-required
 allowed-tools:
   - file_read

@@ -167,7 +167,7 @@ Use centralized preflight's selected publication/review roots for GPD-authored r
 </execution_context>
 
 <context>
-Review target: $ARGUMENTS (optional paper directory, manuscript path, or explicit artifact path). If no argument is provided, first ask whether to review an explicit artifact or the current GPD project's active manuscript when available.
+Review target: $ARGUMENTS (optional paper directory, manuscript path, or explicit artifact path). If no argument is provided, use centralized target-aware init to resolve the unambiguous active GPD manuscript first. Ask only if the target is missing or ambiguous.
 Treat `project-backed manuscript review` as the strict publication-pipeline mode for the active manuscript under `paper/`, `manuscript/`, or `draft/`. Treat `standalone explicit-artifact review` as a path-driven mode that requires one explicit manuscript or artifact target and uses nearby project files only as additive context when present.
 Explicit external artifact intake accepts one specific artifact path and does not widen into wildcard discovery.
 

@@ -8,6 +8,12 @@ Read all files referenced by the invoking prompt's execution_context before star
 
 <process>
 
+Carry explicit session onboarding authorization into the unambiguous selected
+workflow; reuse unchanged approved scope there. A menu choice alone grants no
+writes. Ask for unresolved scientific scope or new state reconciliation. The
+chooser-only defaults below apply when separate authorization is absent.
+
+
 <step name="detect_workspace_state">
 Before offering commands, classify the invoked folder with the thin raw CLI start-context classifier. It uses GPD's workspace-bound, read-only classifier instead of hand-rolled marker checks, and must not let an ancestor or home-directory project claim an unrelated checkout.
 
@@ -144,7 +150,7 @@ Ask for exactly one choice.
 Route immediately into the real existing workflow for the chosen path.
 
 Normalize the reply to one stable `option_id`; labels are aliases only.
-For every start-routed path, the start-menu choice authorizes only routing into that command. For write-capable routes, say plainly: opened command, no downstream writes approved by `gpd:start`, and the next downstream approval/confirmation needed before writes.
+Absent separate existing authorization as defined above, for every start-routed path, the start-menu choice authorizes only routing into that command. For write-capable routes, say plainly: opened command, no downstream writes approved by `gpd:start`, and the next downstream approval/confirmation needed before writes.
 
 **If the researcher chooses option_id `resume_work` (`Resume this project (recommended)`, `Continue where I left off`, `Inspect recovery state (recommended)`, or `Inspect recovery state`):**
 

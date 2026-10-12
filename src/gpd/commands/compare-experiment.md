@@ -1,6 +1,6 @@
 ---
 name: gpd:compare-experiment
-description: Systematically compare theoretical predictions with experimental or observational data
+description: Compare GPD theoretical results with experimental or observational data
 argument-hint: "[prediction, dataset, phase, or comparison target]"
 context_mode: project-aware
 command-policy:

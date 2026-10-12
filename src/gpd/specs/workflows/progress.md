@@ -14,6 +14,43 @@ Read all files referenced by the invoking prompt's execution_context before star
 
 <process>
 
+<step name="init_context" priority="first">
+Initialize once for the selected mode. For --full:
+
+```bash
+INIT=$(gpd --raw init progress --include state,roadmap,project,config,references)
+```
+
+Otherwise load compact decision fields:
+
+```bash
+INIT=$(gpd --raw init progress)
+```
+
+After the selected initialization, stop on error and run centralized preflight:
+
+```bash
+if [ $? -ne 0 ]; then echo "$INIT"; exit 1; fi
+CONTEXT=$(gpd --raw validate command-context progress "$ARGUMENTS")
+if [ $? -ne 0 ]; then echo "$CONTEXT"; exit 1; fi
+```
+
+Extract from init JSON: `project_exists`, `roadmap_exists`, `state_exists`, `phases`, `current_phase`, `next_phase`, `milestone_version`, `completed_count`, `phase_count`, `paused_at`, `autonomy`, `research_mode`, `project_contract`, `project_contract_gate`, `project_contract_validation`, `project_contract_load_info`, `contract_intake`, `effective_reference_intake`, `active_reference_context`, `reference_artifacts_content`, `knowledge_doc_files`, `knowledge_doc_count`, `stable_knowledge_doc_files`, `stable_knowledge_doc_count`, `knowledge_doc_status_counts`, `derived_knowledge_docs`, `derived_knowledge_doc_count`, `knowledge_doc_warnings`, `derived_convention_lock`, `derived_convention_lock_count`, `derived_intermediate_results`, `derived_intermediate_result_count`, `derived_approximations`, `derived_approximation_count`.
+
+`phases`, `current_phase`, `next_phase`, `completed_count`, and `phase_count` are derived from the same canonical roadmap inventory used by `gpd --raw roadmap analyze`, including roadmap phases whose directories do not exist yet. Do not rescan only `GPD/phases/` to override them.
+
+**File contents (from --include):** `state_content`, `roadmap_content`, `project_content`, `config_content`. These are null if files don't exist.
+
+If missing STATE.md: suggest `gpd:new-project`.
+
+**If ROADMAP.md missing but PROJECT.md exists:**
+
+This means a milestone was completed and archived. Report that state, then let
+the `route` step use `gpd --raw suggest` for the next command.
+
+If missing both ROADMAP.md and PROJECT.md: suggest `gpd:new-project`.
+</step>
+
 <step name="mode_detection">
 ## Mode Detection
 
@@ -31,8 +68,13 @@ STOP here. Do not show full report.
 **If --reconcile:**
 Go to `reconcile_state` step.
 
-**Default (no flag) or --full:**
-Continue to full report below. With `--full`, also include detailed per-phase artifact listings.
+**Default (no flag):**
+Report compact current position, live execution, blockers, and the code-owned
+suggested next action from INIT, `gpd --raw progress`, and `gpd --raw suggest`, then
+STOP. Do not execute the suggestion or hydrate project/reference bodies.
+
+**--full:**
+Continue to the detailed report below, including per-phase artifact listings.
 </step>
 
 <step name="reconcile_state">
@@ -71,69 +113,25 @@ Options:
 
 If user chooses sync: update STATE.md position, progress bar, and plan counters to match disk reality using `gpd state` commands.
 
-Confirmation contract: before any command that writes reconciled state, ask for an explicit user decision. If `ask_user` is available, present the three options above with `Sync STATE.md to disk` as the recommended option. If `ask_user` is not available, require a typed reply that exactly matches one of `Sync STATE.md to disk`, `Keep STATE.md`, or `Show details`; do not infer consent from a vague acknowledgement.
+Confirmation contract: before any command that writes reconciled state, require
+an explicit user decision for the exact discrepancies and chosen authoritative
+source. Reuse prior session authorization only if it covers these unchanged
+repairs; a generic status or execution request is insufficient. If that decision
+is unresolved or the discrepancies changed, ask for an explicit user decision. If `ask_user` is available, present the three options above with `Sync STATE.md to disk` as the recommended option. If `ask_user` is not available, require a typed reply that exactly matches one of `Sync STATE.md to disk`, `Keep STATE.md`, or `Show details`; do not infer consent from a vague acknowledgement.
 
 **If no discrepancies:** Report "STATE.md is consistent with disk artifacts." and continue to full report.
 </step>
 
-<step name="init_context">
-**Load progress context (with file contents to avoid redundant reads):**
 
-```bash
-INIT=$(gpd --raw init progress --include state,roadmap,project,config,references)
-if [ $? -ne 0 ]; then
-  echo "ERROR: gpd initialization failed: $INIT"
-  # STOP; surface the error.
-fi
-```
-
-Extract from init JSON: `project_exists`, `roadmap_exists`, `state_exists`, `phases`, `current_phase`, `next_phase`, `milestone_version`, `completed_count`, `phase_count`, `paused_at`, `autonomy`, `research_mode`, `project_contract`, `project_contract_gate`, `project_contract_validation`, `project_contract_load_info`, `contract_intake`, `effective_reference_intake`, `active_reference_context`, `reference_artifacts_content`, `knowledge_doc_files`, `knowledge_doc_count`, `stable_knowledge_doc_files`, `stable_knowledge_doc_count`, `knowledge_doc_status_counts`, `derived_knowledge_docs`, `derived_knowledge_doc_count`, `knowledge_doc_warnings`, `derived_convention_lock`, `derived_convention_lock_count`, `derived_intermediate_results`, `derived_intermediate_result_count`, `derived_approximations`, `derived_approximation_count`.
-
-`phases`, `current_phase`, `next_phase`, `completed_count`, and `phase_count` are derived from the same canonical roadmap inventory used by `gpd --raw roadmap analyze`, including roadmap phases whose directories do not exist yet. Do not rescan only `GPD/phases/` to override them.
-
-**File contents (from --include):** `state_content`, `roadmap_content`, `project_content`, `config_content`. These are null if files don't exist.
-
-If missing STATE.md: suggest `gpd:new-project`.
-
-**If ROADMAP.md missing but PROJECT.md exists:**
-
-This means a milestone was completed and archived. Report that state, then let
-the `route` step use `gpd --raw suggest` for the next command.
-
-If missing both ROADMAP.md and PROJECT.md: suggest `gpd:new-project`.
-</step>
 
 <step name="load">
 **Use project context from INIT:**
 
-All file contents are already loaded via `--include` in init_context step:
-
-- `state_content` — living memory (position, decisions, issues)
-- `roadmap_content` — phase structure and objectives
-- `project_content` — current state (Research Question, Framework, Answered Questions)
-- `config_content` — settings (model_profile, workflow toggles)
-- `project_contract` — machine-readable scoping and anchor contract, authoritative only when `project_contract_gate.authoritative` is true
-- `project_contract_load_info` — structured load status, warnings, and blockers for the contract
-- `project_contract_validation` — contract approval gate for authoritative use
-- `effective_reference_intake` — structured carry-forward ledger for refs, baselines, prior outputs, and context gaps
-- `active_reference_context` / `reference_artifacts_content` — readable anchor context to explain the next-step recommendation
-- `knowledge_doc_files` / `knowledge_doc_count` — inventory-visible knowledge docs loaded from `GPD/knowledge/`
-- `stable_knowledge_doc_files` / `stable_knowledge_doc_count` — reviewed docs that are runtime-active for shared reference context
-- `knowledge_doc_status_counts` — lifecycle mix across `draft`, `in_review`, `stable`, and `superseded`
-- `derived_knowledge_docs` / `derived_knowledge_doc_count` — stable runtime-active docs surfaced for this run
-- `knowledge_doc_warnings` — parse/read problems forwarded from knowledge discovery
-
-No additional file reads needed.
-
-Run centralized context preflight before continuing:
-
-```bash
-CONTEXT=$(gpd --raw validate command-context progress "$ARGUMENTS")
-if [ $? -ne 0 ]; then
-  echo "$CONTEXT"
-  exit 1
-fi
-```
+Reuse INIT; do not reread files or repeat preflight. Preserve structured load status
+(`project_contract_load_info`), warnings/blockers, approval validation, knowledge
+lifecycle and evidence distinctions. Treat the contract as authoritative only when
+`project_contract_gate.authoritative` is true. Load reference bodies only for --full
+or a discrepancy needing them.
 </step>
 
 <step name="analyze_roadmap">
@@ -337,7 +335,7 @@ phase closeout, milestone completion, or new-milestone routing in this prompt.
 - [ ] Current position clear with visual progress
 - [ ] What's next clearly explained
 - [ ] Smart routing delegated to the code-owned suggestion/lifecycle payload
-- [ ] User confirms before any action
+- [ ] Read-only status creates no execution authority; reconciliation requires an explicit decision or matching prior repair authorization
 - [ ] Seamless handoff to appropriate gpd command
 
 </success_criteria>

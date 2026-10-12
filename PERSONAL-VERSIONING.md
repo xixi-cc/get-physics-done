@@ -48,6 +48,14 @@ not the newest dirty working tree or the newest official release.
 
 ## Current promoted release
 
+- Formal personal tag: `xixi-v1.2.2-astra.20261013.1`
+- Upstream package baseline: `1.2.2`
+- Skill routing and scoped approval maintenance: 2026-10-13
+- Validation: 13,119 passed, 18 skipped; live arXiv/OpenAlex probes disabled using the existing documented option.
+- Both hosts install one exact wheel; release receipt and ACTIVE-SOURCE identify the build.
+
+## Previous promoted release
+
 - Historical rollout label: `personal-astra-theory-20260906`
 - Formal personal tag: `xixi-v1.2.2-astra.20260924.2`
 - Upstream package baseline: `1.2.2`

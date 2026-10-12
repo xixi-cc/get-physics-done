@@ -56,8 +56,8 @@ Peer review supports:
   artifacts are additive unless the selected mode makes them authoritative.
 
 Explicit external artifact intake points at one artifact path and must not widen
-into default root discovery. If no argument is provided, ask whether to review an
-explicit artifact or the current GPD project's active manuscript when available.
+into default root discovery. With no argument, use the unambiguous active
+manuscript from centralized init; ask only when missing or ambiguous.
 
 Use centralized target-aware init and the authoritative manuscript resolver:
 explicit argument first, otherwise manuscript-root `ARTIFACT-MANIFEST.json`,

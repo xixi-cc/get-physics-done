@@ -1,6 +1,6 @@
 ---
 name: gpd:settings
-description: Configure autonomy, unattended execution budgets, runtime permission sync, workflow preset bundles, model-cost posture, runtime-specific tier model overrides, review cadence, and git preferences
+description: Configure GPD autonomy, workflow, runtime permissions, model-cost posture, and git preferences
 context_mode: projectless
 allowed-tools:
   - file_read

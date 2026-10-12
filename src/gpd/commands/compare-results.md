@@ -1,6 +1,6 @@
 ---
 name: gpd:compare-results
-description: Compare internal results, baselines, or methods and emit decisive verdicts
+description: Compare GPD research artifacts or baselines and emit decisive verdicts
 argument-hint: "[comparison target or source-a vs source-b]"
 context_mode: project-aware
 command-policy:

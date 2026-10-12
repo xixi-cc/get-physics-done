@@ -817,7 +817,7 @@ def test_progress_reconcile_prompt_preserves_no_write_confirmation_branches() ->
     workflow = (REPO_ROOT / "src/gpd/specs/workflows/progress.md").read_text(encoding="utf-8")
 
     reconcile_start = workflow.index('<step name="reconcile_state">')
-    reconcile_end = workflow.index('<step name="init_context">', reconcile_start)
+    reconcile_end = workflow.index("</step>", reconcile_start)
     reconcile_step = workflow[reconcile_start:reconcile_end]
 
     _assert_normalized_fragments(

@@ -150,7 +150,7 @@ def test_precheck_requires_explicit_interactive_answer_before_recording_alignmen
     assert_prompt_contracts(
         _PRECHECK_BODY,
         *fail_closed_before_writes(
-            "Only explicit `Y: proceed` authorizes record-alignment.",
+            "When no same-contract prior authorization exists, only explicit `Y: proceed` authorizes record-alignment.",
             "On `Y: proceed` record alignment and continue",
             safe_stop_anchor="STOP before writes, scripts, computations, dispatches, subagents, or artifacts",
             context="claim/deliverable record-alignment confirmation",
@@ -166,7 +166,7 @@ def test_precheck_requires_explicit_interactive_answer_before_recording_alignmen
         semantic_anchor(
             "explicit confirmation precedes record-alignment command",
             (
-                "Only explicit `Y: proceed`",
+                "When no same-contract prior authorization exists, only explicit `Y: proceed`",
                 'gpd contract record-alignment --contract-hash "$CONTRACT_HASH" --context-hash "$CONTEXT_HASH"',
             ),
             mode="ordered",

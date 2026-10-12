@@ -1,6 +1,6 @@
 ---
 name: gpd:export
-description: Export research results to HTML, LaTeX, or ZIP package
+description: Export completed GPD phase results to HTML, LaTeX, or ZIP
 argument-hint: "[--format html|latex|zip|all] [--commit]"
 context_mode: project-required
 allowed-tools:

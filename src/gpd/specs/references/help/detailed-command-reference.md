@@ -56,7 +56,7 @@ Notes:
 - Staged workflow: `resume-work`.
 
 **`gpd:progress [--brief | --full | --reconcile]`**
-Check research progress, show context, and route to next action (execute or plan)
+Report GPD project progress and suggest the next canonical action
 
 - `gpd:progress --full`
 - `gpd:progress --brief`
@@ -227,7 +227,7 @@ Notes:
 - Output policy: mode=managed; managed root=gpd_managed_durable; default subtree=GPD/analysis; stage artifacts=gpd_owned_outputs_only
 
 **`gpd:compare-experiment [prediction, dataset, phase, or comparison target]`**
-Systematically compare theoretical predictions with experimental or observational data
+Compare GPD theoretical results with experimental or observational data
 
 - `gpd:compare-experiment data/results.csv`
 
@@ -235,7 +235,7 @@ Systematically compare theoretical predictions with experimental or observationa
 - Output policy: mode=managed; managed root=gpd_managed_durable; default subtree=GPD/comparisons
 
 **`gpd:compare-results [phase, artifact, or comparison target]`**
-Compare internal results, baselines, or methods and emit decisive verdicts
+Compare GPD research artifacts or baselines and emit decisive verdicts
 
 - `gpd:compare-results GPD/comparisons/baseline.md`
 
@@ -279,7 +279,7 @@ Track how uncertainties propagate through multi-step calculations across phases
 ### Knowledge authoring
 
 **`gpd:digest-knowledge [topic|arXiv id|source file|knowledge path]`**
-Create or update a draft knowledge document in the current workspace from a topic, source file, arXiv ID, or canonical knowledge path
+Create or update a draft GPD knowledge document under GPD/knowledge from a topic or source
 
 - `gpd:digest-knowledge "renormalization group fixed points"`
 - `gpd:digest-knowledge 2401.12345v2`
@@ -329,7 +329,7 @@ Notes:
 - Staged workflow: `literature-review`.
 
 **`gpd:write-paper [--intake path/to/write-paper-authoring-input.json]`**
-Structure and write a physics paper from project research results or a bounded external-authoring intake
+Author a complete GPD physics paper from research results or an explicit external-authoring intake
 
 - `gpd:write-paper`
 - `gpd:write-paper --intake intake/write-paper-authoring-input.json`
@@ -409,7 +409,7 @@ Create a hypothesis branch for parallel investigation of an alternative approach
 - Requires files: `GPD/ROADMAP.md`, `GPD/STATE.md`
 
 **`gpd:compare-branches`**
-Compare results across hypothesis branches side-by-side
+Compare results across GPD hypothesis branches side-by-side
 
 **`gpd:pause-work`**
 Create continuation handoff when pausing research mid-phase
@@ -432,7 +432,7 @@ Notes:
 - Complements the technical-analysis lane; use separate commands such as gpd:error-propagation for uncertainty flow.
 
 **`gpd:export [--format html|latex|zip|all] [--commit]`**
-Export research results to HTML, LaTeX, or ZIP package
+Export completed GPD phase results to HTML, LaTeX, or ZIP
 
 - `gpd:export --format latex --commit`
 
@@ -476,7 +476,7 @@ Create phases to close all gaps identified by research milestone audit
 ### Configuration and maintenance
 
 **`gpd:settings`**
-Configure autonomy, unattended execution budgets, runtime permission sync, workflow preset bundles, model-cost posture, runtime-specific tier model overrides, review cadence, and git preferences
+Configure GPD autonomy, workflow, runtime permissions, model-cost posture, and git preferences
 
 Notes:
 - Autonomy vocabulary: Supervised, Max quality, Balanced, Budget-aware, runtime defaults, YOLO.
